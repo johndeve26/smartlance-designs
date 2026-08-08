@@ -155,7 +155,16 @@ export type ProjectCategory =
   | "Product Design"
   | "Web Application Development"
   | "Platform Architecture"
-  | "Automation";
+  | "Automation"
+  | "SaaS Development"
+  | "AI Integration";
+
+export type ProductFeatureSection = {
+  title: string;
+  heading: string;
+  body: string;
+  image?: ProjectGalleryItem;
+};
 
 export type ProjectEngineeringStack = {
   category: string;
@@ -176,11 +185,15 @@ export type ProjectCaseStudyHeadings = {
   outcome?: string;
   engineering?: string;
   platform?: string;
+  principles?: string;
+  saasInfrastructure?: string;
 };
 
 export type ProjectCaseStudyCta = {
   title: string;
   description: string;
+  primaryLabel?: string;
+  primaryHref?: string;
 };
 
 export type ProjectGalleryItem = {
@@ -256,6 +269,12 @@ export type Project = {
   sectionHeadings?: ProjectCaseStudyHeadings;
   caseStudyCta?: ProjectCaseStudyCta;
   externalLinkLabel?: string;
+  heroEyebrow?: string;
+  heroSupportingCopy?: string;
+  productPrinciples?: ProjectCaseStudyPoint[];
+  productFeatures?: ProductFeatureSection[];
+  saasInfrastructure?: ProjectEngineeringStack[];
+  showArchitectureDiagram?: boolean;
   metaTitle: string;
   metaDescription: string;
   noIndex?: boolean;

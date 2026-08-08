@@ -10,6 +10,7 @@ import { CaseStudyHero } from "@/components/work/case-study/case-study-hero";
 import { CaseStudyQuote } from "@/components/work/case-study/case-study-quote";
 import {
   CaseStudyApproach,
+  CaseStudyArchitectureDiagram,
   CaseStudyChallenge,
   CaseStudyEngineering,
   CaseStudyGallery,
@@ -17,6 +18,9 @@ import {
   CaseStudyIntro,
   CaseStudyNav,
   CaseStudyOutcome,
+  CaseStudyPrinciples,
+  CaseStudyProductFeatures,
+  CaseStudySaasInfrastructure,
   CaseStudyServicesPlatform,
   CaseStudySolution,
 } from "@/components/work/case-study/case-study-sections";
@@ -158,6 +162,8 @@ export default async function CaseStudyPage({ params }: PageProps) {
   const galleryItems = content.gallerySections.filter(
     (item) => item.src !== content.heroImage?.src,
   );
+  const usesFeatureSections = content.productFeatures.length > 0;
+  const solutionItems = usesFeatureSections ? [] : content.solutionPoints;
 
   return (
     <>
@@ -177,6 +183,8 @@ export default async function CaseStudyPage({ params }: PageProps) {
           content.hasDistinctGallery ? content.galleryImages[0] : undefined
         }
         externalLinkLabel={content.externalLinkLabel}
+        eyebrow={content.heroEyebrow}
+        supportingCopy={content.heroSupportingCopy}
       />
 
       <CaseStudyIntro
@@ -189,33 +197,46 @@ export default async function CaseStudyPage({ params }: PageProps) {
         heading={content.sectionHeadings.challenge}
       />
 
+      {content.productPrinciples.length > 0 ? (
+        <CaseStudyPrinciples
+          items={content.productPrinciples}
+          heading={content.sectionHeadings.principles}
+        />
+      ) : null}
+
       <CaseStudyApproach
         items={content.approachSteps}
         heading={content.sectionHeadings.approach}
       />
 
-      {galleryItems.length > 0 ? (
+      {!usesFeatureSections && galleryItems.length > 0 ? (
         <CaseStudyGallery items={[galleryItems[0]]} />
       ) : null}
 
       <CaseStudySolution
         summary={content.solutionSummary}
-        items={content.solutionPoints}
+        items={solutionItems}
         heading={content.sectionHeadings.solution}
         visual={
-          content.hasDistinctGallery && !galleryItems.length
+          !usesFeatureSections &&
+          content.hasDistinctGallery &&
+          !galleryItems.length
             ? content.galleryImages[0]
             : undefined
         }
       />
 
-      {galleryItems.length > 1 ? (
+      {usesFeatureSections ? (
+        <CaseStudyProductFeatures features={content.productFeatures} />
+      ) : null}
+
+      {!usesFeatureSections && galleryItems.length > 1 ? (
         <CaseStudyGallery items={galleryItems.slice(1, 3)} />
       ) : null}
 
       <CaseStudyHighlights items={content.highlights} />
 
-      {galleryItems.length > 3 ? (
+      {!usesFeatureSections && galleryItems.length > 3 ? (
         <CaseStudyGallery items={galleryItems.slice(3)} />
       ) : null}
 
@@ -224,6 +245,15 @@ export default async function CaseStudyPage({ params }: PageProps) {
         summary={content.resultSummary}
         items={content.outcomes}
       />
+
+      {content.saasInfrastructure.length > 0 ? (
+        <CaseStudySaasInfrastructure
+          stacks={content.saasInfrastructure}
+          heading={content.sectionHeadings.saasInfrastructure}
+        />
+      ) : null}
+
+      {content.showArchitectureDiagram ? <CaseStudyArchitectureDiagram /> : null}
 
       {content.engineeringStacks?.length ? (
         <CaseStudyEngineering
@@ -297,8 +327,8 @@ export default async function CaseStudyPage({ params }: PageProps) {
             ? "If you need a custom platform, marketplace, dashboard or web application, tell us what you're building and what the product needs to do."
             : "If you need a clearer, better-performing website, tell us what your business needs.")
         }
-        primaryLabel="Tell Us About Your Project"
-        primaryHref="/contact"
+        primaryLabel={cta?.primaryLabel ?? "Tell Us About Your Project"}
+        primaryHref={cta?.primaryHref ?? "/contact"}
         secondaryLabel="View Our Work"
         secondaryHref="/work"
       />

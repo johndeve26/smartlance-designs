@@ -169,6 +169,217 @@ export const projects: Project[] = [
       "See how Smartlance Designs designed and developed Pàdéyá, a multi-sided event technology platform for ticketing, hosts, fans, ambassadors, sponsorships and event engagement.",
   },
   {
+    slug: "freelance-os",
+    name: "Freelance OS",
+    title: "Freelance OS AI-powered SaaS platform",
+    client: "Freelance OS",
+    industry: "Freelance Technology / SaaS",
+    projectType: "AI-Powered SaaS Platform",
+    services: [
+      "Product Design",
+      "SaaS Development",
+      "AI Integration",
+      "Platform Architecture",
+      "Automation",
+    ],
+    published: true,
+    featured: true,
+    displayOrder: 1,
+    caseStudyKind: "product",
+    year: 2026,
+    websiteUrl: "https://getfreelanceos.com/",
+    platform: "Next.js + FastAPI",
+    platforms: ["Next.js", "FastAPI"],
+    technologies: [
+      "Next.js",
+      "TypeScript",
+      "Tailwind CSS",
+      "FastAPI",
+      "Python",
+      "PostgreSQL",
+      "Redis",
+    ],
+    shortDescription:
+      "An AI-powered operating system for freelancers combining opportunity analysis, proposal creation, client management, portfolio building, analytics and business workflows in one platform.",
+    overview:
+      "Freelancers often run their businesses across disconnected tools. Opportunities may live on freelance marketplaces, proposals in documents or AI tools, clients in spreadsheets, portfolio projects somewhere else, and business performance across several dashboards. Freelance OS was designed around a different idea: treat freelancing as a complete business workflow rather than a collection of isolated tasks. The platform connects opportunity discovery and analysis, proposals, applications, clients, portfolio proof, services, profiles, analytics and AI guidance through one shared system. The goal was not simply to build another proposal generator. It was to create infrastructure for running and improving a freelance business.",
+    challenge:
+      "Freelancers frequently move between marketplaces, AI writing tools, spreadsheets, CRMs, portfolio builders, analytics tools and personal task systems. The product needed to connect these workflows without creating another complicated dashboard, while giving AI enough structured context to be genuinely useful.",
+    solution:
+      "Freelance OS became a modular SaaS platform connecting the activities freelancers perform before, during and after winning client work. Rather than treating each feature as a separate tool, the product uses shared context and connected workflows to help users move between opportunities, proposals, relationships, proof and performance.",
+    approach:
+      "We mapped the freelance lifecycle, structured shared freelancer context, built modular product domains, introduced contextual AI for specific jobs, and developed the SaaS infrastructure required to support subscriptions, permissions and ongoing expansion.",
+    resultSummary:
+      "Freelance OS developed into a broader SaaS platform for managing the workflows behind independent work. Opportunity analysis, proposal creation, application tracking, client management, portfolio development, services, profile improvement and analytics are connected through shared product infrastructure rather than operating as isolated tools.",
+    results: [
+      "Connected freelancer workspace",
+      "AI-assisted opportunity analysis",
+      "Context-aware proposal workflows",
+      "Application pipeline",
+      "Freelancer CRM",
+      "Portfolio and proof-of-work system",
+      "Service positioning tools",
+      "Profile and growth workflows",
+      "Performance analytics",
+      "Public profile infrastructure",
+      "Subscription and entitlement system",
+      "Notification infrastructure",
+      "Administration and operational tooling",
+      "Responsive application experience",
+    ],
+    image: "/images/projects/freelance-os/cover.webp",
+    imageAlt: "Freelance OS freelancer dashboard",
+    heroImage: "/images/projects/freelance-os/hero.webp",
+    heroImageAlt: "Freelance OS Today command center",
+    gallery: [
+      {
+        src: "/images/projects/freelance-os/today.webp",
+        alt: "Freelance OS freelancer dashboard",
+        layout: "full",
+      },
+      {
+        src: "/images/projects/freelance-os/opportunity-analyzer.webp",
+        alt: "Freelance OS opportunity analysis interface",
+        layout: "half",
+      },
+      {
+        src: "/images/projects/freelance-os/proposal-generator.webp",
+        alt: "Freelance OS AI proposal generator",
+        layout: "half",
+      },
+      {
+        src: "/images/projects/freelance-os/pipeline.webp",
+        alt: "Freelance OS application pipeline",
+        layout: "half",
+      },
+      {
+        src: "/images/projects/freelance-os/crm.webp",
+        alt: "Freelance OS freelancer CRM",
+        layout: "half",
+      },
+      {
+        src: "/images/projects/freelance-os/portfolio-studio.webp",
+        alt: "Freelance OS Portfolio Studio",
+        layout: "full",
+      },
+      {
+        src: "/images/projects/freelance-os/analytics.webp",
+        alt: "Freelance OS analytics dashboard",
+        layout: "half",
+      },
+      {
+        src: "/images/projects/freelance-os/career-coach.webp",
+        alt: "Freelance OS Career Coach",
+        layout: "half",
+      },
+      {
+        src: "/images/projects/freelance-os/public-profile.webp",
+        alt: "Freelance OS public profile",
+        layout: "full",
+      },
+    ],
+    relatedSlugs: ["padeya", "nashville-home-viewer"],
+    relatedServiceHrefs: [
+      "/services/website-design",
+      "/services/website-development",
+    ],
+    serviceLinks: [
+      {
+        label: "Product & UI Design",
+        href: "/services/website-design",
+        description:
+          "Designing a complex SaaS workspace around connected freelancer workflows while keeping individual tools understandable and actionable.",
+      },
+      {
+        label: "SaaS / Web Application Development",
+        href: "/services/website-development",
+        description:
+          "Building the frontend and backend systems supporting authenticated dashboards, business workflows, subscriptions and platform operations.",
+      },
+      {
+        label: "AI Integration",
+        description:
+          "Designing task-specific AI workflows that use relevant freelancer context for analysis, drafting and guidance.",
+      },
+      {
+        label: "Automation & Integrations",
+        description:
+          "Connecting authentication, notifications, billing, referrals and other product workflows across the application.",
+      },
+      {
+        label: "Platform Architecture",
+        description:
+          "Structuring a modular application capable of supporting multiple connected product domains without turning the experience into disconnected tools.",
+      },
+    ],
+    heroEyebrow: "Project · AI SaaS Platform",
+    externalLinkLabel: "Visit Freelance OS",
+    showArchitectureDiagram: true,
+    engineeringIntro:
+      "Freelance OS was developed as a custom application with separate frontend, backend, data and infrastructure layers rather than as a conventional content website.",
+    engineeringStacks: [
+      {
+        category: "Frontend",
+        items: [
+          "Next.js",
+          "TypeScript",
+          "Tailwind CSS",
+          "App Router",
+          "Responsive application architecture",
+        ],
+      },
+      {
+        category: "Backend",
+        items: ["FastAPI", "Python", "Structured APIs", "Background workflows"],
+      },
+      {
+        category: "Data",
+        items: ["PostgreSQL", "Redis"],
+      },
+      {
+        category: "AI",
+        items: [
+          "Task-specific AI workflows",
+          "Structured freelancer context",
+          "Server-side provider integration",
+        ],
+      },
+      {
+        category: "Authentication",
+        items: ["Email authentication", "Protected application routes"],
+      },
+      {
+        category: "Billing",
+        items: ["Subscription plans", "Usage limits", "Plan entitlements"],
+      },
+      {
+        category: "Infrastructure",
+        items: ["Vercel", "Cloudflare", "Container-ready deployment"],
+      },
+      {
+        category: "Architecture",
+        items: [
+          "Modular product domains",
+          "API-driven frontend and backend",
+          "Role-based access",
+          "Server-side authorization",
+          "Structured feature entitlements",
+          "Audit logging",
+        ],
+      },
+    ],
+    caseStudyCta: {
+      title: "Planning a SaaS Product or Web Application?",
+      description:
+        "If you are building a SaaS platform, AI product, dashboard or custom web application, tell us what the product needs to do and where you are in the build.",
+      primaryLabel: "Tell Us About Your Product",
+      primaryHref: "/contact",
+    },
+    metaTitle: "Freelance OS SaaS Case Study",
+    metaDescription:
+      "See how Smartlance Designs built Freelance OS, an AI-powered SaaS platform connecting opportunities, proposals, clients, portfolio, analytics and freelance business workflows.",
+  },
+  {
     slug: "gemini-corporate-relocations",
     name: "Gemini Corporate Relocations",
     title: "Gemini Corporate Relocations website",
@@ -652,5 +863,6 @@ export const portfolioFilters = [
   "Product Design",
   "Web Application Development",
   "Platform Architecture",
-  "Automation",
+  "SaaS Development",
+  "AI Integration",
 ] as const;

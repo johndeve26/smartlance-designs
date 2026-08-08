@@ -691,7 +691,7 @@ async function main() {
     // Validation summary
     const mismatches: string[] = [];
     if (report.insights !== 59) mismatches.push(`insights ${report.insights} != 59`);
-    if (report.work !== 9) mismatches.push(`work ${report.work} != 9`);
+    if (report.work !== 10) mismatches.push(`work ${report.work} != 10`);
     if (report.testimonials !== 7) mismatches.push(`testimonials ${report.testimonials} != 7`);
     if (report.guides !== 1) mismatches.push(`guides ${report.guides} != 1`);
     if (report.comparisons !== 1) mismatches.push(`comparisons != 1`);

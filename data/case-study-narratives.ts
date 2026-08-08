@@ -1,4 +1,5 @@
 import type {
+  ProductFeatureSection,
   ProjectCaseStudyCta,
   ProjectCaseStudyHeadings,
   ProjectCaseStudyPoint,
@@ -10,6 +11,8 @@ import type {
 export type CaseStudyNarrative = {
   heroStatement: string;
   introHeading?: string;
+  heroEyebrow?: string;
+  heroSupportingCopy?: string;
   challenges: ProjectCaseStudyPoint[];
   approachSteps: ProjectCaseStudyPoint[];
   solutionPoints: ProjectCaseStudyPoint[];
@@ -21,6 +24,10 @@ export type CaseStudyNarrative = {
   serviceLinks?: ProjectServiceLink[];
   engineeringIntro?: string;
   engineeringStacks?: ProjectEngineeringStack[];
+  saasInfrastructure?: ProjectEngineeringStack[];
+  productPrinciples?: ProjectCaseStudyPoint[];
+  productFeatures?: ProductFeatureSection[];
+  showArchitectureDiagram?: boolean;
   gallery?: ProjectGalleryItem[];
   caseStudyCta?: ProjectCaseStudyCta;
   externalLinkLabel?: string;
@@ -264,6 +271,389 @@ export const caseStudyNarratives: Record<string, CaseStudyNarrative> = {
         "If you need a custom platform, marketplace, dashboard or web application, tell us what you're building and what the product needs to do.",
     },
     externalLinkLabel: "Visit Pàdéyá",
+  },
+  "freelance-os": {
+    heroStatement: "The AI operating system for freelancers.",
+    heroSupportingCopy:
+      "Freelance OS brings the fragmented workflow of running a freelance business into one connected platform — from finding opportunities and writing proposals to managing clients, building proof of work and understanding performance.",
+    heroEyebrow: "Project · AI SaaS Platform",
+    introHeading: "Building an operating system for freelance work.",
+    challenges: [
+      {
+        title: "Too many disconnected tools",
+        description:
+          "Freelancers frequently move between marketplaces, AI writing tools, spreadsheets, CRMs, portfolio builders, analytics tools and personal task systems. The challenge was connecting these workflows without creating another complicated dashboard.",
+      },
+      {
+        title: "AI without enough context",
+        description:
+          "Generic AI writing tools can generate proposals, but they often know very little about the freelancer actually applying. Freelance OS needed AI workflows capable of using structured freelancer context such as skills, experience, portfolio projects, services and relevant work history.",
+      },
+      {
+        title: "Finding opportunities is only part of the problem",
+        description:
+          "Finding more jobs does not automatically improve freelance outcomes. The product needed to help users evaluate opportunities before applying and connect those decisions to proposals, applications and eventual outcomes.",
+      },
+      {
+        title: "Freelance relationships need follow-through",
+        description:
+          "Applications, leads and clients require follow-ups. The platform needed a workflow that could continue from opportunity discovery through proposal, interview, client relationship and completed work.",
+      },
+      {
+        title: "Freelancers need reusable proof",
+        description:
+          "Strong previous work can improve future positioning, but project information is often scattered or poorly presented. Freelance OS needed a way to turn experience into reusable portfolio proof and client-facing case studies.",
+      },
+      {
+        title: "Data should improve future decisions",
+        description:
+          "Tracking proposals without learning from outcomes creates another database rather than a useful operating system. Freelance OS needed analytics capable of connecting activity with reported outcomes so freelancers could understand patterns in their business.",
+      },
+      {
+        title: "Complexity had to remain manageable",
+        description:
+          "The platform contains many connected modules. The design challenge was making those capabilities feel like parts of one system instead of a collection of unrelated SaaS tools.",
+      },
+    ],
+    productPrinciples: [
+      {
+        title: "Connected context",
+        description:
+          "Information entered once should become useful throughout the platform. A freelancer's skills, work history, portfolio, services and preferences can support multiple workflows rather than being repeatedly entered.",
+      },
+      {
+        title: "AI with context",
+        description:
+          "AI should operate on relevant structured information instead of treating every request as an isolated prompt.",
+      },
+      {
+        title: "Action before information",
+        description:
+          "Dashboards should help users determine what to do next rather than simply showing more statistics.",
+      },
+      {
+        title: "Proof over claims",
+        description:
+          "Portfolio work, outcomes and demonstrated experience should strengthen the freelancer's positioning.",
+      },
+      {
+        title: "One workflow",
+        description:
+          "Opportunities, proposals, clients and completed work should connect logically.",
+      },
+      {
+        title: "Human control",
+        description:
+          "AI assists with analysis, drafting and guidance. Users review and submit proposals themselves — the platform does not apply for jobs or send messages on their behalf.",
+      },
+    ],
+    approachSteps: [
+      {
+        title: "Map the freelance lifecycle",
+        description:
+          "We mapped the product around the journey from positioning and opportunity discovery through proposal creation, application tracking, client management, completed work and performance analysis.",
+      },
+      {
+        title: "Create shared freelancer context",
+        description:
+          "Core profile, skills, experience, portfolio and service information were structured so different product modules could work from the same underlying freelancer context.",
+      },
+      {
+        title: "Build modular product domains",
+        description:
+          "Opportunities, proposals, CRM, portfolio, services, analytics, billing and other areas were designed as distinct product domains while remaining connected through the wider platform.",
+      },
+      {
+        title: "Introduce contextual AI",
+        description:
+          "AI workflows were designed around specific jobs rather than a single generic chat interface. Opportunity analysis, proposal generation, portfolio writing and guidance can use the context appropriate to each task.",
+      },
+      {
+        title: "Build operational infrastructure",
+        description:
+          "Authentication, subscriptions, usage controls, notifications, administration, security and other supporting systems were developed as part of the SaaS infrastructure.",
+      },
+      {
+        title: "Design for continued expansion",
+        description:
+          "The architecture needed to support additional freelancer workflows without turning the product into an increasingly fragile collection of features.",
+      },
+    ],
+    solutionIntro:
+      "Freelance OS became a modular SaaS platform connecting the activities freelancers perform before, during and after winning client work. Rather than treating each feature as a separate tool, the product uses shared context and connected workflows to help users move between opportunities, proposals, relationships, proof and performance.",
+    solutionPoints: [],
+    productFeatures: [
+      {
+        title: "Today",
+        heading: "Turn the platform into a daily workspace.",
+        body:
+          "The Today experience brings important actions and business context together so users can quickly understand what deserves attention — including follow-ups, high-fit opportunities, profile improvements and recent activity. It is designed as the user's starting point rather than another analytics dashboard.",
+        image: {
+          src: "/images/projects/freelance-os/today.webp",
+          alt: "Freelance OS freelancer dashboard",
+        },
+      },
+      {
+        title: "Opportunity Intelligence",
+        heading: "Decide what is worth pursuing.",
+        body:
+          "Freelance OS helps users evaluate opportunities before investing time and platform resources into an application. Opportunity analysis can consider job requirements alongside relevant freelancer information to surface useful context around fit, requirements and positioning. The goal is not simply to collect more opportunities — it is to support better application decisions.",
+        image: {
+          src: "/images/projects/freelance-os/opportunity-analyzer.webp",
+          alt: "Freelance OS opportunity analysis interface",
+        },
+      },
+      {
+        title: "AI Proposal Generator",
+        heading: "Proposal writing grounded in the freelancer's actual experience.",
+        body:
+          "The proposal system was designed to move beyond generic AI-generated pitches. Freelance OS can use structured freelancer context such as skills, experience, portfolio projects and relevant work history when helping create proposal drafts. Users remain responsible for reviewing and submitting their proposals.",
+        image: {
+          src: "/images/projects/freelance-os/proposal-generator.webp",
+          alt: "Freelance OS AI proposal generator",
+        },
+      },
+      {
+        title: "Proposal & Application Tracking",
+        heading: "From opportunity to outcome.",
+        body:
+          "Applications can be organized through a structured workflow so freelancers can keep track of what they applied for, what needs follow-up and what eventually happened. Stages such as opportunity, proposal, viewed, interview, hired, won and lost help users understand where each application stands based on information they record in the platform.",
+        image: {
+          src: "/images/projects/freelance-os/pipeline.webp",
+          alt: "Freelance OS application pipeline",
+        },
+      },
+      {
+        title: "Client Pipeline",
+        heading: "A CRM designed around freelance relationships.",
+        body:
+          "Freelance OS extends beyond applications by providing a structured place to manage prospects, clients, projects, contact information, notes and follow-ups. The CRM connects business development with the wider freelance workflow rather than requiring users to maintain a separate generic sales system.",
+        image: {
+          src: "/images/projects/freelance-os/crm.webp",
+          alt: "Freelance OS freelancer CRM",
+        },
+      },
+      {
+        title: "Portfolio Studio",
+        heading: "Turn completed work into reusable proof.",
+        body:
+          "Freelance OS helps users organize projects and transform their experience into stronger portfolio assets. Portfolio Studio supports the broader system by making previous work available as context when presenting services, improving positioning and preparing future proposals.",
+        image: {
+          src: "/images/projects/freelance-os/portfolio-studio.webp",
+          alt: "Freelance OS Portfolio Studio",
+        },
+      },
+      {
+        title: "Services",
+        heading: "Package expertise beyond individual applications.",
+        body:
+          "Freelance OS allows users to develop clearer client-facing service offerings from their skills and experience, with support for marketplace listings, project catalog content, positioning copy and related presentation assets where those workflows are enabled in the product.",
+      },
+      {
+        title: "Profile",
+        heading: "Make the freelancer's profile part of the system.",
+        body:
+          "Instead of treating profile information as onboarding data that is never used again, Freelance OS makes freelancer context available across relevant workflows. Profile readiness, skills, work history, testimonials and improvement recommendations help users develop stronger positioning over time.",
+      },
+      {
+        title: "Insights",
+        heading: "Understand what is actually working.",
+        body:
+          "Freelance OS brings activity and outcome data together so users can understand their freelance workflow beyond raw application counts. Depending on the data available, analytics can include proposal activity, reported views, interviews, hires, wins and losses, funnel performance and performance trends.",
+        image: {
+          src: "/images/projects/freelance-os/analytics.webp",
+          alt: "Freelance OS analytics dashboard",
+        },
+      },
+      {
+        title: "Career Coach",
+        heading: "Guidance with business context.",
+        body:
+          "The coaching experience is designed to understand more than the user's latest message. Where permitted by the application's architecture, guidance can draw from relevant Freelance OS context such as profile information, portfolio, services, proposals and business activity.",
+        image: {
+          src: "/images/projects/freelance-os/career-coach.webp",
+          alt: "Freelance OS Career Coach",
+        },
+      },
+      {
+        title: "Public Profile",
+        heading: "Take the freelancer's proof beyond the dashboard.",
+        body:
+          "Freelance OS includes public-facing profile infrastructure that allows freelancers to present selected profile, portfolio and service information through a client-facing experience with hire actions, contact options and privacy controls managed by the user.",
+        image: {
+          src: "/images/projects/freelance-os/public-profile.webp",
+          alt: "Freelance OS public profile",
+        },
+      },
+    ],
+    highlights: [
+      "AI-powered freelancer workspace",
+      "Opportunity intelligence",
+      "Context-aware proposal generation",
+      "Proposal tracking",
+      "Freelancer CRM",
+      "Portfolio Studio",
+      "Public freelancer profiles",
+      "Service positioning tools",
+      "Profile optimization",
+      "Performance analytics",
+      "Career Coach",
+      "Subscription billing",
+      "Notification infrastructure",
+      "Administrative platform",
+      "Role-based access",
+      "Responsive SaaS dashboard",
+      "API-driven architecture",
+    ],
+    saasInfrastructure: [
+      {
+        category: "Authentication",
+        items: [
+          "Email authentication",
+          "Account security",
+          "Protected application areas",
+        ],
+      },
+      {
+        category: "Billing",
+        items: [
+          "Subscription plans",
+          "Plan entitlements",
+          "Usage limits",
+        ],
+      },
+      {
+        category: "Notifications",
+        items: [
+          "Transactional email",
+          "User preferences",
+          "In-app notifications",
+        ],
+      },
+      {
+        category: "Administration",
+        items: [
+          "User management",
+          "Billing administration",
+          "Platform configuration",
+          "Support operations",
+        ],
+      },
+      {
+        category: "Security",
+        items: [
+          "Encrypted sensitive values where applicable",
+          "Server-side authorization",
+          "Role-based access",
+          "Rate limiting",
+          "Controlled administrative permissions",
+          "Audit logging",
+        ],
+      },
+    ],
+    showArchitectureDiagram: true,
+    platformContext:
+      "Freelance OS combines a modern Next.js application frontend with a Python FastAPI backend and structured data services to support a growing collection of connected freelance workflows. The platform separates presentation, business logic and data infrastructure while allowing features such as opportunities, proposals, clients, portfolio, analytics, billing and administration to work through shared product services.",
+    outcomeHeading: "From individual freelance tools to a connected operating system.",
+    sectionHeadings: {
+      challenge: "Freelancing has a fragmented operating system.",
+      approach: "Designing the freelance workflow as one system.",
+      solution: "One workspace across the freelance lifecycle.",
+      principles: "The principles behind the platform",
+      saasInfrastructure: "The systems behind the product",
+      engineering: "Built as a full-stack SaaS application",
+      platform: "Built with Next.js and FastAPI",
+    },
+    serviceLinks: [
+      {
+        label: "Product & UI Design",
+        href: "/services/website-design",
+        description:
+          "Designing a complex SaaS workspace around connected freelancer workflows while keeping individual tools understandable and actionable.",
+      },
+      {
+        label: "SaaS / Web Application Development",
+        href: "/services/website-development",
+        description:
+          "Building the frontend and backend systems supporting authenticated dashboards, business workflows, subscriptions and platform operations.",
+      },
+      {
+        label: "AI Integration",
+        description:
+          "Designing task-specific AI workflows that use relevant freelancer context for analysis, drafting and guidance.",
+      },
+      {
+        label: "Automation & Integrations",
+        description:
+          "Connecting authentication, notifications, billing and other product workflows across the application.",
+      },
+      {
+        label: "Platform Architecture",
+        description:
+          "Structuring a modular application capable of supporting multiple connected product domains without turning the experience into disconnected tools.",
+      },
+    ],
+    engineeringIntro:
+      "Freelance OS was developed as a custom application with separate frontend, backend, data and infrastructure layers rather than as a conventional content website.",
+    engineeringStacks: [
+      {
+        category: "Frontend",
+        items: [
+          "Next.js",
+          "TypeScript",
+          "Tailwind CSS",
+          "App Router",
+          "Responsive application architecture",
+        ],
+      },
+      {
+        category: "Backend",
+        items: ["FastAPI", "Python", "Structured APIs", "Background workflows"],
+      },
+      {
+        category: "Data",
+        items: ["PostgreSQL", "Redis"],
+      },
+      {
+        category: "AI",
+        items: [
+          "Task-specific AI workflows",
+          "Structured freelancer context",
+          "Server-side provider integration",
+        ],
+      },
+      {
+        category: "Authentication",
+        items: ["Email authentication", "Protected application routes"],
+      },
+      {
+        category: "Billing",
+        items: ["Subscription plans", "Usage limits", "Plan entitlements"],
+      },
+      {
+        category: "Infrastructure",
+        items: ["Vercel", "Cloudflare", "Container-ready deployment"],
+      },
+      {
+        category: "Architecture",
+        items: [
+          "Modular product domains",
+          "API-driven frontend and backend",
+          "Role-based access",
+          "Server-side authorization",
+          "Structured feature entitlements",
+          "Audit logging",
+        ],
+      },
+    ],
+    caseStudyCta: {
+      title: "Planning a SaaS Product or Web Application?",
+      description:
+        "If you are building a SaaS platform, AI product, dashboard or custom web application, tell us what the product needs to do and where you are in the build.",
+      primaryLabel: "Tell Us About Your Product",
+      primaryHref: "/contact",
+    },
+    externalLinkLabel: "Visit Freelance OS",
   },
   "gemini-corporate-relocations": {
     heroStatement:

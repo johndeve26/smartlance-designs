@@ -94,6 +94,8 @@ export function resolveCaseStudyContent(project: Project) {
     outcome: narrative?.outcomeHeading,
     engineering: narrative?.sectionHeadings?.engineering,
     platform: narrative?.sectionHeadings?.platform,
+    principles: narrative?.sectionHeadings?.principles,
+    saasInfrastructure: narrative?.sectionHeadings?.saasInfrastructure,
     ...project.sectionHeadings,
   };
 
@@ -141,6 +143,19 @@ export function resolveCaseStudyContent(project: Project) {
     caseStudyCta: project.caseStudyCta ?? narrative?.caseStudyCta,
     externalLinkLabel:
       project.externalLinkLabel ?? narrative?.externalLinkLabel,
+    heroEyebrow: project.heroEyebrow ?? narrative?.heroEyebrow,
+    heroSupportingCopy:
+      project.heroSupportingCopy ?? narrative?.heroSupportingCopy,
+    productPrinciples:
+      project.productPrinciples ?? narrative?.productPrinciples ?? [],
+    productFeatures:
+      project.productFeatures ?? narrative?.productFeatures ?? [],
+    saasInfrastructure:
+      project.saasInfrastructure ?? narrative?.saasInfrastructure ?? [],
+    showArchitectureDiagram:
+      project.showArchitectureDiagram ??
+      narrative?.showArchitectureDiagram ??
+      false,
     isProductCaseStudy: project.caseStudyKind === "product",
   };
 }

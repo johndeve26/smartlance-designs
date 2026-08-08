@@ -14,6 +14,8 @@ type CaseStudyHeroProps = {
   /** Distinct secondary asset only — never a duplicate of the hero */
   supportingImage?: { src: string; alt: string };
   externalLinkLabel?: string;
+  eyebrow?: string;
+  supportingCopy?: string;
 };
 
 export function CaseStudyHero({
@@ -22,6 +24,8 @@ export function CaseStudyHero({
   image,
   supportingImage,
   externalLinkLabel = "Visit Website",
+  eyebrow,
+  supportingCopy,
 }: CaseStudyHeroProps) {
   return (
     <section className="border-b border-border bg-surface-muted">
@@ -37,8 +41,8 @@ export function CaseStudyHero({
         <div className="mt-8 grid items-start gap-10 lg:grid-cols-[minmax(0,0.52fr)_minmax(0,0.48fr)] lg:gap-8 xl:gap-10">
           <div className="min-w-0 lg:pt-2">
             <p className="eyebrow">
-              Project
-              {project.industry ? ` · ${project.industry}` : ""}
+              {eyebrow ||
+                `Project${project.industry ? ` · ${project.industry}` : ""}`}
             </p>
             <h1 className="mt-4 font-display text-[clamp(2.5rem,4.8vw,4.75rem)] font-semibold leading-[1.05] tracking-tight text-foreground">
               {project.name}
@@ -46,6 +50,11 @@ export function CaseStudyHero({
             {statement ? (
               <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted sm:text-xl">
                 {statement}
+              </p>
+            ) : null}
+            {supportingCopy ? (
+              <p className="mt-4 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
+                {supportingCopy}
               </p>
             ) : null}
 

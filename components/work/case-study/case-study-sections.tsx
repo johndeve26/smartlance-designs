@@ -1,6 +1,11 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
-import type { ProjectCaseStudyPoint, ProjectEngineeringStack, ProjectGalleryItem } from "@/types";
+import type {
+  ProductFeatureSection,
+  ProjectCaseStudyPoint,
+  ProjectEngineeringStack,
+  ProjectGalleryItem,
+} from "@/types";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { BrowserFrame } from "@/components/work/case-study/case-study-hero";
@@ -607,5 +612,227 @@ export function CaseStudyGallery({ items }: { items: ProjectGalleryItem[] }) {
         );
       })}
     </>
+  );
+}
+
+export function CaseStudyPrinciples({
+  items,
+  heading = "The principles behind the platform",
+}: {
+  items: ProjectCaseStudyPoint[];
+  heading?: string;
+}) {
+  if (!items.length) return null;
+
+  return (
+    <Section tone="muted" className="!py-14 sm:!py-16 lg:!py-[4.5rem]">
+      <Container>
+        <div className="max-w-2xl">
+          <p className="eyebrow">Product principles</p>
+          <h2 className="mt-4 font-display text-[1.875rem] font-semibold sm:text-4xl">
+            {heading}
+          </h2>
+        </div>
+        <ol className="mt-12 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((item, index) => (
+            <li key={item.title} className="border-t-2 border-accent/50 pt-5">
+              <span className="font-display text-lg font-semibold tabular-nums text-accent-text sm:text-xl">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <h3 className="mt-4 font-display text-xl font-semibold sm:text-[1.375rem]">
+                {item.title}
+              </h3>
+              <p className="mt-3 text-[1.0625rem] leading-relaxed text-muted sm:text-lg">
+                {item.description}
+              </p>
+            </li>
+          ))}
+        </ol>
+      </Container>
+    </Section>
+  );
+}
+
+export function CaseStudyProductFeatures({
+  features,
+}: {
+  features: ProductFeatureSection[];
+}) {
+  if (!features.length) return null;
+
+  return (
+    <>
+      {features.map((feature, index) => (
+        <Section
+          key={feature.title}
+          className="!py-14 sm:!py-16 lg:!py-[4.5rem]"
+          tone={index % 2 === 0 ? undefined : "muted"}
+        >
+          <Container>
+            <div
+              className={cn(
+                "grid gap-10 lg:items-center lg:gap-16",
+                feature.image
+                  ? "lg:grid-cols-[minmax(0,0.42fr)_minmax(0,0.58fr)]"
+                  : "max-w-3xl",
+              )}
+            >
+              <div className={feature.image ? "min-w-0" : undefined}>
+                <p className="eyebrow">{feature.title}</p>
+                <h2 className="mt-4 font-display text-[1.875rem] font-semibold leading-tight sm:text-4xl">
+                  {feature.heading}
+                </h2>
+                <p className="mt-5 text-[1.0625rem] leading-[1.75] text-muted sm:text-lg">
+                  {feature.body}
+                </p>
+              </div>
+              {feature.image ? (
+                <div className="min-w-0">
+                  <BrowserFrame className="shadow-md">
+                    <div className="relative aspect-[16/10] overflow-hidden bg-surface-muted sm:aspect-[16/9]">
+                      <Image
+                        src={feature.image.src}
+                        alt={feature.image.alt}
+                        fill
+                        className="object-cover object-top"
+                        sizes="(max-width: 1024px) 100vw, 58vw"
+                      />
+                    </div>
+                  </BrowserFrame>
+                </div>
+              ) : null}
+            </div>
+          </Container>
+        </Section>
+      ))}
+    </>
+  );
+}
+
+export function CaseStudySaasInfrastructure({
+  stacks,
+  heading = "The systems behind the product",
+}: {
+  stacks?: ProjectEngineeringStack[];
+  heading?: string;
+}) {
+  if (!stacks?.length) return null;
+
+  return (
+    <Section tone="muted" className="!py-14 sm:!py-16 lg:!py-[4.5rem]">
+      <Container>
+        <div className="max-w-2xl">
+          <p className="eyebrow">SaaS infrastructure</p>
+          <h2 className="mt-4 font-display text-[1.875rem] font-semibold sm:text-4xl">
+            {heading}
+          </h2>
+        </div>
+        <div className="mt-12 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {stacks.map((stack) => (
+            <article
+              key={stack.category}
+              className="rounded-xl border border-border bg-surface p-6"
+            >
+              <h3 className="font-display text-lg font-semibold text-foreground">
+                {stack.category}
+              </h3>
+              <ul className="mt-4 space-y-2">
+                {stack.items.map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-start gap-2.5 text-[1.0625rem] leading-relaxed text-muted"
+                  >
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+      </Container>
+    </Section>
+  );
+}
+
+const ARCHITECTURE_LAYERS = [
+  {
+    title: "Freelancer context",
+    items: "Profile · Skills · Work · Proof",
+  },
+  {
+    title: "Win work",
+    items: "Opportunities → Analysis → Proposals → Pipeline",
+  },
+  {
+    title: "Run relationships",
+    items: "Leads → Clients → Projects",
+  },
+  {
+    title: "Present proof",
+    items: "Portfolio → Services → Public Profile",
+  },
+  {
+    title: "Learn and improve",
+    items: "Analytics → Insights → Career Coach",
+  },
+];
+
+const ARCHITECTURE_SUPPORT = [
+  "Authentication",
+  "Billing",
+  "Notifications",
+  "Administration",
+];
+
+export function CaseStudyArchitectureDiagram() {
+  return (
+    <Section className="!py-14 sm:!py-16 lg:!py-[4.5rem]">
+      <Container>
+        <div className="max-w-2xl">
+          <p className="eyebrow">Product architecture</p>
+          <h2 className="mt-4 font-display text-[1.875rem] font-semibold sm:text-4xl">
+            One operating system, many connected workflows
+          </h2>
+          <p className="mt-5 text-[1.0625rem] leading-relaxed text-muted sm:text-lg">
+            Freelance OS is organized around shared freelancer context and
+            connected product domains rather than isolated feature pages.
+          </p>
+        </div>
+        <div className="mt-12 space-y-4">
+          <div className="rounded-xl border border-accent/30 bg-accent/5 px-6 py-5 text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent-text">
+              Freelance OS
+            </p>
+          </div>
+          {ARCHITECTURE_LAYERS.map((layer) => (
+            <div key={layer.title} className="flex flex-col items-center gap-3">
+              <span className="text-accent-text" aria-hidden>
+                ↓
+              </span>
+              <div className="w-full max-w-3xl rounded-xl border border-border bg-surface px-6 py-5 text-center">
+                <p className="font-display text-lg font-semibold text-foreground">
+                  {layer.title}
+                </p>
+                <p className="mt-2 text-[1.0625rem] text-muted">{layer.items}</p>
+              </div>
+            </div>
+          ))}
+          <div className="flex flex-col items-center gap-3 pt-2">
+            <span className="text-accent-text" aria-hidden>
+              ↓
+            </span>
+            <div className="w-full max-w-3xl rounded-xl border border-dashed border-border bg-surface-muted/60 px-6 py-5 text-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-subtle">
+                Supporting infrastructure
+              </p>
+              <p className="mt-3 text-[1.0625rem] text-muted">
+                {ARCHITECTURE_SUPPORT.join(" · ")}
+              </p>
+            </div>
+          </div>
+        </div>
+      </Container>
+    </Section>
   );
 }

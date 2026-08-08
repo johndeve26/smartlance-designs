@@ -118,7 +118,7 @@ describe("Pàdéyá case study content", () => {
   it("participates in previous/next navigation", () => {
     const { previous, next } = getAdjacentProjects(SLUG);
     expect(previous).toBeNull();
-    expect(next?.slug).toBe("banyan-vacations");
+    expect(next?.slug).toBe("freelance-os");
   });
 
   it("builds SEO metadata and breadcrumb structured data", async () => {
