@@ -1,0 +1,72 @@
+{
+  "generatedAt": "2026-08-08T15:26:37.545Z",
+  "writingConfigured": false,
+  "researchConfigured": false,
+  "forceHeuristic": true,
+  "cmsUnchanged": {
+    "wordpressLastReviewedAt": null,
+    "homepageSeoTitle": null
+  },
+  "results": [
+    {
+      "target": "WordPress",
+      "action": "RESEARCH_AND_IMPROVE",
+      "proposalId": "cmskj0n7h000119xpbwjakdud",
+      "runId": "cmskj0mv3000019xp3368c2rj",
+      "promptVersion": "platform.research-improve:v2",
+      "provider": "heuristic+research",
+      "researchAttached": true,
+      "fieldCount": 0,
+      "fields": [],
+      "resultMode": "WRITING_PROVIDER_REQUIRED",
+      "verdict": "PASS"
+    },
+    {
+      "target": "Short-Term Rentals",
+      "action": "IMPROVE_INDUSTRY",
+      "proposalId": "cmskj0rop000419xp8l3dcmgc",
+      "runId": "cmskj0rbz000319xpqzrv0vdy",
+      "promptVersion": "industry.improve:v2",
+      "provider": "heuristic",
+      "fieldCount": 2,
+      "fields": [
+        "seoTitle",
+        "seoDescription"
+      ],
+      "currentDescriptionPreview": "Direct-booking and property websites for vacation rental and guest-stay businesses.",
+      "descriptionPreview": "",
+      "resultMode": "PARTIAL_CHANGE_RECOMMENDED",
+      "verdict": "PASS"
+    },
+    {
+      "target": "Website Redesign",
+      "action": "SUGGEST_RELATIONSHIPS + IMPROVE_SERVICE",
+      "proposalIds": [
+        "cmskj0vo2000719xpjhnyombz",
+        "cmskj0ynv000a19xp1aor2evd"
+      ],
+      "relationCount": 5,
+      "relationTitles": [
+        "Outdated Website",
+        "Planning a Website Migration",
+        "Website Not Generating Leads",
+        "Slow Website",
+        "Low Website Conversions"
+      ],
+      "reasons": [
+        "Outdated Website already links to this Service — reciprocal relevance.",
+        "Planning a Website Migration already links to this Service — reciprocal relevance.",
+        "Website Not Generating Leads already links to this Service — reciprocal relevance.",
+        "Slow Website already links to this Service — reciprocal relevance.",
+        "Low Website Conversions already links to this Service — reciprocal relevance."
+      ],
+      "improveFields": [
+        "primaryCtaLabel",
+        "primaryCtaHref"
+      ],
+      "firstNSmell": false,
+      "bodyRewritten": false,
+      "verdict": "PASS"
+    }
+  ]
+}

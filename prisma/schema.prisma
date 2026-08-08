@@ -1,0 +1,1789 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  EDITOR
+  CONTENT_MANAGER
+  REVIEWER
+}
+
+enum AdminUserStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum RedirectType {
+  PERMANENT_301
+  TEMPORARY_302
+}
+
+enum RedirectStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum RedirectOrigin {
+  SLUG_CHANGE
+  LEGACY_MIGRATION
+  MANUAL
+}
+
+enum MediaSourceType {
+  STATIC_EXISTING
+  UPLOADED
+  EXTERNAL
+}
+
+enum MediaAssetStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum NavigationMenuKey {
+  HEADER_PRIMARY
+  HEADER_RESOURCES
+  HEADER_SERVICES
+  HEADER_SEO
+  HEADER_PLATFORMS
+  HEADER_CTA
+  FOOTER_SERVICES
+  FOOTER_SEO
+  FOOTER_PLATFORMS
+  FOOTER_COMPANY
+  FOOTER_RESOURCES
+  FOOTER_LEGAL
+}
+
+enum NavigationItemStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum LinkHealthIssueType {
+  BROKEN
+  REDIRECTING
+  UNPUBLISHED_DESTINATION
+  ORPHAN
+  INVALID_RELATION
+  CANONICAL_MISMATCH
+  OPTIONAL_WARNING
+}
+
+enum LinkHealthSeverity {
+  ERROR
+  WARNING
+  INFO
+}
+
+enum EnquiryType {
+  CONTACT
+  WEBSITE_REVIEW
+}
+
+enum EnquiryStatus {
+  NEW
+  REVIEWING
+  REPLIED
+  QUALIFIED
+  CLOSED
+  SPAM
+}
+
+enum NotificationStatus {
+  NOT_ATTEMPTED
+  SENT
+  FAILED
+}
+
+model AdminUser {
+  id           String          @id @default(cuid())
+  name         String
+  email        String          @unique
+  passwordHash String
+  role         AdminRole       @default(EDITOR)
+  status       AdminUserStatus @default(ACTIVE)
+  lastLoginAt  DateTime?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  sessions          AdminSession[]
+  auditLogs         AuditLog[]       @relation("AuditActor")
+  contentRevisions  ContentRevision[] @relation("RevisionAuthor")
+  redirectsCreated  Redirect[]       @relation("RedirectCreator")
+  servicesCreated   Service[]        @relation("ServiceCreator")
+  servicesUpdated   Service[]        @relation("ServiceUpdater")
+  solutionsCreated  Solution[]       @relation("SolutionCreator")
+  solutionsUpdated  Solution[]       @relation("SolutionUpdater")
+  platformsCreated  Platform[]       @relation("PlatformCreator")
+  platformsUpdated  Platform[]       @relation("PlatformUpdater")
+  homepageUpdated   HomepageContent[] @relation("HomepageUpdater")
+  homepageDraftUpdated HomepageContent[] @relation("HomepageDraftUpdater")
+  industriesCreated Industry[]       @relation("IndustryCreator")
+  industriesUpdated Industry[]       @relation("IndustryUpdater")
+  workCreated       WorkProject[]    @relation("WorkCreator")
+  workUpdated       WorkProject[]    @relation("WorkUpdater")
+  testimonialsCreated Testimonial[]  @relation("TestimonialCreator")
+  testimonialsUpdated Testimonial[]  @relation("TestimonialUpdater")
+  insightsCreated   Insight[]        @relation("InsightCreator")
+  insightsUpdated   Insight[]        @relation("InsightUpdater")
+  resourcesCreated  CmsResource[]    @relation("ResourceCreator")
+  resourcesUpdated  CmsResource[]    @relation("ResourceUpdater")
+  mediaCreated      MediaAsset[]     @relation("MediaCreator")
+  mediaUpdated      MediaAsset[]     @relation("MediaUpdater")
+  navMenusUpdated   NavigationMenu[] @relation("NavMenuUpdater")
+  managedPagesUpdated ManagedPage[]  @relation("ManagedPageUpdater")
+  linkHealthRuns    LinkHealthRun[]  @relation("LinkHealthRunner")
+  enquiryNotes      EnquiryNote[]    @relation("EnquiryNoteAuthor")
+  enquiriesUpdated  Enquiry[]        @relation("EnquiryUpdater")
+  aiProjectsCreated AIEditorialProject[] @relation("AIProjectCreator")
+  aiProjectsUpdated AIEditorialProject[] @relation("AIProjectUpdater")
+  aiProjectsApproved AIEditorialProject[] @relation("AIProjectApprover")
+  aiRunsCreated     AIEditorialRun[]     @relation("AIRunCreator")
+  aiBrandVoicesUpdated AIBrandVoice[]    @relation("AIBrandVoiceUpdater")
+  aiEvaluationSnapshots AIEvaluationSnapshot[] @relation("AIEvaluationCreator")
+  aiProviderAccountsUpdated AIProviderAccount[] @relation("AIProviderAccountUpdater")
+  topicSeedsCreated         TopicSeed[]              @relation("TopicSeedCreator")
+  topicOpportunitiesReviewed EditorialOpportunity[]  @relation("TopicOpportunityReviewer")
+  topicDiscoveryRuns        TopicDiscoveryRun[]      @relation("TopicDiscoveryRunner")
+  topicSourcePacksUpdated   TopicSourcePack[]        @relation("TopicSourcePackUpdater")
+  topicWatchlistsUpdated    TopicWatchlist[]         @relation("TopicWatchlistUpdater")
+  aiContentRunsCreated      AIContentRun[]           @relation("AIContentRunCreator")
+  aiContentProposalsCreated AIContentProposal[]      @relation("AIContentProposalCreator")
+  aiContentProposalsAccepted AIContentProposal[]     @relation("AIContentProposalAcceptor")
+
+  @@index([status])
+  @@index([role])
+}
+
+model AdminSession {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  revokedAt DateTime?
+  userAgent String?
+  ipHash    String?
+
+  user AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  actor AdminUser? @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([entityType, entityId])
+  @@index([actorId])
+  @@index([action])
+}
+
+model ContentRevision {
+  id         String   @id @default(cuid())
+  entityType String
+  entityId   String
+  revision   Int
+  snapshot   Json
+  createdById String?
+  createdAt  DateTime @default(now())
+
+  createdBy AdminUser? @relation("RevisionAuthor", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@unique([entityType, entityId, revision])
+  @@index([entityType, entityId])
+}
+
+model Redirect {
+  id          String         @id @default(cuid())
+  sourcePath  String         @unique
+  destination String
+  type        RedirectType   @default(PERMANENT_301)
+  status      RedirectStatus @default(ACTIVE)
+  origin      RedirectOrigin @default(MANUAL)
+  reason      String?
+  createdById String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  createdBy AdminUser? @relation("RedirectCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([origin])
+}
+
+model SiteSettings {
+  id                     String   @id @default("site")
+  siteName               String   @default("Smartlance Designs")
+  businessName           String   @default("Smartlance Designs")
+  defaultSiteDescription String?
+  defaultLocale          String   @default("en")
+  timezone               String   @default("Africa/Lagos")
+  canonicalHost          String?
+  contactEmail           String?
+  contactPhone           String?
+  whatsapp               String?
+  footerDescription      String?
+  primaryLogoPath        String?
+  logoOnDarkPath         String?
+  brandMarkPath          String?
+  faviconPath            String?
+  defaultMetaTitle       String?
+  defaultMetaDescription String?
+  defaultOgImagePath     String?
+  defaultTitleTemplate   String?
+  publisherName          String?
+  /// Public analytics IDs only (never secrets)
+  gaMeasurementId        String?
+  gtmContainerId         String?
+  clarityProjectId       String?
+  analyticsEnabled       Boolean  @default(true)
+  contactFormEnabled     Boolean  @default(true)
+  freeReviewFormEnabled  Boolean  @default(true)
+  formSuccessMessage     String?
+  formFallbackMessage    String?
+  showPublicPricing      Boolean  @default(false)
+  robotsDefaultIndex     Boolean  @default(true)
+  /// [{ platform, url, enabled, displayOrder }]
+  socialLinks            Json     @default("[]")
+  /// Flexible extras (never secrets)
+  extras                 Json     @default("{}")
+  updatedAt              DateTime @updatedAt
+  updatedById            String?
+}
+
+model HomepageContent {
+  id                     String    @id @default("home")
+  heroEyebrow            String
+  heroHeadline           String
+  heroHeadlineAccent     String?
+  heroSupporting         String
+  primaryCtaLabel        String
+  primaryCtaHref         String
+  secondaryCtaLabel      String
+  secondaryCtaHref       String
+  metaTitle              String?
+  metaDescription        String?
+  sections               Json
+  sectionVisibility      Json
+  curatedServiceItems    Json
+  curatedTestimonialIds  Json
+  seoTitle               String?
+  seoDescription         String?
+  ogTitle                String?
+  ogDescription          String?
+  ogImagePath            String?
+  noIndex                Boolean   @default(false)
+  canonicalOverride      String?
+  /// Unpublished editor/AI draft — public site never reads this until publish
+  draftJson              Json?
+  draftUpdatedAt         DateTime?
+  draftUpdatedById       String?
+  updatedById            String?
+  updatedAt              DateTime  @updatedAt
+
+  updatedBy      AdminUser? @relation("HomepageUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  draftUpdatedBy AdminUser? @relation("HomepageDraftUpdater", fields: [draftUpdatedById], references: [id], onDelete: SetNull)
+}
+
+model Service {
+  id                   String        @id @default(cuid())
+  slug                 String        @unique
+  href                 String        @unique
+  title                String
+  shortTitle           String?
+  category             String
+  group                String
+  icon                 String
+  summary              String
+  description          String        @db.Text
+  tagline              String?
+  narrativeTitle       String?
+  narrative            String?       @db.Text
+  seoConnection        String?       @db.Text
+  audience             String?
+  platformsNote        String?
+  visualVariant        String?
+  featured             Boolean       @default(false)
+  navigationFeatured   Boolean       @default(false)
+  displayOrder         Int           @default(0)
+  capabilities         Json?
+  idealFor             Json?
+  problems             Json?
+  deliverables         Json?
+  process              Json?
+  evaluationItems      Json?
+  faqs                 Json?
+  relatedProjectSlugs  Json?
+  relatedServiceSlugs  Json?
+  relatedSeoSlugs      Json?
+  relatedPlatformSlugs Json?
+  relatedSolutionSlugs Json?
+  ctaTitle             String?
+  ctaDescription       String?       @db.Text
+  primaryCtaLabel      String?
+  primaryCtaHref       String?
+  secondaryCtaLabel    String?
+  secondaryCtaHref     String?
+  seoTitle             String
+  seoDescription       String
+  ogTitle              String?
+  ogDescription        String?
+  ogImagePath          String?
+  noIndex              Boolean       @default(false)
+  canonicalOverride    String?
+  status               PublishStatus @default(DRAFT)
+  publishedAt          DateTime?
+  createdById          String?
+  updatedById          String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  createdBy AdminUser? @relation("ServiceCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy AdminUser? @relation("ServiceUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([publishedAt])
+  @@index([group])
+  @@index([displayOrder])
+}
+
+model Solution {
+  id                     String        @id @default(cuid())
+  slug                   String        @unique
+  name                   String
+  title                  String
+  shortDescription       String        @db.Text
+  category               String
+  icon                   String
+  featured               Boolean       @default(false)
+  displayOrder           Int           @default(0)
+  eyebrow                String?
+  heroStatement          String?       @db.Text
+  heroSupporting         String?       @db.Text
+  problemSymptoms        Json?
+  possibleCauses         Json?
+  whatWeReview           Json?
+  process                Json?
+  measurementPoints      Json?
+  relatedServiceHrefs    Json
+  relatedPlatformSlugs   Json?
+  relatedIndustrySlugs   Json?
+  relatedProjectSlugs    Json?
+  relatedArticleSlugs    Json?
+  relatedServiceReasons  Json?
+  relatedSolutions       Json?
+  faqs                   Json?
+  pageKind               String?
+  pageContent            Json?
+  ctaTitle               String?
+  ctaDescription         String?       @db.Text
+  primaryCtaLabel        String?
+  primaryCtaHref         String?
+  secondaryCtaLabel      String?
+  secondaryCtaHref       String?
+  seoTitle               String?
+  seoDescription         String?
+  ogTitle                String?
+  ogDescription          String?
+  ogImagePath            String?
+  noIndex                Boolean       @default(false)
+  canonicalOverride      String?
+  status                 PublishStatus @default(DRAFT)
+  publishedAt            DateTime?
+  createdById            String?
+  updatedById            String?
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+
+  createdBy AdminUser? @relation("SolutionCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy AdminUser? @relation("SolutionUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([publishedAt])
+  @@index([category])
+  @@index([displayOrder])
+}
+
+model Platform {
+  id                   String        @id @default(cuid())
+  slug                 String        @unique
+  href                 String        @unique
+  name                 String
+  title                String
+  summary              String
+  description          String        @db.Text
+  tagline              String?
+  icon                 String
+  group                String
+  prominence           String?
+  featured             Boolean       @default(false)
+  navigationFeatured   Boolean       @default(false)
+  verifiedExperience   Boolean       @default(false)
+  platformMatch        String
+  displayOrder         Int           @default(0)
+  audiences            Json
+  whenItFits           Json?
+  capabilities         Json
+  challenges           Json?
+  seoSection           Json?
+  relatedServiceHrefs  Json
+  relatedSeoHrefs      Json?
+  faqs                 Json?
+  legacyUrl            String?
+  conversionNote       String?       @db.Text
+  migrationNote        String?       @db.Text
+  ctaTitle             String?
+  ctaDescription       String?       @db.Text
+  seoTitle             String
+  seoDescription       String
+  ogTitle              String?
+  ogDescription        String?
+  ogImagePath          String?
+  noIndex              Boolean       @default(false)
+  canonicalOverride    String?
+  lastReviewedAt       DateTime?
+  status               PublishStatus @default(DRAFT)
+  publishedAt          DateTime?
+  createdById          String?
+  updatedById          String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  createdBy AdminUser? @relation("PlatformCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy AdminUser? @relation("PlatformUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  workProjects WorkProject[]
+
+  @@index([status])
+  @@index([publishedAt])
+  @@index([group])
+  @@index([displayOrder])
+}
+
+/* -------------------------------------------------------------------------- */
+/* Phase 3 — Proof, Industries, Insights, Resources                           */
+/* -------------------------------------------------------------------------- */
+
+enum IndustryGroupKind {
+  proven
+  supported
+}
+
+enum ResourceKind {
+  guide
+  comparison
+  checklist
+  glossary
+  template
+  tool
+}
+
+enum CurationPlacement {
+  RESOURCES_HUB
+  HOMEPAGE_WORK
+  HOMEPAGE_INSIGHT
+  WORK_ARCHIVE
+}
+
+model Topic {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  name         String
+  displayOrder Int      @default(0)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  insights  InsightTopic[]
+  resources CmsResourceTopic[]
+
+  @@index([active, displayOrder])
+}
+
+model Industry {
+  id                          String            @id @default(cuid())
+  slug                        String            @unique
+  name                        String
+  description                 String            @db.Text
+  icon                        String
+  group                       IndustryGroupKind
+  featured                    Boolean           @default(false)
+  displayOrder                Int               @default(0)
+  hasVerifiedProjectExperience Boolean          @default(false)
+  relatedServiceLinks         Json
+  relatedSolutionSlugs        Json?
+  seoTitle                    String?
+  seoDescription              String?
+  ogTitle                     String?
+  ogDescription               String?
+  ogImagePath                 String?
+  noIndex                     Boolean           @default(false)
+  canonicalOverride           String?
+  status                      PublishStatus     @default(DRAFT)
+  publishedAt                 DateTime?
+  createdById                 String?
+  updatedById                 String?
+  createdAt                   DateTime          @default(now())
+  updatedAt                   DateTime          @updatedAt
+
+  createdBy AdminUser? @relation("IndustryCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy AdminUser? @relation("IndustryUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  workLinks IndustryWork[]
+
+  @@index([status])
+  @@index([group])
+  @@index([displayOrder])
+  @@index([hasVerifiedProjectExperience])
+}
+
+model WorkProject {
+  id                   String        @id @default(cuid())
+  slug                 String        @unique
+  name                 String
+  title                String?
+  clientName           String?
+  industryLabel        String
+  projectType          String?
+  shortDescription     String?       @db.Text
+  overview             String?       @db.Text
+  challenge            String        @db.Text
+  solution             String        @db.Text
+  approach             String?       @db.Text
+  designNotes          String?       @db.Text
+  developmentNotes     String?       @db.Text
+  seoNotes             String?       @db.Text
+  resultSummary        String?       @db.Text
+  results              Json?
+  measurableResults    Json?
+  goals                Json?
+  servicesLabels       Json
+  technologies         Json?
+  platformId           String?
+  platformLabel        String?
+  platformsLabels      Json?
+  websiteUrl           String?
+  oldUrl               String?
+  year                 Int?
+  coverImagePath       String?
+  coverImageAlt        String?
+  heroImagePath        String?
+  heroImageAlt         String?
+  gallery              Json?
+  relatedServiceHrefs  Json?
+  relatedWorkSlugs     Json?
+  featuredHomepage     Boolean       @default(false)
+  featuredWorkArchive  Boolean       @default(false)
+  featured             Boolean       @default(false)
+  displayOrder         Int           @default(0)
+  heroStatement        String?       @db.Text
+  challenges           Json?
+  approachSteps        Json?
+  solutionPoints       Json?
+  highlights           Json?
+  platformContext      String?       @db.Text
+  outcomeHeading       String?
+  seoTitle             String
+  seoDescription       String
+  ogTitle              String?
+  ogDescription        String?
+  ogImagePath          String?
+  noIndex              Boolean       @default(false)
+  canonicalOverride    String?
+  /// Explicit opt-in: approved project facts may be sent to AI when an editor invokes Case Study AI
+  approvedForAI        Boolean       @default(false)
+  /// Structured verified project facts for Case Study AI (not public page copy)
+  /// { objective, problem, workCompleted, deliverables[], technology[], platform, clientContext, outcome, verifiedMetrics[] }
+  approvedProjectFacts Json?
+  status               PublishStatus @default(DRAFT)
+  publishedAt          DateTime?
+  createdById          String?
+  updatedById          String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  platform     Platform?      @relation(fields: [platformId], references: [id], onDelete: SetNull)
+  createdBy    AdminUser?     @relation("WorkCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy    AdminUser?     @relation("WorkUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  industryLinks IndustryWork[]
+  testimonials Testimonial[]
+
+  @@index([status])
+  @@index([publishedAt])
+  @@index([displayOrder])
+  @@index([featuredHomepage])
+  @@index([featuredWorkArchive])
+  @@index([platformId])
+}
+
+model IndustryWork {
+  industryId String
+  workId     String
+  sortOrder  Int    @default(0)
+
+  industry Industry    @relation(fields: [industryId], references: [id], onDelete: Cascade)
+  work     WorkProject @relation(fields: [workId], references: [id], onDelete: Cascade)
+
+  @@id([industryId, workId])
+  @@index([workId])
+}
+
+model Testimonial {
+  id                       String        @id @default(cuid())
+  legacyId                 String        @unique
+  /// Working display quote (may receive safe punctuation normalization only)
+  quote                    String        @db.Text
+  /// Immutable verified source wording — preserved exactly; never inventively rewritten
+  originalQuote            String?       @db.Text
+  /// Optional shorter display excerpt derived from originalQuote (extraction only)
+  displayExcerpt           String?       @db.Text
+  name                     String
+  role                     String?
+  company                  String
+  serviceLabel             String?
+  avatarPath               String?
+  workProjectId            String?
+  verified                 Boolean       @default(false)
+  featured                 Boolean       @default(false)
+  displayOrder             Int           @default(0)
+  /// Internal editorial themes (optional metadata — not public copy)
+  themesJson               Json?
+  internalSource           String?
+  internalSourceUrl        String?
+  internalVerificationNote String?       @db.Text
+  status                   PublishStatus @default(DRAFT)
+  publishedAt              DateTime?
+  createdById              String?
+  updatedById              String?
+  createdAt                DateTime      @default(now())
+  updatedAt                DateTime      @updatedAt
+
+  workProject WorkProject? @relation(fields: [workProjectId], references: [id], onDelete: SetNull)
+  createdBy   AdminUser?   @relation("TestimonialCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   AdminUser?   @relation("TestimonialUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([verified])
+  @@index([displayOrder])
+  @@index([workProjectId])
+}
+
+model Insight {
+  id                  String        @id @default(cuid())
+  slug                String        @unique
+  title               String
+  description         String        @db.Text
+  bodyMarkdown        String        @db.Text
+  categoryLabel       String
+  author              String?
+  readingTime         String?
+  heroImagePath       String?
+  heroImageAlt        String?
+  relatedServiceHrefs Json?
+  tags                Json?
+  featured            Boolean       @default(false)
+  legacyUrl           String?
+  originalPublishedAt DateTime
+  materialUpdatedAt   DateTime?
+  seoTitle            String?
+  seoDescription      String?
+  ogTitle             String?
+  ogDescription       String?
+  ogImagePath         String?
+  noIndex             Boolean       @default(false)
+  canonicalOverride   String?
+  status              PublishStatus @default(DRAFT)
+  publishedAt         DateTime?
+  createdById         String?
+  updatedById         String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  createdBy AdminUser?     @relation("InsightCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy AdminUser?     @relation("InsightUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  topics    InsightTopic[]
+  aiProject AIEditorialProject?
+
+  @@index([status])
+  @@index([publishedAt])
+  @@index([originalPublishedAt])
+  @@index([categoryLabel])
+  @@index([featured])
+}
+
+model InsightTopic {
+  insightId String
+  topicId   String
+
+  insight Insight @relation(fields: [insightId], references: [id], onDelete: Cascade)
+  topic   Topic   @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([insightId, topicId])
+  @@index([topicId])
+}
+
+/** Non-insight resource types (guide, comparison, checklist, glossary, template, tool). */
+model CmsResource {
+  id                  String        @id @default(cuid())
+  type                ResourceKind
+  slug                String
+  title               String
+  description         String        @db.Text
+  deck                String?       @db.Text
+  href                String
+  payload             Json
+  featured            Boolean       @default(false)
+  featuredOnResources Boolean       @default(false)
+  featuredOrder       Int           @default(0)
+  readingTime         String?
+  author              String?
+  heroImagePath       String?
+  heroImageAlt        String?
+  relatedServiceHrefs Json?
+  relatedSolutionSlugs Json?
+  relatedPlatformSlugs Json?
+  relatedInsightSlugs Json?
+  relatedResourceIds  Json?
+  aliases             Json?
+  acronym             String?
+  shortDefinition     String?       @db.Text
+  seoTitle            String?
+  seoDescription      String?
+  ogTitle             String?
+  ogDescription       String?
+  ogImagePath         String?
+  noIndex             Boolean       @default(false)
+  canonicalOverride   String?
+  status              PublishStatus @default(DRAFT)
+  publishedAt         DateTime?
+  materialUpdatedAt   DateTime?
+  createdById         String?
+  updatedById         String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  createdBy AdminUser?         @relation("ResourceCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy AdminUser?         @relation("ResourceUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  topics    CmsResourceTopic[]
+
+  @@unique([type, slug])
+  @@index([status])
+  @@index([type, status])
+  @@index([publishedAt])
+  @@index([featuredOnResources, featuredOrder])
+}
+
+model CmsResourceTopic {
+  resourceId String
+  topicId    String
+
+  resource CmsResource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  topic    Topic       @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([resourceId, topicId])
+  @@index([topicId])
+}
+
+model ContentCuration {
+  id         String            @id @default(cuid())
+  placement  CurationPlacement
+  entityType String
+  entityId   String
+  sortOrder  Int               @default(0)
+  active     Boolean           @default(true)
+  updatedAt  DateTime          @updatedAt
+  createdAt  DateTime          @default(now())
+
+  @@unique([placement, entityType, entityId])
+  @@index([placement, active, sortOrder])
+}
+
+model AssetReference {
+  id        String   @id @default(cuid())
+  path      String   @unique
+  alt       String?
+  kind      String
+  entityHint String?
+  createdAt DateTime @default(now())
+
+  @@index([kind])
+}
+
+model ContentImportMarker {
+  id          String   @id
+  version     String
+  report      Json?
+  completedAt DateTime @default(now())
+}
+
+model MediaAsset {
+  id               String           @id @default(cuid())
+  filename         String
+  originalFilename String
+  storageProvider  String
+  storageKey       String           @unique
+  publicUrl        String
+  mimeType         String
+  extension        String
+  byteSize         Int
+  width            Int?
+  height           Int?
+  altText          String?
+  caption          String?
+  title            String?
+  sourceType       MediaSourceType  @default(UPLOADED)
+  status           MediaAssetStatus @default(ACTIVE)
+  createdById      String?
+  updatedById      String?
+  archivedAt       DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  createdBy AdminUser? @relation("MediaCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy AdminUser? @relation("MediaUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([filename])
+  @@index([sourceType])
+  @@index([mimeType])
+}
+
+model NavigationMenu {
+  id          String            @id @default(cuid())
+  menuKey     NavigationMenuKey @unique
+  label       String
+  status      PublishStatus     @default(DRAFT)
+  draftItems  Json              @default("[]")
+  publishedItems Json           @default("[]")
+  version     Int               @default(1)
+  updatedById String?
+  publishedAt DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  updatedBy AdminUser?      @relation("NavMenuUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  items     NavigationItem[]
+
+  @@index([status])
+}
+
+model NavigationItem {
+  id           String                @id @default(cuid())
+  menuId       String
+  parentId     String?
+  label        String
+  href         String
+  description  String?
+  displayOrder Int                   @default(0)
+  external     Boolean               @default(false)
+  openInNewTab Boolean               @default(false)
+  visibility   String                @default("public")
+  status       NavigationItemStatus  @default(PUBLISHED)
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  menu   NavigationMenu  @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  parent NavigationItem? @relation("NavItemParent", fields: [parentId], references: [id], onDelete: Cascade)
+  children NavigationItem[] @relation("NavItemParent")
+
+  @@index([menuId, displayOrder])
+  @@index([parentId])
+}
+
+model ManagedPage {
+  id                String        @id @default(cuid())
+  key               String        @unique
+  route             String        @unique
+  displayName       String
+  seoTitle          String?
+  seoDescription    String?
+  ogTitle           String?
+  ogDescription     String?
+  ogImagePath       String?
+  noIndex           Boolean       @default(false)
+  canonicalOverride String?
+  heroEyebrow       String?
+  heroHeadline      String?
+  heroSupporting    String?
+  status            PublishStatus @default(PUBLISHED)
+  updatedById       String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  updatedBy AdminUser? @relation("ManagedPageUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([status])
+}
+
+model LinkHealthRun {
+  id          String   @id @default(cuid())
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  summary     Json?
+  triggeredById String?
+  triggeredBy AdminUser? @relation("LinkHealthRunner", fields: [triggeredById], references: [id], onDelete: SetNull)
+  issues      LinkHealthIssue[]
+}
+
+model LinkHealthIssue {
+  id          String              @id @default(cuid())
+  runId       String
+  type        LinkHealthIssueType
+  severity    LinkHealthSeverity  @default(WARNING)
+  sourceType  String
+  sourceLabel String
+  sourcePath  String?
+  targetPath  String?
+  message     String
+  fixHint     String?
+  createdAt   DateTime            @default(now())
+
+  run LinkHealthRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId, type])
+  @@index([severity])
+}
+
+/**
+ * Commercial enquiry operations (Contact + Free Website Review).
+ * Private Admin-only — never exposed via public repositories.
+ */
+model Enquiry {
+  id                   String             @id @default(cuid())
+  reference            String             @unique
+  type                 EnquiryType
+  status               EnquiryStatus      @default(NEW)
+  name                 String?
+  email                String?
+  company              String?
+  websiteUrl           String?
+  /// Contact: selected service interest
+  service              String?
+  /// Contact: project details message
+  projectDetails       String?            @db.Text
+  budget               String?
+  timeline             String?
+  referralSource       String?
+  /// Website review main concern
+  mainConcern          String?
+  sourcePath           String?
+  submittedAt          DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  statusChangedAt      DateTime?
+  notificationStatus   NotificationStatus @default(NOT_ATTEMPTED)
+  notificationAttemptedAt DateTime?
+  notificationProviderId  String?
+  notificationErrorCode   String?
+  lastNotificationError   String?
+  anonymizedAt         DateTime?
+  isAnonymized         Boolean            @default(false)
+  updatedById          String?
+
+  updatedBy AdminUser?   @relation("EnquiryUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  notes     EnquiryNote[]
+
+  @@index([type, status, submittedAt])
+  @@index([status, submittedAt])
+  @@index([submittedAt])
+  @@index([email])
+  @@index([notificationStatus])
+  @@index([isAnonymized])
+}
+
+model EnquiryNote {
+  id        String   @id @default(cuid())
+  enquiryId String
+  authorId  String?
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  enquiry Enquiry    @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
+  author  AdminUser? @relation("EnquiryNoteAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([enquiryId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// AI Editorial Studio
+// ---------------------------------------------------------------------------
+
+enum AIEditorialMode {
+  NEW_ARTICLE
+  UPDATE_EXISTING
+  BRIEF_ONLY
+  OUTLINE_ONLY
+  IMPROVE_DRAFT
+}
+
+enum AIEditorialStatus {
+  IDEA
+  RESEARCHING
+  BRIEF_READY
+  OUTLINE_READY
+  DRAFTING
+  DRAFT_READY
+  NEEDS_REVIEW
+  APPROVED_FOR_CMS
+  ARCHIVED
+}
+
+enum AIRunStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
+enum AIRunOperation {
+  TOPIC_ANALYSIS
+  RESEARCH
+  SERP_ANALYSIS
+  BRIEF
+  OUTLINE
+  SECTION_DRAFT
+  FULL_DRAFT
+  FACT_CHECK
+  SEO_REVIEW
+  AI_SEARCH_REVIEW
+  INTERNAL_LINK_REVIEW
+  EDITORIAL_REVIEW
+  META_GENERATION
+  FAQ_GENERATION
+  REFRESH_ANALYSIS
+  CANNIBALIZATION_CHECK
+  BRAND_VOICE_SUGGEST
+  CONTENT_IDEAS
+  CMS_HANDOFF
+}
+
+enum AISourceType {
+  PRIMARY
+  OFFICIAL
+  RESEARCH
+  INDUSTRY
+  COMMUNITY
+  COMPETITOR
+  USER_SUPPLIED
+}
+
+enum AIClaimSupport {
+  SUPPORTED_EXTERNAL
+  SUPPORTED_INTERNAL
+  GENERAL_KNOWLEDGE
+  EDITORIAL_OPINION
+  UNSUPPORTED
+  TIME_SENSITIVE
+}
+
+enum AIClaimEvidenceStrength {
+  DIRECT
+  PARTIAL
+  CONTEXTUAL
+  INSUFFICIENT
+}
+
+model AIEditorialProject {
+  id                String            @id @default(cuid())
+  title             String
+  workingTopic      String            @db.Text
+  mode              AIEditorialMode   @default(NEW_ARTICLE)
+  status            AIEditorialStatus @default(IDEA)
+  targetAudience    String?
+  businessGoal      String?
+  primaryIntent     String?
+  primaryQuery      String?
+  secondaryQueries  Json?
+  targetRegion      String?
+  contentType       String?
+  serviceHref       String?
+  solutionSlug      String?
+  notes             String?           @db.Text
+  uniqueValue       String?           @db.Text
+  commodityWarning  Boolean           @default(false)
+  cannibalization   Json?
+  briefJson         Json?
+  researchJson      Json?
+  outlineJson       Json?
+  draftMarkdown     String?           @db.Text
+  seoJson           Json?
+  aiSearchJson      Json?
+  factCheckJson     Json?
+  internalLinksJson Json?
+  qualityReviewJson Json?
+  analysisStale     Json?
+  draftContentHash  String?
+  citationMode      String            @default("RESEARCH_ONLY")
+  provider          String?
+  model             String?
+  promptVersion     String?
+  brandVoiceRevisionAt DateTime?
+  lastResearchAt    DateTime?
+  insightSnapshotAt DateTime?
+  handoffRevisionId String?
+  linkedInsightId   String?           @unique
+  approvedById      String?
+  approvedAt        DateTime?
+  createdById       String?
+  updatedById       String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  completedAt       DateTime?
+
+  createdBy     AdminUser?         @relation("AIProjectCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy     AdminUser?         @relation("AIProjectUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  approvedBy    AdminUser?         @relation("AIProjectApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  linkedInsight Insight?           @relation(fields: [linkedInsightId], references: [id], onDelete: SetNull)
+  runs          AIEditorialRun[]
+  sources       AIResearchSource[]
+  claims        AIClaim[]
+  topicOpportunity EditorialOpportunity?
+
+  @@index([status, updatedAt])
+  @@index([mode])
+  @@index([createdById])
+  @@index([workingTopic])
+}
+
+model AIEditorialRun {
+  id                String         @id @default(cuid())
+  projectId         String
+  operation         AIRunOperation
+  provider          String
+  model             String?
+  promptVersion     String?
+  inputFingerprint  String?
+  status            AIRunStatus    @default(QUEUED)
+  startedAt         DateTime?
+  completedAt       DateTime?
+  tokenUsageInput   Int?
+  tokenUsageOutput  Int?
+  providerRequestId String?
+  errorCode         String?
+  errorSummary      String?
+  resultSummary     Json?
+  createdById       String?
+  createdAt         DateTime       @default(now())
+
+  project   AIEditorialProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy AdminUser?         @relation("AIRunCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([projectId, createdAt])
+  @@index([status])
+  @@index([operation])
+}
+
+model AIResearchSource {
+  id          String       @id @default(cuid())
+  projectId   String
+  url         String
+  title       String?
+  publisher   String?
+  publishedAt DateTime?
+  accessedAt  DateTime     @default(now())
+  sourceType  AISourceType @default(INDUSTRY)
+  notes       String?      @db.Text
+  snippet     String?      @db.Text
+  selected    Boolean      @default(true)
+  excluded    Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  project AIEditorialProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  claims  AIClaimSource[]
+
+  @@index([projectId, selected])
+  @@index([projectId, excluded])
+}
+
+model AIClaim {
+  id          String         @id @default(cuid())
+  projectId   String
+  claimText   String         @db.Text
+  support     AIClaimSupport @default(UNSUPPORTED)
+  sectionHint String?
+  checkedAt   DateTime?
+  actionNote  String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  project AIEditorialProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sources AIClaimSource[]
+
+  @@index([projectId, support])
+}
+
+model AIClaimSource {
+  claimId          String
+  sourceId         String
+  evidenceStrength AIClaimEvidenceStrength @default(INSUFFICIENT)
+  evidenceSummary  String?                 @db.Text
+  checkedAt        DateTime?
+
+  claim  AIClaim          @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  source AIResearchSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@id([claimId, sourceId])
+}
+
+model AIBrandVoice {
+  id                 String   @id @default("default")
+  personality        String?  @db.Text
+  audience           String?  @db.Text
+  tone               String?  @db.Text
+  sentenceStyle      String?  @db.Text
+  technicalDepth     String?  @db.Text
+  preferredTerms     Json?
+  avoidedPhrases     Json?
+  ctaStyle           String?  @db.Text
+  formattingPrefs    String?  @db.Text
+  exemplarInsightIds Json?
+  approved           Boolean  @default(false)
+  revision           Int      @default(1)
+  updatedById        String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  updatedBy AdminUser? @relation("AIBrandVoiceUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+}
+
+model AIProviderAccount {
+  id               String   @id @default(cuid())
+  /// Catalog id: openai | anthropic | google | xai | openrouter | custom
+  providerId       String   @unique
+  label            String
+  enabled          Boolean  @default(true)
+  apiKeyCiphertext String?  @db.Text
+  apiKeyIv         String?
+  apiKeyTag        String?
+  apiKeyLast4      String?
+  /// Optional base URL override (required for custom)
+  baseUrl          String?
+  /// Admin override of catalog default model for this provider
+  defaultModel     String?
+  updatedById      String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  updatedBy AdminUser? @relation("AIProviderAccountUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([enabled])
+}
+
+model AIWriterSettings {
+  id                        String   @id @default("default")
+  /// Default catalog provider id for all roles unless overridden
+  defaultProviderId         String   @default("openai")
+  writingProviderId         String?
+  researchProviderId        String?
+  editorProviderId          String?
+  fastProviderId            String?
+  writingModel              String?
+  researchModel             String?
+  editorModel               String?
+  fastModel                 String?
+  citationModeDefault       String   @default("RESEARCH_ONLY")
+  maxResearchQueries        Int      @default(8)
+  maxSources                Int      @default(12)
+  maxDraftRegens            Int      @default(20)
+  maxConcurrentJobs         Int      @default(2)
+  dailyTokenWarningThreshold Int?
+  staleJobMinutes           Int      @default(30)
+  allowResultCache          Boolean  @default(true)
+  /// Optional [{ model, inputPer1MUsd, outputPer1MUsd }] — never invent pricing
+  modelPricingJson          Json?
+  sourcePolicyNotes         String?  @db.Text
+  disclosureMode            String   @default("none")
+  /// Topic Intelligence discovery limits
+  maxDiscoveryQueries       Int      @default(6)
+  maxDiscoveryResultsPerSource Int   @default(8)
+  maxDiscoveryProviderCalls Int      @default(20)
+  updatedAt                 DateTime @updatedAt
+}
+
+model AIEvaluationSnapshot {
+  id            String   @id @default(cuid())
+  name          String
+  fixtureId     String
+  promptVersion String?
+  model         String?
+  mode          String   @default("mock")
+  dimensions    Json
+  notes         String?  @db.Text
+  createdById   String?
+  createdAt     DateTime @default(now())
+
+  createdBy AdminUser? @relation("AIEvaluationCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([fixtureId, createdAt])
+  @@index([createdAt])
+}
+
+// —— AI Content Assistants (CMS field proposals; not Insight Studio) ——
+
+enum AIContentEntityType {
+  SERVICE
+  SOLUTION
+  PLATFORM
+  INDUSTRY
+  WORK
+  TESTIMONIAL
+  GUIDE
+  COMPARISON
+  CHECKLIST
+  GLOSSARY
+  TEMPLATE
+  TOOL
+  HOMEPAGE
+}
+
+enum AIContentProposalStatus {
+  PENDING
+  PARTIALLY_ACCEPTED
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  STALE
+}
+
+enum AIContentRunStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
+model AIContentRun {
+  id                String             @id @default(cuid())
+  entityType        AIContentEntityType
+  entityId          String
+  action            String
+  provider          String
+  model             String?
+  promptVersion     String?
+  inputFingerprint  String?
+  status            AIContentRunStatus @default(QUEUED)
+  startedAt         DateTime?
+  completedAt       DateTime?
+  tokenUsageInput   Int?
+  tokenUsageOutput  Int?
+  errorCode         String?
+  errorSummary      String?
+  resultSummary     Json?
+  createdById       String?
+  createdAt         DateTime           @default(now())
+
+  createdBy AdminUser?          @relation("AIContentRunCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  proposals AIContentProposal[]
+
+  @@index([entityType, entityId, createdAt])
+  @@index([status])
+  @@index([action])
+}
+
+model AIContentProposal {
+  id                  String                  @id @default(cuid())
+  entityType          AIContentEntityType
+  entityId            String
+  action              String
+  status              AIContentProposalStatus @default(PENDING)
+  payloadJson         Json
+  currentSnapshotJson Json
+  entityUpdatedAt     DateTime
+  acceptedFieldsJson  Json?
+  rejectedFieldsJson  Json?
+  lockedFieldsJson    Json?
+  customInstructions  String?                 @db.Text
+  promptVersion       String?
+  runId               String?
+  /// Optional Topic Intelligence opportunity that opened this commercial handoff
+  opportunityId       String?
+  createdById         String?
+  acceptedById        String?
+  acceptedAt          DateTime?
+  createdAt           DateTime                @default(now())
+  updatedAt           DateTime                @updatedAt
+
+  run        AIContentRun? @relation(fields: [runId], references: [id], onDelete: SetNull)
+  createdBy  AdminUser?    @relation("AIContentProposalCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  acceptedBy AdminUser?    @relation("AIContentProposalAcceptor", fields: [acceptedById], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId, status])
+  @@index([createdAt])
+  @@index([runId])
+  @@index([opportunityId])
+}
+
+// —— Topic Intelligence Engine ——
+
+enum TopicSignalType {
+  NEWS
+  TREND
+  PRODUCT_UPDATE
+  INDUSTRY_UPDATE
+  OFFICIAL_GUIDANCE
+  RESEARCH
+  QUESTION
+  CONTENT_GAP
+  FIRST_PARTY_SEARCH
+  USER_SEED
+  COMPETITOR_COVERAGE
+}
+
+enum TopicSignalStatus {
+  ACTIVE
+  SUPERSEDED
+  ARCHIVED
+}
+
+enum TopicOpportunityStatus {
+  NEW
+  REVIEWING
+  APPROVED
+  MONITORING
+  REJECTED
+  CONVERTED_TO_PROJECT
+  ARCHIVED
+}
+
+enum TopicRecommendation {
+  WRITE_NEW
+  UPDATE_EXISTING
+  EXPAND_EXISTING_RESOURCE
+  SUPPORT_COMMERCIAL_PAGE
+  UPDATE_SERVICE_PAGE
+  UPDATE_SOLUTION_PAGE
+  UPDATE_PLATFORM_PAGE
+  UPDATE_INDUSTRY_PAGE
+  UPDATE_WORK_PAGE
+  UPDATE_HOMEPAGE
+  MONITOR
+  IGNORE
+}
+
+enum TopicFreshnessClass {
+  EVERGREEN
+  TIMELY
+  HYBRID
+}
+
+enum TopicDiscoveryMode {
+  MIXED
+  EXPLORE_SUGGESTION
+  SITE_GAPS
+  NEWS
+  INDUSTRY
+  PLATFORMS
+  TRENDS
+  EXISTING_CONTENT
+}
+
+enum TopicSourceAuthority {
+  OFFICIAL
+  PRIMARY
+  RESEARCH
+  INDUSTRY
+  NEWS
+  COMMUNITY
+  COMPETITOR
+}
+
+enum TopicSeedType {
+  TOPIC
+  QUESTION
+  INDUSTRY
+  SERVICE
+  SOLUTION
+  PLATFORM
+  COMPETITOR_THEME
+  SOURCE_URL
+  EDITORIAL_NOTE
+}
+
+enum TopicContentFormat {
+  INSIGHT
+  GUIDE
+  COMPARISON
+  CHECKLIST
+  GLOSSARY
+  TEMPLATE
+  TOOL
+  SERVICE_UPDATE
+  SOLUTION_UPDATE
+  PLATFORM_UPDATE
+  INDUSTRY_UPDATE
+}
+
+enum TopicPriority {
+  HIGH
+  NORMAL
+  LOW
+}
+
+enum TopicRejectionReason {
+  DUPLICATE
+  WEAK_RELEVANCE
+  NO_UNIQUE_ANGLE
+  POOR_SOURCE_QUALITY
+  OUTSIDE_STRATEGY
+  TOO_TEMPORARY
+  ALREADY_COVERED
+  OTHER
+}
+
+enum TopicEditorialFeedback {
+  GOOD_RECOMMENDATION
+  WRONG_FORMAT
+  DUPLICATE_MISSED
+  WEAK_ANGLE
+  IRRELEVANT
+  STRONG_REFRESH
+  USEFUL_SOURCE
+}
+
+model TopicStrategySettings {
+  id                    String   @id @default("default")
+  priorityThemesJson    Json?
+  lowerPriorityThemesJson Json?
+  marketsJson           Json?
+  contentGoalsJson      Json?
+  industryFocusJson     Json?
+  pausedTopicsJson      Json?
+  defaultMarket         String   @default("global_en")
+  notes                 String?  @db.Text
+  updatedAt             DateTime @updatedAt
+}
+
+model TopicSourcePack {
+  id                String   @id @default(cuid())
+  slug              String   @unique
+  name              String
+  description       String?  @db.Text
+  enabled           Boolean  @default(true)
+  market            String?
+  priority          Int      @default(50)
+  officialDomainsJson Json?
+  rssFeedsJson      Json?
+  researchOrgsJson  Json?
+  publicationsJson  Json?
+  changelogUrlsJson Json?
+  newsQueriesJson   Json?
+  keywordsJson      Json?
+  excludedDomainsJson Json?
+  relatedServiceHrefsJson Json?
+  relatedSolutionSlugsJson Json?
+  relatedPlatformSlugsJson Json?
+  relatedIndustrySlugsJson Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  updatedById       String?
+
+  updatedBy  AdminUser?       @relation("TopicSourcePackUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  watchlists TopicWatchlist[]
+
+  @@index([enabled, priority])
+}
+
+model TopicWatchlist {
+  id                String   @id @default(cuid())
+  slug              String   @unique
+  name              String
+  description       String?  @db.Text
+  active            Boolean  @default(true)
+  marketsJson       Json?
+  keywordsJson      Json?
+  conceptsJson      Json?
+  relatedServiceHrefsJson Json?
+  relatedSolutionSlugsJson Json?
+  relatedPlatformSlugsJson Json?
+  sourcePackId      String?
+  scheduleCron      String?
+  scheduleEnabled   Boolean  @default(false)
+  lastScanAt        DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  updatedById       String?
+
+  sourcePack TopicSourcePack? @relation(fields: [sourcePackId], references: [id], onDelete: SetNull)
+  updatedBy  AdminUser?       @relation("TopicWatchlistUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  runs       TopicDiscoveryRun[]
+  seeds      TopicSeed[]
+
+  @@index([active])
+}
+
+model TopicSeed {
+  id          String        @id @default(cuid())
+  text        String        @db.Text
+  seedType    TopicSeedType @default(TOPIC)
+  market      String?
+  industry    String?
+  notes       String?       @db.Text
+  watchlistId String?
+  createdById String?
+  createdAt   DateTime      @default(now())
+  analyzedAt  DateTime?
+
+  watchlist TopicWatchlist? @relation(fields: [watchlistId], references: [id], onDelete: SetNull)
+  createdBy AdminUser?      @relation("TopicSeedCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  opportunities EditorialOpportunity[]
+
+  @@index([createdAt])
+  @@index([seedType])
+}
+
+model TopicDiscoveryRun {
+  id                   String            @id @default(cuid())
+  watchlistId          String?
+  mode                 TopicDiscoveryMode @default(MIXED)
+  status               AIRunStatus       @default(QUEUED)
+  seedText             String?           @db.Text
+  market               String?
+  industry             String?
+  freshnessPreference  String?
+  commercialGoal       String?
+  sourcePreference     String?
+  forceRefresh         Boolean           @default(false)
+  providersUsedJson    Json?
+  signalsFound         Int               @default(0)
+  clustersCreated      Int               @default(0)
+  opportunitiesCreated Int               @default(0)
+  tokenUsageInput      Int?
+  tokenUsageOutput     Int?
+  providerCalls        Int               @default(0)
+  errorCode            String?
+  errorSummary         String?           @db.Text
+  startedAt            DateTime?
+  completedAt          DateTime?
+  createdById          String?
+  createdAt            DateTime          @default(now())
+
+  watchlist     TopicWatchlist?        @relation(fields: [watchlistId], references: [id], onDelete: SetNull)
+  createdBy     AdminUser?             @relation("TopicDiscoveryRunner", fields: [createdById], references: [id], onDelete: SetNull)
+  signals       TopicSignal[]
+  opportunities EditorialOpportunity[]
+
+  @@index([status, createdAt])
+  @@index([watchlistId, status])
+}
+
+model TopicSignal {
+  id                 String              @id @default(cuid())
+  runId              String?
+  provider           String
+  type               TopicSignalType
+  title              String
+  summary            String?             @db.Text
+  sourceUrl          String?
+  sourceDomain       String?
+  publishedAt        DateTime?
+  discoveredAt       DateTime            @default(now())
+  market             String?
+  language           String?             @default("en")
+  entitiesJson       Json?
+  topicsJson         Json?
+  rawProviderId      String?
+  sourceAuthorityType TopicSourceAuthority @default(INDUSTRY)
+  freshness          TopicFreshnessClass @default(HYBRID)
+  status             TopicSignalStatus   @default(ACTIVE)
+  fingerprint        String
+  clusterKey         String?
+  provenanceJson     Json?
+  createdAt          DateTime            @default(now())
+
+  run TopicDiscoveryRun? @relation(fields: [runId], references: [id], onDelete: SetNull)
+
+  @@unique([fingerprint])
+  @@index([status, discoveredAt])
+  @@index([clusterKey])
+  @@index([type, discoveredAt])
+  @@index([runId])
+}
+
+model EditorialOpportunity {
+  id                    String                 @id @default(cuid())
+  workingTitle          String
+  coreTopic             String                 @db.Text
+  question              String?                @db.Text
+  status                TopicOpportunityStatus @default(NEW)
+  recommendation        TopicRecommendation    @default(MONITOR)
+  /// Engine recommendation at creation; preserved when humans override.
+  aiOriginalRecommendation TopicRecommendation?
+  humanDecisionNote     String?                @db.Text
+  editorialFeedback     TopicEditorialFeedback?
+  editorialFeedbackNote String?                @db.Text
+  intent                String?
+  audience              String?
+  market                String?
+  timeliness            TopicFreshnessClass    @default(HYBRID)
+  evergreenPotential    Boolean                @default(true)
+  commercialRelationship String?               @db.Text
+  uniqueValue           String?                @db.Text
+  reasonToExist         String?                @db.Text
+  whyNow                String?                @db.Text
+  whySmartlance         String?                @db.Text
+  existingContentJson   Json?
+  supportingSignalsJson Json?
+  sourceSummaryJson     Json?
+  suggestedServicesJson Json?
+  suggestedSolutionsJson Json?
+  suggestedPlatformsJson Json?
+  suggestedResourcesJson Json?
+  /// Resolved CMS target for handoffs (optional; preferred over title matching)
+  targetEntityType      String?
+  targetEntityId        String?
+  suggestedFormat       TopicContentFormat     @default(INSIGHT)
+  suggestedCta          String?
+  dimensionsJson        Json?
+  badge                 String?
+  priority              TopicPriority          @default(NORMAL)
+  pinned                Boolean                @default(false)
+  plannedFor            DateTime?
+  rejectionReason       TopicRejectionReason?
+  rejectionNote         String?                @db.Text
+  higherFactualReview   Boolean                @default(false)
+  mergeKey              String?
+  evidenceCount         Int                    @default(0)
+  recurringSignal       Boolean                @default(false)
+  seedId                String?
+  runId                 String?
+  linkedAIProjectId     String?                @unique
+  reviewedById          String?
+  reviewedAt            DateTime?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+
+  seed            TopicSeed?         @relation(fields: [seedId], references: [id], onDelete: SetNull)
+  run             TopicDiscoveryRun? @relation(fields: [runId], references: [id], onDelete: SetNull)
+  reviewedBy      AdminUser?         @relation("TopicOpportunityReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  linkedAIProject AIEditorialProject? @relation(fields: [linkedAIProjectId], references: [id], onDelete: SetNull)
+
+  @@index([status, updatedAt])
+  @@index([recommendation, status])
+  @@index([mergeKey])
+  @@index([priority, status])
+  @@index([market])
+}

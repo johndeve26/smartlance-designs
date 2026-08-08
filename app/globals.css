@@ -1,0 +1,465 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* -------------------------------------------------------------------------
+   Smartlance Designs — Official brand tokens
+   Orange #F47A48 · Charcoal #535353 · White #FFFFFF
+--------------------------------------------------------------------------- */
+
+:root {
+  /* Core brand */
+  --brand-orange: #f47a48;
+  --brand-dark: #535353;
+  --brand-white: #ffffff;
+
+  /* Orange scale */
+  --orange-50: #fff7f3;
+  --orange-100: #ffeadf;
+  --orange-200: #ffd0bc;
+  --orange-300: #ffb092;
+  --orange-400: #ff9168;
+  --orange-500: #f47a48;
+  --orange-600: #e06330;
+  --orange-700: #c04e22;
+  --orange-800: #9a3e1c;
+  --orange-900: #7a3218;
+
+  /* Neutral scale (warm, charcoal-based) */
+  --neutral-50: #faf9f7;
+  --neutral-100: #f3f1ee;
+  --neutral-200: #e6e3df;
+  --neutral-300: #d0ccc7;
+  --neutral-400: #a8a39d;
+  --neutral-500: #7a7570;
+  --neutral-600: #535353;
+  --neutral-700: #3f3f3f;
+  --neutral-800: #2c2c2c;
+  --neutral-900: #1a1a1a;
+
+  /* Semantic tokens */
+  --color-brand: var(--orange-500);
+  --color-brand-hover: var(--orange-600);
+  /* Interactive fills use darker orange for WCAG AA with white text */
+  --color-cta: var(--orange-700);
+  --color-cta-hover: var(--orange-800);
+  --color-cta-foreground: #ffffff;
+  --color-brand-soft: var(--orange-50);
+
+  --color-accent: var(--orange-500);
+  /* Text on solid brand-orange surfaces (if used) */
+  --color-accent-on-brand: var(--neutral-900);
+  --color-accent-foreground: var(--neutral-900);
+  --color-accent-soft: var(--orange-100);
+  --color-accent-hover: var(--orange-600);
+  /* Readable accent text on light backgrounds */
+  --color-accent-text: var(--orange-700);
+
+  --color-primary: var(--neutral-800);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--neutral-600);
+  --color-secondary-foreground: #ffffff;
+
+  --color-background: var(--neutral-50);
+  --color-surface: #ffffff;
+  --color-surface-muted: var(--neutral-100);
+  --color-surface-dark: var(--neutral-900);
+
+  --color-foreground: var(--neutral-800);
+  /*
+   * Supporting copy must clear WCAG AA on BOTH white and the warm neutral
+   * section background. neutral-500 only reached 4.04:1 on --color-surface-muted.
+   */
+  --color-muted: var(--neutral-600);
+  --color-muted-foreground: var(--neutral-600);
+  /* Metadata and quiet labels — never below AA on white */
+  --color-subtle: var(--neutral-500);
+
+  --color-border: var(--neutral-200);
+  --color-border-strong: var(--neutral-300);
+  --color-ring: var(--orange-500);
+
+  /* Semantic UI — not brand */
+  --color-success: #157a4b;
+  --color-success-soft: #e8f6ef;
+  --color-error: #b42318;
+  --color-error-soft: #fef3f2;
+  --color-warning: #b54708;
+  --color-warning-soft: #fffaeb;
+
+  /* Typography */
+  --font-display: var(--font-syne), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+
+  /* Spacing & radius — moderate radii echo logo geometry */
+  --section-y: clamp(3.5rem, 6vw, 7.5rem);
+  --section-y-compact: clamp(2.75rem, 4vw, 5rem);
+  --section-y-feature: clamp(4.5rem, 7vw, 8rem);
+
+  /*
+   * Layout width tokens — one grid system, intentional content measures.
+   * Shell/standard share 80rem so header, footer and page sections align.
+   * Prefer Container size props over one-off max-w-[…] wrappers.
+   */
+  --site-shell: 80rem; /* 1280px — header, footer, archives, section frames */
+  --content-max: 80rem; /* same as shell — no nested 1200/1280 mismatch */
+  /* Page content uses the shell. Short headline/deck limits stay as local max-w-*. */
+  --reading-max: var(--site-shell);
+  --narrow-max: var(--site-shell);
+  --interactive-max: var(--site-shell);
+
+  /* Back-compat aliases */
+  --container: var(--site-shell);
+  --container-narrow: var(--site-shell);
+  --readable: var(--site-shell);
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.125rem;
+
+  --shadow-sm: 0 1px 2px rgb(26 26 26 / 0.04);
+  --shadow-md: 0 8px 24px rgb(26 26 26 / 0.06);
+}
+
+@theme inline {
+  --color-brand: var(--color-brand);
+  --color-brand-hover: var(--color-brand-hover);
+  --color-brand-foreground: var(--color-cta-foreground);
+  --color-brand-soft: var(--color-brand-soft);
+  --color-cta: var(--color-cta);
+  --color-cta-hover: var(--color-cta-hover);
+  --color-cta-foreground: var(--color-cta-foreground);
+
+  --color-primary: var(--color-primary);
+  --color-primary-foreground: var(--color-primary-foreground);
+  --color-secondary: var(--color-secondary);
+  --color-secondary-foreground: var(--color-secondary-foreground);
+  --color-accent: var(--color-accent);
+  --color-accent-foreground: var(--color-accent-foreground);
+  --color-accent-on-brand: var(--color-accent-on-brand);
+  --color-accent-soft: var(--color-accent-soft);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-accent-text: var(--color-accent-text);
+
+  --color-background: var(--color-background);
+  --color-surface: var(--color-surface);
+  --color-surface-muted: var(--color-surface-muted);
+  --color-surface-dark: var(--color-surface-dark);
+  --color-foreground: var(--color-foreground);
+  --color-muted: var(--color-muted);
+  --color-muted-foreground: var(--color-muted-foreground);
+  --color-subtle: var(--color-subtle);
+  --color-border: var(--color-border);
+  --color-border-strong: var(--color-border-strong);
+  --color-ring: var(--color-ring);
+  --color-success: var(--color-success);
+  --color-success-soft: var(--color-success-soft);
+  --color-error: var(--color-error);
+  --color-error-soft: var(--color-error-soft);
+  --color-warning: var(--color-warning);
+  --color-warning-soft: var(--color-warning-soft);
+
+  --color-orange-50: var(--orange-50);
+  --color-orange-100: var(--orange-100);
+  --color-orange-200: var(--orange-200);
+  --color-orange-300: var(--orange-300);
+  --color-orange-400: var(--orange-400);
+  --color-orange-500: var(--orange-500);
+  --color-orange-600: var(--orange-600);
+  --color-orange-700: var(--orange-700);
+  --color-orange-800: var(--orange-800);
+  --color-orange-900: var(--orange-900);
+
+  --color-neutral-50: var(--neutral-50);
+  --color-neutral-100: var(--neutral-100);
+  --color-neutral-200: var(--neutral-200);
+  --color-neutral-300: var(--neutral-300);
+  --color-neutral-400: var(--neutral-400);
+  --color-neutral-500: var(--neutral-500);
+  --color-neutral-600: var(--neutral-600);
+  --color-neutral-700: var(--neutral-700);
+  --color-neutral-800: var(--neutral-800);
+  --color-neutral-900: var(--neutral-900);
+
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "ss01" on, "cv11" on;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display font-semibold tracking-tight text-foreground;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  a {
+    @apply transition-colors;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--color-accent) 28%, white);
+  }
+}
+
+@layer utilities {
+  /* Shared gutters: 20 / 24 / 32px */
+  /* Outer frame only — always shell-aligned with the header */
+  .container-site {
+    @apply mx-auto w-full px-5 sm:px-6 lg:px-8;
+    max-width: var(--site-shell);
+  }
+
+  /* Legacy aliases → same shell frame (measure via Container or utilities) */
+  .container-reading,
+  .container-narrow,
+  .container-interactive {
+    @apply mx-auto w-full px-5 sm:px-6 lg:px-8;
+    max-width: var(--site-shell);
+  }
+
+  /* Inner measure only — parent already provides gutters; left-align by default */
+  .readable-width {
+    max-width: var(--reading-max);
+  }
+
+  .narrow-width {
+    max-width: var(--narrow-max);
+  }
+
+  .interactive-width {
+    max-width: var(--interactive-max);
+  }
+
+  .section-padding {
+    padding-block: var(--section-y);
+  }
+
+  .section-padding-compact {
+    padding-block: var(--section-y-compact);
+  }
+
+  .section-padding-feature {
+    padding-block: var(--section-y-feature);
+  }
+
+  .heading-hero {
+    font-size: clamp(2.625rem, 4.2vw, 4.75rem);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+  }
+
+  .heading-major {
+    font-size: clamp(2rem, 3.5vw, 4rem);
+    line-height: 1.05;
+  }
+
+  .heading-section {
+    font-size: clamp(1.75rem, 2.8vw, 3.25rem);
+    line-height: 1.08;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .eyebrow {
+    @apply text-[0.8125rem] font-semibold uppercase tracking-[0.12em] text-accent-text;
+  }
+
+  /* Section deck — supporting statement under a section heading */
+  .section-deck {
+    @apply text-[1.0625rem] leading-[1.65] text-muted sm:text-[1.125rem];
+  }
+
+  /* Body copy inside editorial grids (outcomes, steps, capabilities) */
+  .body-copy {
+    @apply text-base leading-[1.7] text-muted;
+  }
+
+  /* Metadata: categories, dates, project context. Small but never faint. */
+  .text-meta {
+    @apply text-[0.9375rem] leading-normal text-muted;
+  }
+
+  /* Ordinal markers that must stay secondary to the title they precede */
+  .ordinal-marker {
+    @apply font-display text-[0.875rem] font-semibold tabular-nums text-accent-text;
+  }
+
+  /* Standalone inline action link */
+  .link-action {
+    @apply inline-flex items-center gap-1.5 text-[0.9375rem] font-semibold text-accent-text hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2;
+  }
+
+  .prose-smartlance {
+    @apply prose max-w-none text-foreground
+      prose-headings:font-display prose-headings:font-semibold prose-headings:tracking-tight prose-headings:text-foreground
+      prose-h2:mt-14 prose-h2:mb-4 prose-h2:text-[1.875rem] prose-h2:leading-tight sm:prose-h2:mt-16 sm:prose-h2:mb-5 sm:prose-h2:text-[2.125rem]
+      prose-h3:mt-10 prose-h3:mb-3.5 prose-h3:text-[1.375rem] sm:prose-h3:mt-11 sm:prose-h3:text-[1.5rem]
+      prose-h4:mt-8 prose-h4:mb-3 prose-h4:text-lg sm:prose-h4:text-[1.25rem]
+      prose-p:my-5 prose-p:text-[1.0625rem] prose-p:leading-[1.75] prose-p:text-muted sm:prose-p:text-[1.125rem] sm:prose-p:leading-[1.78]
+      prose-p:first-of-type:text-[1.125rem] prose-p:first-of-type:leading-[1.7] prose-p:first-of-type:text-foreground sm:prose-p:first-of-type:text-[1.1875rem]
+      prose-a:font-medium prose-a:text-accent-text prose-a:no-underline hover:prose-a:underline
+      prose-strong:font-semibold prose-strong:text-foreground
+      prose-ul:my-6 prose-ol:my-6
+      prose-li:my-2.5 prose-li:text-[1.0625rem] prose-li:leading-[1.75] prose-li:text-muted sm:prose-li:text-[1.125rem]
+      prose-li:marker:text-accent
+      prose-blockquote:border-l-2 prose-blockquote:border-accent prose-blockquote:pl-5 prose-blockquote:not-italic prose-blockquote:text-xl prose-blockquote:font-medium prose-blockquote:leading-snug prose-blockquote:text-foreground sm:prose-blockquote:text-2xl
+      prose-img:my-10 prose-img:rounded-xl prose-img:border prose-img:border-border
+      prose-hr:my-12 prose-hr:border-border
+      prose-table:my-8 prose-table:w-full prose-table:overflow-hidden prose-table:rounded-lg prose-table:border prose-table:border-border
+      prose-th:bg-surface-muted prose-th:px-4 prose-th:py-3 prose-th:text-left prose-th:text-sm prose-th:font-semibold prose-th:text-foreground
+      prose-td:border-t prose-td:border-border prose-td:px-4 prose-td:py-3 prose-td:text-[0.9375rem] prose-td:text-muted
+      prose-code:rounded prose-code:bg-surface-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:text-[0.9em] prose-code:font-normal prose-code:text-foreground prose-code:before:content-none prose-code:after:content-none
+      prose-pre:overflow-x-auto prose-pre:rounded-xl prose-pre:border prose-pre:border-border prose-pre:bg-surface-dark prose-pre:p-5 prose-pre:text-sm prose-pre:text-white;
+  }
+
+  .prose-smartlance :where(ul > li)::marker {
+    color: var(--color-accent);
+  }
+
+  .article-callout {
+    @apply my-8 rounded-xl border border-border bg-surface-muted px-5 py-5 sm:px-6;
+  }
+
+  .article-callout__label {
+    @apply text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-accent-text;
+  }
+
+  .article-callout__body {
+    @apply mt-2 text-[1.0625rem] leading-relaxed text-muted sm:text-[1.125rem];
+  }
+
+  .article-image-breakout {
+    @apply relative left-1/2 my-12 w-[min(100vw-2.5rem,65rem)] max-w-none -translate-x-1/2 sm:w-[min(100vw-3rem,62rem)] lg:w-[min(100%,52rem)] xl:w-[min(100%,58rem)];
+  }
+}
+
+@media print {
+  header,
+  footer,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: #1c1917 !important;
+  }
+
+  .checklist-body,
+  .checklist-hero,
+  .template-hero,
+  .template-brief {
+    background: white !important;
+  }
+
+  .checklist-checkbox {
+    appearance: auto !important;
+    -webkit-appearance: checkbox !important;
+    print-color-adjust: exact;
+  }
+
+  a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+
+  h2,
+  h3,
+  section {
+    break-inside: avoid;
+  }
+
+  /* Filled brief: hide interactive form fields, keep summary */
+  html[data-print-mode="brief"] .template-form-fields,
+  html[data-print-mode="brief"] .template-section-nav,
+  html[data-print-mode="brief"] .template-utilities {
+    display: none !important;
+  }
+
+  html[data-print-mode="brief"] .template-brief-summary {
+    display: block !important;
+  }
+
+  /* Blank worksheet: show fields as printable blanks, hide summary */
+  html[data-print-mode="blank"] .template-brief-summary,
+  html[data-print-mode="blank"] .template-section-nav,
+  html[data-print-mode="blank"] .template-utilities,
+  html[data-print-mode="blank"] .template-contact-handoff {
+    display: none !important;
+  }
+
+  html[data-print-mode="blank"] .template-form-fields input,
+  html[data-print-mode="blank"] .template-form-fields textarea,
+  html[data-print-mode="blank"] .template-form-fields select {
+    border: none !important;
+    border-bottom: 1px solid #a8a29e !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    min-height: 1.75rem;
+    color: transparent !important;
+    -webkit-text-fill-color: transparent !important;
+  }
+
+  html[data-print-mode="blank"] .template-form-fields textarea {
+    min-height: 4.5rem;
+    border: 1px solid #a8a29e !important;
+  }
+
+  html[data-print-mode="blank"] .template-form-fields input[type="radio"],
+  html[data-print-mode="blank"] .template-form-fields input[type="checkbox"] {
+    appearance: auto !important;
+    -webkit-appearance: auto !important;
+    color: inherit !important;
+    -webkit-text-fill-color: inherit !important;
+    border: none !important;
+    min-height: auto;
+  }
+}

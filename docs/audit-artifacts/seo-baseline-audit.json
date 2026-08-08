@@ -1,0 +1,324 @@
+{
+  "generatedAt": "2026-08-08T16:05:52.091Z",
+  "origin": "https://smartlancedesigns.com",
+  "indexNowEnabled": false,
+  "urlInventory": {
+    "rows": [
+      {
+        "url": "/seo/technical-seo",
+        "path": "/seo/technical-seo",
+        "family": "seo-topic",
+        "classification": "INDEX",
+        "inSitemapExpected": true,
+        "canonical": "/seo/technical-seo",
+        "title": null,
+        "description": null,
+        "notes": [
+          "static-seo-topic"
+        ]
+      },
+      {
+        "url": "/seo/local-seo",
+        "path": "/seo/local-seo",
+        "family": "seo-topic",
+        "classification": "INDEX",
+        "inSitemapExpected": true,
+        "canonical": "/seo/local-seo",
+        "title": null,
+        "description": null,
+        "notes": [
+          "static-seo-topic"
+        ]
+      },
+      {
+        "url": "/seo/on-page-seo",
+        "path": "/seo/on-page-seo",
+        "family": "seo-topic",
+        "classification": "INDEX",
+        "inSitemapExpected": true,
+        "canonical": "/seo/on-page-seo",
+        "title": null,
+        "description": null,
+        "notes": [
+          "static-seo-topic"
+        ]
+      },
+      {
+        "url": "/seo/seo-audit",
+        "path": "/seo/seo-audit",
+        "family": "seo-topic",
+        "classification": "INDEX",
+        "inSitemapExpected": true,
+        "canonical": "/seo/seo-audit",
+        "title": null,
+        "description": null,
+        "notes": [
+          "static-seo-topic"
+        ]
+      },
+      {
+        "url": "/about",
+        "path": "/about",
+        "family": "about",
+        "classification": "INDEX",
+        "inSitemapExpected": true,
+        "canonical": "/about",
+        "title": "About Smartlance Designs",
+        "description": "Learn how Smartlance Designs builds websites and SEO strategies that help businesses get found and convert.",
+        "notes": [
+          "known-managed-page"
+        ]
+      },
+      {
+        "url": "/contact",
+        "path": "/contact",
+        "family": "contact",
+        "classification": "INDEX",
+        "inSitemapExpected": true,
+        "canonical": "/contact",
+        "title": "Contact Smartlance Designs",
+        "description": "Tell us about your website project. We respond with clear next steps for design, development and SEO.",
+        "notes": [
+          "known-managed-page"
+        ]
+      },
+      {
+        "url": "/pricing",
+        "path": "/pricing",
+        "family": "pricing",
+        "classification": "INDEX",
+        "inSitemapExpected": true,
+        "canonical": "/pricing",
+        "title": "Website Project Pricing",
+        "description": "How Smartlance Designs scopes website and SEO projects — transparent process without vanity price lists.",
+        "notes": [
+          "known-managed-page"
+        ]
+      },
+      {
+        "url": "/project-planner",
+        "path": "/project-planner",
+        "family": "project-planner",
+        "classification": "INDEX",
+        "inSitemapExpected": true,
+        "canonical": "/project-planner",
+        "title": "Website Project Planner",
+        "description": "Clarify your website goals, scope and priorities before you enquire.",
+        "notes": [
+          "known-managed-page"
+        ]
+      },
+      {
+        "url": "/free-website-review",
+        "path": "/free-website-review",
+        "family": "free-website-review",
+        "classification": "INDEX",
+        "inSitemapExpected": true,
+        "canonical": "/free-website-review",
+        "title": "Free Website Review",
+        "description": "Request a free website review focused on clarity, conversion and search visibility.",
+        "notes": [
+          "known-managed-page"
+        ]
+      },
+      {
+        "url": "/resources",
+        "path": "/resources",
+        "family": "resources",
+        "classification": "INDEX",
+        "inSitemapExpected": true,
+        "canonical": "/resources",
+        "title": "Website Resources",
+        "description": "Guides, checklists, comparisons, templates and tools for clearer website decisions.",
+        "notes": [
+          "known-managed-page"
+        ]
+      },
+      {
+        "url": "/legal/terms-and-condition",
+        "path": "/legal/terms-and-condition",
+        "family": "legal",
+        "classification": "INDEX",
+        "inSitemapExpected": true,
+        "canonical": "/legal/terms-and-condition",
+        "title": null,
+        "description": null,
+        "notes": [
+          "known-managed-page"
+        ]
+      },
+      {
+        "url": "/legal/privacy-statement",
+        "path": "/legal/privacy-statement",
+        "family": "legal",
+        "classification": "INDEX",
+        "inSitemapExpected": true,
+        "canonical": "/legal/privacy-statement",
+        "title": null,
+        "description": null,
+        "notes": [
+          "known-managed-page"
+        ]
+      },
+      {
+        "url": "/legal/accessibility-statement",
+        "path": "/legal/accessibility-statement",
+        "family": "legal",
+        "classification": "INDEX",
+        "inSitemapExpected": true,
+        "canonical": "/legal/accessibility-statement",
+        "title": null,
+        "description": null,
+        "notes": [
+          "known-managed-page"
+        ]
+      }
+    ],
+    "summary": {
+      "INDEX": 13
+    }
+  },
+  "sitemap": {
+    "count": 131,
+    "urls": [
+      "https://smartlancedesigns.com",
+      "https://smartlancedesigns.com/services",
+      "https://smartlancedesigns.com/solutions",
+      "https://smartlancedesigns.com/platforms",
+      "https://smartlancedesigns.com/seo",
+      "https://smartlancedesigns.com/work",
+      "https://smartlancedesigns.com/industries",
+      "https://smartlancedesigns.com/about",
+      "https://smartlancedesigns.com/blog",
+      "https://smartlancedesigns.com/resources",
+      "https://smartlancedesigns.com/guides",
+      "https://smartlancedesigns.com/compare",
+      "https://smartlancedesigns.com/checklists",
+      "https://smartlancedesigns.com/glossary",
+      "https://smartlancedesigns.com/templates",
+      "https://smartlancedesigns.com/tools",
+      "https://smartlancedesigns.com/pricing",
+      "https://smartlancedesigns.com/project-planner",
+      "https://smartlancedesigns.com/contact",
+      "https://smartlancedesigns.com/free-website-review",
+      "https://smartlancedesigns.com/legal/terms-and-condition",
+      "https://smartlancedesigns.com/legal/privacy-statement",
+      "https://smartlancedesigns.com/legal/accessibility-statement",
+      "https://smartlancedesigns.com/work/gemini-corporate-relocations",
+      "https://smartlancedesigns.com/work/katerinas-place",
+      "https://smartlancedesigns.com/work/the-coast",
+      "https://smartlancedesigns.com/work/banyan-vacations",
+      "https://smartlancedesigns.com/work/overlook-cabin-rentals",
+      "https://smartlancedesigns.com/work/nashville-home-viewer",
+      "https://smartlancedesigns.com/work/kaerek-homes",
+      "https://smartlancedesigns.com/work/zen-stays-rental",
+      "https://smartlancedesigns.com/blog/what-makes-a-website-convert",
+      "https://smartlancedesigns.com/blog/technical-seo-foundations",
+      "https://smartlancedesigns.com/blog/leveraging-calendar-sync-to-scale-your-vacation-rental-business",
+      "https://smartlancedesigns.com/blog/boost-off-season-bookings-with-pricelabs-dynamic-pricing",
+      "https://smartlancedesigns.com/blog/harness-the-power-of-pricelabs-for-dynamic-airbnb-pricing",
+      "https://smartlancedesigns.com/blog/pricelabs-vs-manual-pricing-why-automation-wins",
+      "https://smartlancedesigns.com/blog/website-redesign-checklist",
+      "https://smartlancedesigns.com/blog/branding-tips-that-make-your-rental-stand-out-from-airbnb",
+      "https://smartlancedesigns.com/blog/building-guest-loyalty-with-your-direct-booking-website-strategies-for-success",
+      "https://smartlancedesigns.com/blog/leveraging-social-media-for-effective-vacation-rental-marketing",
+      "https://smartlancedesigns.com/blog/efficient-calendar-management-for-vacation-rental-owners",
+      "https://smartlancedesigns.com/blog/how-to-set-up-auto-blocking-for-double-booking-prevention",
+      "https://smartlancedesigns.com/blog/syncing-airbnb-and-vrbo-calendars-with-your-website-a-comprehensive-guide",
+      "https://smartlancedesigns.com/blog/mastering-pricelabs-integration-for-effective-revenue-management",
+      "https://smartlancedesigns.com/blog/using-pricelabs-for-optimal-weekend-and-holiday-pricing",
+      "https://smartlancedesigns.com/blog/why-smart-owners-use-pricelabs-with-their-direct-booking-site",
+      "https://smartlancedesigns.com/blog/direct-booking-websites-the-key-to-repeat-guests-and-enhanced-profits",
+      "https://smartlancedesigns.com/blog/how-direct-booking-websites-empower-guest-communication",
+      "https://smartlancedesigns.com/blog/how-your-website-can-replace-third-party-listing-dependence",
+      "https://smartlancedesigns.com/blog/how-technology-helps-you-avoid-overbooking-in-vacation-rentals",
+      "https://smartlancedesigns.com/blog/maximizing-efficiency-with-api-syncs-airbnb-vrbo-and-your-website",
+      "https://smartlancedesigns.com/blog/top-vacation-rental-automation-tools-to-transform-your-management",
+      "https://smartlancedesigns.com/blog/how-direct-booking-helps-avoid-price-wars-and-boost-revenue",
+      "https://smartlancedesigns.com/blog/how-to-increase-profit-margins-with-your-own-direct-booking-website",
+      "https://smartlancedesigns.com/blog/seo-tips-for-boosting-direct-bookings-on-vacation-rental-sites",
+      "https://smartlancedesigns.com/blog/showcase-your-propertys-unique-features-marketing-strategies-for-vacation-rentals",
+      "https://smartlancedesigns.com/blog/preventing-booking-overlaps-syncing-your-airbnb-and-rental-website-calendars",
+      "https://smartlancedesigns.com/blog/how-to-convert-airbnb-guests-into-repeat-direct-booking-guests",
+      "https://smartlancedesigns.com/blog/maximize-your-vacation-rental-bookings-with-effective-marketing-strategies",
+      "https://smartlancedesigns.com/blog/why-calendar-sync-is-essential-for-multi-platform-listings",
+      "https://smartlancedesigns.com/blog/automate-your-airbnb-pricing-with-pricelabs-for-direct-bookings",
+      "https://smartlancedesigns.com/blog/dynamic-pricing-secrets-for-vacation-rental-success",
+      "https://smartlancedesigns.com/blog/enhancing-guest-experience-through-direct-booking-websites",
+      "https://smartlancedesigns.com/blog/top-features-every-vacation-rental-website-must-have",
+      "https://smartlancedesigns.com/blog/why-vacation-rental-owners-should-not-rely-only-on-airbnb",
+      "https://smartlancedesigns.com/blog/airbnb-dependence-vs-independence-why-your-website-matters-for-vacation-rental-success",
+      "https://smartlancedesigns.com/blog/scaling-your-vacation-rental-business-with-a-direct-booking-site",
+      "https://smartlancedesigns.com/blog/integrate-pricelabs-with-your-vacation-rental-website-without-coding",
+      "https://smartlancedesigns.com/blog/the-essential-tech-toolkit-for-vacation-rental-owners-in-2026",
+      "https://smartlancedesigns.com/blog/top-booking-engines-for-streamlining-direct-booking-websites",
+      "https://smartlancedesigns.com/blog/keep-more-revenue-direct-booking-vs-airbnb-commissions",
+      "https://smartlancedesigns.com/blog/maximize-revenue-dynamic-pricing-and-direct-bookings-for-vacation-rentals",
+      "https://smartlancedesigns.com/blog/maximize-revenue-with-direct-booking-websites",
+      "https://smartlancedesigns.com/blog/boost-your-vacation-rental-business-effective-marketing-strategies-for-direct-bookings",
+      "https://smartlancedesigns.com/blog/build-your-vacation-rental-brand-with-a-professional-website",
+      "https://smartlancedesigns.com/blog/how-to-attract-more-guests-with-your-own-booking-site",
+      "https://smartlancedesigns.com/blog/avoid-double-bookings-with-centralized-calendar-management",
+      "https://smartlancedesigns.com/blog/how-calendar-sync-saves-time-for-property-managers",
+      "https://smartlancedesigns.com/blog/keep-your-booking-calendars-in-sync-across-airbnb-vrbo-and-your-site",
+      "https://smartlancedesigns.com/blog/top-tools-for-vacation-rental-calendar-automation",
+      "https://smartlancedesigns.com/blog/harnessing-pricelabs-a-step-by-step-guide-to-syncing-with-your-vacation-rental-website",
+      "https://smartlancedesigns.com/blog/maximizing-revenue-with-pricelabs-integration-for-vacation-rentals",
+      "https://smartlancedesigns.com/blog/avoid-marketplace-fees-the-financial-advantage-of-direct-bookings",
+      "https://smartlancedesigns.com/blog/direct-booking-website-vs-airbnb-alternative-pros-and-cons-for-vacation-rentals",
+      "https://smartlancedesigns.com/blog/how-a-direct-booking-website-can-boost-your-rental-income",
+      "https://smartlancedesigns.com/blog/why-every-vacation-rental-owner-needs-a-direct-booking-website-3",
+      "https://smartlancedesigns.com/blog/best-alternatives-to-airbnb-for-hosts",
+      "https://smartlancedesigns.com/blog/tools-to-test-wordpress-website",
+      "https://smartlancedesigns.com/blog/how-to-start-a-profitable-airbnb-business",
+      "https://smartlancedesigns.com/guides/website-redesign-guide",
+      "https://smartlancedesigns.com/compare/wordpress-vs-webflow",
+      "https://smartlancedesigns.com/checklists/website-redesign-checklist",
+      "https://smartlancedesigns.com/glossary/seo",
+      "https://smartlancedesigns.com/glossary/cms",
+      "https://smartlancedesigns.com/glossary/cta",
+      "https://smartlancedesigns.com/glossary/conversion-rate",
+      "https://smartlancedesigns.com/glossary/core-web-vitals",
+      "https://smartlancedesigns.com/glossary/lcp",
+      "https://smartlancedesigns.com/glossary/inp",
+      "https://smartlancedesigns.com/glossary/cls",
+      "https://smartlancedesigns.com/glossary/canonical-url",
+      "https://smartlancedesigns.com/glossary/301-redirect",
+      "https://smartlancedesigns.com/glossary/xml-sitemap",
+      "https://smartlancedesigns.com/glossary/structured-data",
+      "https://smartlancedesigns.com/templates/website-project-brief-template",
+      "https://smartlancedesigns.com/tools/website-platform-selector",
+      "https://smartlancedesigns.com/industries/short-term-rentals",
+      "https://smartlancedesigns.com/industries/hospitality",
+      "https://smartlancedesigns.com/industries/cabin-rentals",
+      "https://smartlancedesigns.com/industries/real-estate",
+      "https://smartlancedesigns.com/industries/property-management",
+      "https://smartlancedesigns.com/industries/professional-services",
+      "https://smartlancedesigns.com/industries/ecommerce",
+      "https://smartlancedesigns.com/industries/local-businesses",
+      "https://smartlancedesigns.com/industries/travel-tourism",
+      "https://smartlancedesigns.com/industries/restaurants-food",
+      "https://smartlancedesigns.com/industries/construction-home-services",
+      "https://smartlancedesigns.com/industries/legal-advisory",
+      "https://smartlancedesigns.com/industries/healthcare-wellness",
+      "https://smartlancedesigns.com/industries/education-training",
+      "https://smartlancedesigns.com/industries/technology-saas",
+      "https://smartlancedesigns.com/industries/beauty-personal-care",
+      "https://smartlancedesigns.com/industries/automotive",
+      "https://smartlancedesigns.com/industries/events-entertainment",
+      "https://smartlancedesigns.com/industries/nonprofits-community",
+      "https://smartlancedesigns.com/industries/finance-business-services",
+      "https://smartlancedesigns.com/seo/technical-seo",
+      "https://smartlancedesigns.com/seo/local-seo",
+      "https://smartlancedesigns.com/seo/on-page-seo",
+      "https://smartlancedesigns.com/seo/seo-audit"
+    ]
+  },
+  "sitemapMismatches": [],
+  "seoHealthSummary": {
+    "errors": 0,
+    "warnings": 0,
+    "infos": 0
+  },
+  "seoHealthIssueCodes": []
+}

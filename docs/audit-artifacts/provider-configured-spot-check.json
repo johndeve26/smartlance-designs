@@ -1,0 +1,23 @@
+{
+  "generatedAt": "2026-08-08T15:46:46.643Z",
+  "mode": "CONFIGURATION_BLOCKED",
+  "configuration": {
+    "writing": {
+      "configured": true,
+      "providerId": "agentrouter",
+      "model": "gpt-5.6-sol",
+      "apiKeyLast4": "NQYX",
+      "connectionTest": "ok"
+    },
+    "research": {
+      "configured": false,
+      "providerId": "manual",
+      "connectionTest": "skipped"
+    }
+  },
+  "blockReason": "Tavily not configured. Set TAVILY_API_KEY or AI_RESEARCH_API_KEY in .env.local (server secret — not committed).",
+  "writingStatusSummary": "Configured",
+  "researchStatusSummary": "Not Configured",
+  "liveRuns": [],
+  "cmsUnchangedNote": "Proposals only — no apply, draft save, or publish performed by this script."
+}

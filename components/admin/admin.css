@@ -1,0 +1,256 @@
+/* Admin productivity chrome — charcoal / white / orange accent */
+
+.admin-root {
+  --admin-sidebar: #1a1a1a;
+  --admin-accent: #f47a48;
+  --admin-accent-hover: #e06330;
+  --admin-border: #e6e3df;
+  --admin-muted: #7a7570;
+  color: #2c2c2c;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+}
+
+.admin-sidebar {
+  background: var(--admin-sidebar);
+  color: #f3f1ee;
+}
+
+.admin-nav-link {
+  display: block;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: #d0ccc7;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.admin-nav-link:hover {
+  background: #2c2c2c;
+  color: #fff;
+}
+
+.admin-nav-link[data-active="true"],
+.admin-nav-link-active {
+  background: #2c2c2c;
+  color: #fff;
+  box-shadow: inset 3px 0 0 var(--admin-accent);
+}
+
+.admin-env-badge {
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-env-dev {
+  background: #fff7f3;
+  color: #c04e22;
+  border: 1px solid #ffd0bc;
+}
+
+.admin-env-prod {
+  background: #e8f6ef;
+  color: #157a4b;
+  border: 1px solid #b7e4c7;
+}
+
+.admin-page-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #1a1a1a;
+}
+
+.admin-card {
+  border: 1px solid var(--admin-border);
+  border-radius: 0.5rem;
+  background: #fff;
+  padding: 1rem 1.25rem;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.admin-table th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--admin-muted);
+  border-bottom: 1px solid var(--admin-border);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-table td {
+  border-bottom: 1px solid var(--admin-border);
+  padding: 0.625rem 0.75rem;
+  vertical-align: middle;
+}
+
+.admin-table tr:hover td {
+  background: #faf9f7;
+}
+
+.admin-fieldset {
+  border: 1px solid var(--admin-border);
+  border-radius: 0.5rem;
+  padding: 1rem 1.25rem 1.25rem;
+  margin: 0 0 1.25rem;
+}
+
+.admin-legend {
+  padding: 0 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--admin-muted);
+}
+
+.admin-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.admin-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #535353;
+}
+
+.admin-hint {
+  font-size: 0.7rem;
+  color: var(--admin-muted);
+}
+
+.admin-input {
+  width: 100%;
+  border: 1px solid var(--admin-border);
+  border-radius: 0.375rem;
+  background: #fff;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.875rem;
+  color: #2c2c2c;
+}
+
+.admin-input:focus {
+  outline: 2px solid color-mix(in srgb, var(--admin-accent) 45%, transparent);
+  outline-offset: 1px;
+  border-color: var(--admin-accent);
+}
+
+.admin-input:disabled {
+  background: #f3f1ee;
+  color: #7a7570;
+  cursor: not-allowed;
+}
+
+.admin-btn,
+.admin-btn-primary,
+.admin-btn-ghost,
+.admin-btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border-radius: 0.375rem;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.admin-btn {
+  background: #fff;
+  border-color: var(--admin-border);
+  color: #2c2c2c;
+}
+
+.admin-btn:hover {
+  background: #f3f1ee;
+}
+
+.admin-btn-primary {
+  background: var(--admin-accent);
+  color: #fff;
+}
+
+.admin-btn-primary:hover {
+  background: var(--admin-accent-hover);
+}
+
+.admin-btn-ghost {
+  background: transparent;
+  border-color: var(--admin-border);
+  color: #535353;
+}
+
+.admin-btn-ghost:hover {
+  background: #f3f1ee;
+}
+
+.admin-btn-danger {
+  background: #fef3f2;
+  border-color: #fecdca;
+  color: #b42318;
+}
+
+.admin-btn-danger:hover {
+  background: #fee4e2;
+}
+
+/* Native buttons in Admin pages that don't use .admin-btn* */
+.admin-root button:not(:disabled),
+.admin-root input[type="submit"]:not(:disabled),
+.admin-root input[type="button"]:not(:disabled) {
+  cursor: pointer;
+}
+
+.admin-root button:disabled,
+.admin-root input[type="submit"]:disabled,
+.admin-root input[type="button"]:disabled {
+  cursor: not-allowed;
+}
+
+.admin-empty {
+  border: 1px dashed var(--admin-border);
+  border-radius: 0.5rem;
+  padding: 2rem;
+  text-align: center;
+  color: var(--admin-muted);
+  font-size: 0.875rem;
+}
+
+.admin-stat {
+  border: 1px solid var(--admin-border);
+  border-radius: 0.5rem;
+  background: #fff;
+  padding: 1rem;
+}
+
+.admin-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #1a1a1a;
+}
+
+.admin-stat-label {
+  font-size: 0.75rem;
+  color: var(--admin-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 0.25rem;
+}

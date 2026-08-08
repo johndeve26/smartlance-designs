@@ -1,0 +1,218 @@
+{
+  "$comment": "Machine-readable summary of the Smartlance backend security audit. Contains no keys, tokens, credentials, or PII.",
+  "audit": {
+    "scope": [
+      "security",
+      "database",
+      "auth",
+      "rbac",
+      "api",
+      "server-actions",
+      "ai",
+      "cms",
+      "performance",
+      "reliability"
+    ],
+    "method": "source review, empirical probes of security helpers, regression tests, full QA",
+    "verdict": "BACKEND_READY_WITH_MANUAL_ACTIONS",
+    "destructiveOperationsPerformed": false,
+    "migrationsCreatedOrApplied": 0,
+    "productionDataAccessed": false
+  },
+  "inventory": {
+    "runtime": "Next.js App Router (Node runtime)",
+    "database": "PostgreSQL",
+    "orm": "Prisma",
+    "httpRouteHandlers": 6,
+    "serverActionModules": 11,
+    "exportedServerActions": 115,
+    "roles": 4,
+    "capabilities": 23,
+    "prismaMigrations": 15,
+    "schemaIndexes": 104,
+    "inboundWebhooks": 0,
+    "cronEndpoints": 0,
+    "paymentEndpoints": 0,
+    "rawSqlUnsafeCalls": 0
+  },
+  "findings": [
+    {
+      "id": "BE-01",
+      "severity": "HIGH",
+      "component": "lib/ai/ssrf.ts",
+      "title": "SSRF filter bypass via IPv4-mapped IPv6",
+      "behavior": "isPrivateOrReservedHostname did not decode IPv4-mapped IPv6, so ::ffff:169.254.169.254 (normalised by the URL parser to ::ffff:a9fe:a9fe) matched no private-range rule.",
+      "risk": "Server-side requests to loopback, RFC1918 ranges, and the cloud instance metadata endpoint, which can return instance credentials.",
+      "evidence": "Pre-fix probe: http://[::ffff:169.254.169.254]/, http://[::ffff:127.0.0.1]/, http://[::ffff:10.0.0.1]/ and http://[::]/ all returned ALLOWED.",
+      "fix": "Decode IPv4-mapped and IPv4-compatible IPv6 in both dotted and compressed-hextet form and apply IPv4 private-range rules; block the unspecified address; widen the IPv6 prefix rule.",
+      "testAdded": true,
+      "status": "FIXED"
+    },
+    {
+      "id": "BE-02",
+      "severity": "HIGH",
+      "component": "lib/repositories/adminUsersRepository.ts",
+      "title": "Last-Super-Admin guard is racy",
+      "behavior": "Active Super Admins were counted outside the write transaction, then the update ran unguarded.",
+      "risk": "Two concurrent demote or disable requests with exactly two Super Admins both pass the guard, leaving zero active Super Admins and an unrecoverable admin lockout, since manage_users is exclusive to SUPER_ADMIN.",
+      "evidence": "Standalone count() followed by an unrelated update() with no isolation between them.",
+      "fix": "Count and update now run inside prisma.$transaction at Serializable isolation so Postgres aborts the losing transaction.",
+      "testAdded": true,
+      "status": "FIXED"
+    },
+    {
+      "id": "BE-03",
+      "severity": "HIGH",
+      "component": "lib/repositories/redirectsRepository.ts",
+      "title": "Slug rename-back takes a published page offline",
+      "behavior": "upsertSlugRedirect had no self-redirect check and no awareness of existing rows, unlike manual redirects which run detectRedirectLoop.",
+      "risk": "Renaming a published entity a -> b -> a leaves /a redirecting to /b while the entity lives at /a. The proxy applies DB redirects before rendering, producing an infinite 301 loop that removes a live indexed page from the site.",
+      "evidence": "proxy.ts applies applyDbSlugRedirect ahead of NextResponse.next(); findActiveRedirect matches sourcePath with status ACTIVE.",
+      "fix": "Skip self-redirects, disable any ACTIVE redirect whose source equals the new live destination, and repoint redirects that targeted the old path so chains collapse.",
+      "testAdded": true,
+      "status": "FIXED"
+    },
+    {
+      "id": "BE-04",
+      "severity": "NORMAL",
+      "component": "lib/admin/ai-content-assistant-actions.ts",
+      "title": "AI content-assistant actions skipped the same-origin check",
+      "behavior": "Four mutating Server Actions called requireAdminUser but not assertSameOrigin, unlike the other ten action modules.",
+      "risk": "Defence-in-depth gap. Next.js applies its own Server Action origin check, but if that were misconfigured a logged-in editor could be induced to burn AI budget or apply a proposal.",
+      "evidence": "Coverage scan: ai-content-assistant-actions.ts had 4 exported actions and 0 assertSameOrigin calls.",
+      "fix": "assertSameOrigin() added to all four actions; coverage is now uniform across all 11 modules.",
+      "testAdded": false,
+      "status": "FIXED"
+    },
+    {
+      "id": "BE-05",
+      "severity": "NORMAL",
+      "component": "lib/forms.ts, lib/seo/indexnow.ts, lib/ai/research/index.ts, lib/ai/topic-intelligence/providers/*",
+      "title": "Six outbound calls had no timeout",
+      "behavior": "Webhook, Resend, IndexNow, Tavily, GNews and NewsAPI fetches passed no signal or only an optional caller signal that callers omitted.",
+      "risk": "A hung upstream holds the serverless function open until the platform kills it, turning a slow provider into a failed-looking request.",
+      "evidence": "Exhaustive fetch inventory; LLM adapters (90s) and safeFetchText (12s) were already bounded.",
+      "fix": "Added lib/ops/request-timeout.ts with named budgets (notification 10s, indexing 8s, research 15s) composed with any caller signal, applied to all six.",
+      "testAdded": true,
+      "status": "FIXED"
+    },
+    {
+      "id": "BE-06",
+      "severity": "NORMAL",
+      "component": "lib/admin/auth-actions.ts, lib/admin/session.ts, lib/admin/crypto.ts",
+      "title": "Login timing revealed account existence; throttling keyed only on email",
+      "behavior": "Unknown or disabled accounts returned before any Argon2 work while valid accounts paid full verification cost. Rate limiting used the submitted email only.",
+      "risk": "Admin email enumeration by response timing, and unbounded credential stuffing across many accounts from one source.",
+      "evidence": "Early return at the unknown-user branch preceded verifyPassword; isLoginRateLimited was called with the email alone.",
+      "fix": "burnPasswordVerification performs a real Argon2 verification against a throwaway hash on the rejection path; a per-source-address limit (30 per 15 min) now runs alongside the per-account limit (10 per 15 min).",
+      "testAdded": true,
+      "status": "FIXED"
+    },
+    {
+      "id": "BE-07",
+      "severity": "NORMAL",
+      "component": "lib/admin/ai-content-assistant-actions.ts",
+      "title": "AI proposal decisions were unvalidated client JSON",
+      "behavior": "JSON.parse(decisionsJson) was cast directly to FieldDecision[] with no runtime validation.",
+      "risk": "Low. The downstream field allowlist is the real control and held. The unbounded array and unchecked shape broke the runtime-validation boundary maintained elsewhere, and a non-array body threw a raw TypeError.",
+      "evidence": "Direct cast with no schema; array length unbounded.",
+      "fix": "Zod envelope: max 200 entries, field constrained to a 1-120 character string, decision restricted to accept|keep|edit. editedValue stays unknown by design, since editors may hand-write any value for an allowlisted field.",
+      "testAdded": false,
+      "status": "FIXED"
+    },
+    {
+      "id": "BE-08",
+      "severity": "NORMAL",
+      "component": "app/api/admin/media/route.ts",
+      "title": "Media list endpoint accepted unvalidated enums and pagination",
+      "behavior": "status was cast as MediaAssetStatus with no check; pagination relied on downstream clamping.",
+      "risk": "Invalid enum values reached Prisma and produced unhandled 500s instead of a clean 400.",
+      "evidence": "Direct `as` cast on a query parameter.",
+      "fix": "Zod schema at the boundary with enums derived from the generated Prisma enum objects so they cannot drift from the schema, plus explicit page and pageSize bounds.",
+      "testAdded": false,
+      "status": "FIXED"
+    },
+    {
+      "id": "BE-09",
+      "severity": "NORMAL",
+      "component": "lib/media/validation.ts",
+      "title": "Unpatched image-size advisory was reachable through HEIF",
+      "behavior": "The magic-byte sniffer treated the generic HEIF major brand mif1 as AVIF, so a crafted HEIF file passed validation and reached imageSize().",
+      "risk": "Denial of service via the unfixed infinite-loop advisories GHSA-w3rx-r6r6-pgpr and GHSA-5p2g-fcmc-qvqq. An infinite loop is not recoverable by the surrounding try/catch. Requires an authenticated admin with manage_media. ICNS and JXL were never reachable, being rejected by sniffing.",
+      "evidence": "npm audit reports 1 high severity with no fix available; sniffMime accepted mif1 as image/avif.",
+      "fix": "Only the true AVIF major brands avif and avis are accepted. This also corrects a MIME-labelling bug that stored HEIF files as image/avif.",
+      "testAdded": false,
+      "status": "MITIGATED"
+    },
+    {
+      "id": "BE-10",
+      "severity": "INFO",
+      "component": "DATABASE_URL / DIRECT_URL connection strings",
+      "title": "Node 24 reinterprets sslmode=require as verify-full",
+      "behavior": "The build emits a runtime warning that prefer, require and verify-ca are treated as aliases for verify-full. Both connection strings use sslmode=require.",
+      "risk": "None currently. verify-full is the stricter interpretation and Neon presents publicly trusted certificates, so verification succeeds. A future move to a host using self-signed or private-CA certificates would fail with the same connection string that works today.",
+      "evidence": "Build output warning on Node v24.13.1; connections succeeded throughout build and test run.",
+      "fix": "None applied. Setting sslmode=verify-full explicitly would document the effective behavior and silence the warning.",
+      "testAdded": false,
+      "status": "NO_CHANGE"
+    }
+  ],
+  "acceptedRisks": [
+    {
+      "id": "AR-01",
+      "title": "Publishing is not transactional",
+      "detail": "Status promotion, revision creation and audit write are sequential across roughly eight repositories. Published state is a single row update and stays coherent; only bookkeeping can be incomplete. Fixing it warrants its own reviewed change."
+    },
+    {
+      "id": "AR-02",
+      "title": "Rate limiting is per-instance and in memory",
+      "detail": "Deliberate, to avoid introducing Redis. Effective limit is roughly configured_limit x instance_count on serverless. Front with CDN rate limiting if stronger guarantees are required."
+    },
+    {
+      "id": "AR-03",
+      "title": "DNS rebinding is not blocked",
+      "detail": "Hostnames are validated on the initial URL and every redirect hop, but resolved IPs are not pinned for the connection. Closing this requires resolve-then-connect control the fetch API does not expose."
+    },
+    {
+      "id": "AR-04",
+      "title": "X-Forwarded-For is trusted for rate-limit bucketing",
+      "detail": "The header is not authenticated, so spoofing moves an attacker between buckets. It cannot bypass the per-account login limit."
+    },
+    {
+      "id": "AR-05",
+      "title": "Draft saves demote published content without revalidating",
+      "detail": "For most content families a draft save sets status DRAFT without revalidating the public path, so the CDN may serve a stale page. Pre-existing CMS semantic and a product decision, not a security issue."
+    },
+    {
+      "id": "AR-06",
+      "title": "Unbounded AI context reads",
+      "detail": "lib/ai/knowledge.ts and lib/ai/topic-intelligence/content-index.ts load every published entity with no take. Prompt output is capped downstream. Acceptable at current catalogue size."
+    }
+  ],
+  "manualActions": [
+    "Take a database backup and perform a restore drill",
+    "Confirm ADMIN_SESSION_SECRET is at least 32 random characters in production",
+    "Set AI_SECRETS_ENCRYPTION_KEY explicitly so session-secret rotation does not destroy provider keys",
+    "Verify the object storage bucket is not publicly listable",
+    "Confirm MEDIA_STORAGE_PROVIDER=s3 and that S3 credentials work",
+    "Verify SPF and DKIM for the configured email sender domain",
+    "Decide whether per-instance rate limiting is sufficient; add CDN rate limiting if not",
+    "Add error alerting so provider and publish failures are noticed",
+    "Track image-size for a patched release and upgrade when available",
+    "Review hosting execution limits against long AI research runs"
+  ],
+  "qa": {
+    "vitestFiles": 28,
+    "vitestTests": 311,
+    "vitestPassed": 311,
+    "vitestAddedByAudit": 13,
+    "typescript": "clean",
+    "lintErrors": 4,
+    "lintWarnings": 2,
+    "lintNote": "All pre-existing React set-state-in-effect issues in admin client components; untouched by this audit",
+    "build": "success",
+    "prismaValidate": "valid",
+    "npmAuditHigh": 1,
+    "npmAuditNote": "image-size, no upstream fix available; reachability mitigated in BE-09"
+  }
+}

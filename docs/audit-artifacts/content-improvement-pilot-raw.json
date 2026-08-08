@@ -1,0 +1,822 @@
+{
+  "pilotedAt": "2026-08-08T14:32:36.060Z",
+  "actor": {
+    "id": "cmsjiseq1000037xpm77q6rf0",
+    "email": "admin@smartlancedesigns.com",
+    "role": "SUPER_ADMIN"
+  },
+  "environment": {
+    "writingProviderConfigured": false,
+    "writingProviderId": "openrouter",
+    "researchProviderId": "manual",
+    "researchConfigured": false,
+    "forceHeuristic": true,
+    "note": "Writing provider not configured — assistants used heuristic path. Official researchOverride supplied for Platform/Comparison research actions."
+  },
+  "targets": {
+    "homepage": "home",
+    "platforms": [
+      {
+        "id": "cmsjixqfn000pakxpyq677vwf",
+        "slug": "wordpress",
+        "name": "WordPress"
+      },
+      {
+        "id": "cmsjixqn2000qakxpm2j53qbz",
+        "slug": "shopify",
+        "name": "Shopify"
+      },
+      {
+        "id": "cmsjixrid000uakxp6cowxjnm",
+        "slug": "woocommerce",
+        "name": "WooCommerce"
+      },
+      {
+        "id": "cmsjixrq1000vakxp5cbvfy7b",
+        "slug": "webflow",
+        "name": "Webflow"
+      }
+    ],
+    "industry": {
+      "id": "cmsjiz4nm000x5sxp3c9x8rzl",
+      "slug": "short-term-rentals",
+      "name": "Short-Term Rentals"
+    },
+    "service": {
+      "id": "cmsjixlb90002akxp3wy7660j",
+      "slug": "website-redesign",
+      "title": "Website Redesign"
+    },
+    "comparison": {
+      "id": "cmsjj28p4006c5sxpy16dsali",
+      "slug": "wordpress-vs-webflow"
+    }
+  },
+  "cmsUnchangedCheck": {
+    "homepageSeoStillEmpty": true,
+    "homepageDraftUntouched": true,
+    "wordpressLastReviewedStillNull": true
+  },
+  "results": [
+    {
+      "ok": true,
+      "label": "1 Homepage SEO",
+      "entityType": "HOMEPAGE",
+      "entityId": "home",
+      "action": "GENERATE_SEO",
+      "proposalId": "cmskh28120001mkxprjx458hs",
+      "runId": "cmskh27ms0000mkxp79m2ciu4",
+      "status": "PENDING",
+      "promptVersion": "homepage.seo:v1",
+      "durationMs": 4617,
+      "fieldCount": 6,
+      "fields": [
+        {
+          "field": "seoTitle",
+          "label": "SEO title",
+          "current": null,
+          "proposed": "Smartlance Designs | Websites Built to Rank, Convert and Grow."
+        },
+        {
+          "field": "seoDescription",
+          "label": "SEO description",
+          "current": null,
+          "proposed": "We design high-performing websites and SEO strategies that help businesses get found, build trust and turn more visitors into customers."
+        },
+        {
+          "field": "metaTitle",
+          "label": "Meta title",
+          "current": null,
+          "proposed": "Smartlance Designs | Websites Built to Rank, Convert and Grow."
+        },
+        {
+          "field": "metaDescription",
+          "label": "Meta description",
+          "current": null,
+          "proposed": "We design high-performing websites and SEO strategies that help businesses get found, build trust and turn more visitors into customers."
+        },
+        {
+          "field": "ogTitle",
+          "label": "OG title",
+          "current": null,
+          "proposed": "Smartlance Designs | Websites Built to Rank, Convert and Grow."
+        },
+        {
+          "field": "ogDescription",
+          "label": "OG description",
+          "current": null,
+          "proposed": "We design high-performing websites and SEO strategies that help businesses get found, build trust and turn more visitors into customers."
+        }
+      ],
+      "reviewFindings": null,
+      "suggestedRelations": null,
+      "research": null,
+      "claims": null,
+      "error": null
+    },
+    {
+      "ok": true,
+      "label": "Platform WordPress",
+      "entityType": "PLATFORM",
+      "entityId": "cmsjixqfn000pakxpyq677vwf",
+      "action": "RESEARCH_AND_IMPROVE",
+      "proposalId": "cmskh2b3c0004mkxp5bhm3uhc",
+      "runId": "cmskh2apr0003mkxp8d1r5dmv",
+      "status": "PENDING",
+      "promptVersion": "platform.research-improve:v1",
+      "durationMs": 3864,
+      "fieldCount": 2,
+      "fields": [
+        {
+          "field": "summary",
+          "label": "Summary",
+          "current": "Flexible websites for service businesses, hospitality brands and content-heavy sites that need manageable updates.",
+          "proposed": "WordPress fit, strengths, and trade-offs for teams deciding whether it matches their website requirements. Editor note: Prefer official sources. Preserve strong existing trade-offs and limitations. Do not invent partner/certification claims. Do not claim Smartlance verified experience unless the CMS flag already says s"
+        },
+        {
+          "field": "description",
+          "label": "Description",
+          "current": "Smartlance Designs designs, builds and improves WordPress websites for businesses that need a professional online presence, clearer conversion paths and content they can manage day to day — without treating WordPress as a one-size-fits-all shortcut.",
+          "proposed": "WordPress is presented as a technology option with clear fit guidance and honest limitations. Smartlance can help evaluate suitability and deliver related website work within our actual capabilities. Factual details should stay aligned with current official documentation (wordpress.org)."
+        }
+      ],
+      "reviewFindings": null,
+      "suggestedRelations": null,
+      "research": {
+        "sources": [
+          {
+            "url": "https://wordpress.org/",
+            "title": "WordPress.org — Meet WordPress",
+            "domain": "wordpress.org",
+            "snippet": "Open source publishing platform. Block editor, themes, plugins. WordPress 7.0 emphasizes preferred AI providers, patterns, navigation overlays, visual revision history. Community and documentation via learn.wordpress.org / developer.wordpress.org.",
+            "sourceType": "OFFICIAL",
+            "retrievedAt": "2026-08-08T14:31:27.696Z"
+          },
+          {
+            "url": "https://wordpress.org/news/2026/08/wordpress-7-0-3-release/",
+            "title": "WordPress 7.0.3 release",
+            "domain": "wordpress.org",
+            "snippet": "Maintenance release in the 7.0 line (August 2026).",
+            "sourceType": "OFFICIAL",
+            "retrievedAt": "2026-08-08T14:31:27.696Z"
+          },
+          {
+            "url": "https://developer.wordpress.org/",
+            "title": "WordPress Developer Resources",
+            "domain": "developer.wordpress.org",
+            "snippet": "Official developer documentation for themes, plugins, REST API, and block editor.",
+            "sourceType": "OFFICIAL",
+            "retrievedAt": "2026-08-08T14:31:27.696Z"
+          }
+        ],
+        "required": true,
+        "checkedAt": "2026-08-08T14:31:39.970Z",
+        "performed": true,
+        "sourceCount": 3,
+        "officialOrPrimaryCount": 3,
+        "factualFreshnessReviewed": true
+      },
+      "claims": [],
+      "error": null
+    },
+    {
+      "ok": true,
+      "label": "Platform Shopify",
+      "entityType": "PLATFORM",
+      "entityId": "cmsjixqn2000qakxpm2j53qbz",
+      "action": "RESEARCH_AND_IMPROVE",
+      "proposalId": "cmskh2e2v0007mkxp9kkaehye",
+      "runId": "cmskh2dpf0006mkxpencqz4ai",
+      "status": "PENDING",
+      "promptVersion": "platform.research-improve:v1",
+      "durationMs": 3862,
+      "fieldCount": 2,
+      "fields": [
+        {
+          "field": "summary",
+          "label": "Summary",
+          "current": "Conversion-focused Shopify stores designed around product discovery, mobile shopping and checkout clarity.",
+          "proposed": "Shopify fit, strengths, and trade-offs for teams deciding whether it matches their website requirements. Editor note: Prefer official sources. Preserve strong existing trade-offs and limitations. Do not invent partner/certification claims. Do not claim Smartlance verified experience unless the CMS flag already says s"
+        },
+        {
+          "field": "description",
+          "label": "Description",
+          "current": "We help product businesses improve Shopify storefronts with clearer navigation, stronger product pages, better mobile shopping experiences and practical SEO foundations — focused on selling, not platform buzzwords.",
+          "proposed": "Shopify is presented as a technology option with clear fit guidance and honest limitations. Smartlance can help evaluate suitability and deliver related website work within our actual capabilities. Factual details should stay aligned with current official documentation (shopify.com)."
+        }
+      ],
+      "reviewFindings": null,
+      "suggestedRelations": null,
+      "research": {
+        "sources": [
+          {
+            "url": "https://www.shopify.com/plus",
+            "title": "Shopify Plus",
+            "domain": "shopify.com",
+            "snippet": "Commerce platform positioned for DTC, retail, B2B, omnichannel, and extensibility via APIs/apps. Shop Pay and checkout performance emphasized. Headless options available. Marketing claims (conversion %, CAC) should not be copied as Smartlance proof.",
+            "sourceType": "OFFICIAL",
+            "retrievedAt": "2026-08-08T14:31:27.696Z"
+          },
+          {
+            "url": "https://shopify.dev/",
+            "title": "Shopify.dev",
+            "domain": "shopify.dev",
+            "snippet": "Official Shopify developer documentation for Admin API, Storefront API, Hydrogen, and app development.",
+            "sourceType": "OFFICIAL",
+            "retrievedAt": "2026-08-08T14:31:27.696Z"
+          }
+        ],
+        "required": true,
+        "checkedAt": "2026-08-08T14:31:43.827Z",
+        "performed": true,
+        "sourceCount": 2,
+        "officialOrPrimaryCount": 2,
+        "factualFreshnessReviewed": true
+      },
+      "claims": [],
+      "error": null
+    },
+    {
+      "ok": true,
+      "label": "Platform Webflow",
+      "entityType": "PLATFORM",
+      "entityId": "cmsjixrq1000vakxp5cbvfy7b",
+      "action": "RESEARCH_AND_IMPROVE",
+      "proposalId": "cmskh2hkr000amkxppmob05zk",
+      "runId": "cmskh2h7e0009mkxp5e6bwwho",
+      "status": "PENDING",
+      "promptVersion": "platform.research-improve:v1",
+      "durationMs": 4564,
+      "fieldCount": 2,
+      "fields": [
+        {
+          "field": "summary",
+          "label": "Summary",
+          "current": "Marketing websites with flexible visual development and a clean content-management experience.",
+          "proposed": "Webflow fit, strengths, and trade-offs for teams deciding whether it matches their website requirements. Editor note: Prefer official sources. Preserve strong existing trade-offs and limitations. Do not invent partner/certification claims. Do not claim Smartlance verified experience unless the CMS flag already says s"
+        },
+        {
+          "field": "description",
+          "label": "Description",
+          "current": "Webflow can work well for marketing-led websites that need flexible design, structured content and an editing experience teams can manage. Smartlance can use Webflow for business websites, landing pages and redesigns where its capabilities fit the project — without treating animation as the main goal.",
+          "proposed": "Webflow is presented as a technology option with clear fit guidance and honest limitations. Smartlance can help evaluate suitability and deliver related website work within our actual capabilities. Factual details should stay aligned with current official documentation (webflow.com)."
+        }
+      ],
+      "reviewFindings": null,
+      "suggestedRelations": null,
+      "research": {
+        "sources": [
+          {
+            "url": "https://webflow.com/",
+            "title": "Webflow",
+            "domain": "webflow.com",
+            "snippet": "Visual development platform for designing, building, and launching production websites. CMS, hosting, interactions, and collaboration features are part of the product surface. Evaluate fit for design-led marketing sites vs complex app-like requirements.",
+            "sourceType": "OFFICIAL",
+            "retrievedAt": "2026-08-08T14:31:27.696Z"
+          },
+          {
+            "url": "https://university.webflow.com/",
+            "title": "Webflow University",
+            "domain": "university.webflow.com",
+            "snippet": "Official learning and product education resources for Webflow.",
+            "sourceType": "OFFICIAL",
+            "retrievedAt": "2026-08-08T14:31:27.696Z"
+          }
+        ],
+        "required": true,
+        "checkedAt": "2026-08-08T14:31:48.366Z",
+        "performed": true,
+        "sourceCount": 2,
+        "officialOrPrimaryCount": 2,
+        "factualFreshnessReviewed": true
+      },
+      "claims": [],
+      "error": null
+    },
+    {
+      "ok": true,
+      "label": "Platform WooCommerce",
+      "entityType": "PLATFORM",
+      "entityId": "cmsjixrid000uakxp6cowxjnm",
+      "action": "RESEARCH_AND_IMPROVE",
+      "proposalId": "cmskh2lcj000dmkxpt96f6ahe",
+      "runId": "cmskh2l07000cmkxphvf1rhbc",
+      "status": "PENDING",
+      "promptVersion": "platform.research-improve:v1",
+      "durationMs": 4810,
+      "fieldCount": 2,
+      "fields": [
+        {
+          "field": "summary",
+          "label": "Summary",
+          "current": "Flexible WordPress-powered stores focused on product discovery, usability, SEO and conversion.",
+          "proposed": "WooCommerce fit, strengths, and trade-offs for teams deciding whether it matches their website requirements. Editor note: Prefer official sources. Preserve strong existing trade-offs and limitations. Do not invent partner/certification claims. Do not claim Smartlance verified experience unless the CMS flag already says s"
+        },
+        {
+          "field": "description",
+          "label": "Description",
+          "current": "WooCommerce can be a strong fit when you want e-commerce on WordPress — with product pages, categories and checkout journeys designed around how customers shop. Smartlance can set up, redesign and improve WooCommerce storefronts with attention to usability, performance and SEO foundations.",
+          "proposed": "WooCommerce is presented as a technology option with clear fit guidance and honest limitations. Smartlance can help evaluate suitability and deliver related website work within our actual capabilities. Factual details should stay aligned with current official documentation (woocommerce.com)."
+        }
+      ],
+      "reviewFindings": null,
+      "suggestedRelations": null,
+      "research": {
+        "sources": [
+          {
+            "url": "https://woocommerce.com/",
+            "title": "WooCommerce",
+            "domain": "woocommerce.com",
+            "snippet": "Open-source ecommerce for WordPress. Full control of checkout, data, hosting, payments, and extensions. Sell online/offline; customize to fit. Extensions and themes ecosystem. Enterprise options available.",
+            "sourceType": "OFFICIAL",
+            "retrievedAt": "2026-08-08T14:31:27.696Z"
+          },
+          {
+            "url": "https://developer.woocommerce.com/",
+            "title": "WooCommerce Developer Docs",
+            "domain": "developer.woocommerce.com",
+            "snippet": "Official developer documentation for extending WooCommerce.",
+            "sourceType": "OFFICIAL",
+            "retrievedAt": "2026-08-08T14:31:27.696Z"
+          }
+        ],
+        "required": true,
+        "checkedAt": "2026-08-08T14:31:53.261Z",
+        "performed": true,
+        "sourceCount": 2,
+        "officialOrPrimaryCount": 2,
+        "factualFreshnessReviewed": true
+      },
+      "claims": [],
+      "error": null
+    },
+    {
+      "ok": true,
+      "label": "6 Industry Short-Term Rentals IMPROVE",
+      "entityType": "INDUSTRY",
+      "entityId": "cmsjiz4nm000x5sxp3c9x8rzl",
+      "action": "IMPROVE_INDUSTRY",
+      "proposalId": "cmskh2prx000gmkxpxgr8zbeo",
+      "runId": "cmskh2pev000fmkxpef8tqvfd",
+      "status": "PENDING",
+      "promptVersion": "industry.improve:v1",
+      "durationMs": 5759,
+      "fieldCount": 3,
+      "fields": [
+        {
+          "field": "description",
+          "label": "Description",
+          "current": "Direct-booking and property websites for vacation rental and guest-stay businesses.",
+          "proposed": "Short-Term Rentals organisations typically need websites that help the right customers understand the offer, trust the organisation, and take a clear next step. Common needs include clearer service presentation, stronger enquiry paths, and content that matches how buyers actually research short-term rentals providers. Related published work such as Katerina's Place may illustrate delivery context without inventing metrics. Editor note: Transform the thin blurb into sector-specific Short-Term Rental / vacation rental website guidance (direct booking, guest trust, listing clarity). Use only verified related Work facts. Do not invent m"
+        },
+        {
+          "field": "seoTitle",
+          "label": "SEO title",
+          "current": null,
+          "proposed": "Short-Term Rentals | Smartlance Designs"
+        },
+        {
+          "field": "seoDescription",
+          "label": "SEO description",
+          "current": null,
+          "proposed": "Practical website guidance for Short-Term Rentals."
+        }
+      ],
+      "reviewFindings": null,
+      "suggestedRelations": null,
+      "research": null,
+      "claims": null,
+      "error": null
+    },
+    {
+      "ok": true,
+      "label": "6b Industry Short-Term Rentals SEO",
+      "entityType": "INDUSTRY",
+      "entityId": "cmsjiz4nm000x5sxp3c9x8rzl",
+      "action": "GENERATE_SEO",
+      "proposalId": "cmskh2ubt000jmkxpm5iry79r",
+      "runId": "cmskh2tyk000imkxpqachvdnp",
+      "status": "PENDING",
+      "promptVersion": "industry.seo:v1",
+      "durationMs": 5890,
+      "fieldCount": 4,
+      "fields": [
+        {
+          "field": "seoTitle",
+          "label": "SEO title",
+          "current": null,
+          "proposed": "Short-Term Rentals websites | Smartlance Designs"
+        },
+        {
+          "field": "seoDescription",
+          "label": "SEO description",
+          "current": null,
+          "proposed": "Website and digital needs for Short-Term Rentals — practical Smartlance guidance."
+        },
+        {
+          "field": "ogTitle",
+          "label": "OG title",
+          "current": null,
+          "proposed": "Short-Term Rentals websites | Smartlance Designs"
+        },
+        {
+          "field": "ogDescription",
+          "label": "OG description",
+          "current": null,
+          "proposed": "Website and digital needs for Short-Term Rentals — practical Smartlance guidance."
+        }
+      ],
+      "reviewFindings": null,
+      "suggestedRelations": null,
+      "research": null,
+      "claims": null,
+      "error": null
+    },
+    {
+      "ok": true,
+      "label": "7 Service Website Redesign REVIEW",
+      "entityType": "SERVICE",
+      "entityId": "cmsjixlb90002akxp3wy7660j",
+      "action": "REVIEW_SERVICE",
+      "proposalId": "cmskh2yza000mmkxp324i6ynh",
+      "runId": "cmskh2yms000lmkxpguew5mhs",
+      "status": "PENDING",
+      "promptVersion": "service.review:v1",
+      "durationMs": 6025,
+      "fieldCount": 0,
+      "fields": [],
+      "reviewFindings": [
+        {
+          "message": "Summary is present.",
+          "section": "OFFER CLARITY",
+          "severity": "PASS"
+        },
+        {
+          "message": "Audience is set.",
+          "section": "AUDIENCE",
+          "severity": "PASS"
+        },
+        {
+          "message": "Capabilities are present; verify none were invented.",
+          "section": "CAPABILITIES",
+          "severity": "PASS"
+        },
+        {
+          "message": "Process steps are present.",
+          "section": "PROCESS",
+          "severity": "PASS"
+        },
+        {
+          "message": "Related Work slugs present; confirm they remain verified.",
+          "section": "PROOF",
+          "severity": "PASS"
+        },
+        {
+          "message": "SEO fields present; check for duplicate titles before publish.",
+          "section": "SEO",
+          "severity": "PASS"
+        },
+        {
+          "message": "Confirm the page clearly explains capability, audience, process, and fit — not blog-style education.",
+          "section": "AI SEARCH CLARITY",
+          "severity": "REVIEW"
+        },
+        {
+          "message": "Primary CTA label is empty.",
+          "section": "CTA",
+          "severity": "WARNING"
+        },
+        {
+          "message": "Compare nearby Services in the same group — flag copy that would fit another Service unchanged.",
+          "section": "DIFFERENTIATION",
+          "severity": "REVIEW"
+        },
+        {
+          "message": "Relationship suggestions remain advisory until accepted.",
+          "section": "RELATIONSHIPS",
+          "severity": "PASS"
+        },
+        {
+          "message": "Use Fill missing fields for empty eligible prose and structured lists.",
+          "section": "MISSING FIELDS",
+          "severity": "REVIEW"
+        }
+      ],
+      "suggestedRelations": null,
+      "research": null,
+      "claims": null,
+      "error": null
+    },
+    {
+      "ok": true,
+      "label": "7b Service Website Redesign IMPROVE",
+      "entityType": "SERVICE",
+      "entityId": "cmsjixlb90002akxp3wy7660j",
+      "action": "IMPROVE_SERVICE",
+      "proposalId": "cmskh31st000pmkxpdz21dkpu",
+      "runId": "cmskh31ft000omkxpif7j1zss",
+      "status": "PENDING",
+      "promptVersion": "service.improve:v1",
+      "durationMs": 3674,
+      "fieldCount": 4,
+      "fields": [
+        {
+          "field": "summary",
+          "label": "Summary",
+          "current": "Transform outdated or underperforming websites.",
+          "proposed": "Website Redesign helps Businesses with outdated, slow or underperforming websites with focused, practical delivery — clear scope, honest constraints, and durable outcomes. Editor note: Differentiate Website Redesign from Website Design, Development, Strategy, UI/UX, and Migration. Preserve strong existing narrative where better. Prefer Tell Us About Your Project or Get a Free Websit"
+        },
+        {
+          "field": "description",
+          "label": "Description",
+          "current": "If your website looks old, loads slowly, confuses visitors or fails to generate enquiries, a focused redesign can improve clarity, trust, usability and conversion — without guessing what needs to change.",
+          "proposed": "Website Redesign is a Smartlance capability. It explains what the work involves, who it suits, and what clients can reasonably expect — without Solution-style diagnostic framing or invented guarantees."
+        },
+        {
+          "field": "primaryCtaLabel",
+          "label": "Primary CTA label",
+          "current": null,
+          "proposed": "Request a free review"
+        },
+        {
+          "field": "primaryCtaHref",
+          "label": "Primary CTA href",
+          "current": null,
+          "proposed": "/free-website-review"
+        }
+      ],
+      "reviewFindings": null,
+      "suggestedRelations": null,
+      "research": null,
+      "claims": null,
+      "error": null
+    },
+    {
+      "ok": true,
+      "label": "7c Service Website Redesign RELATIONS",
+      "entityType": "SERVICE",
+      "entityId": "cmsjixlb90002akxp3wy7660j",
+      "action": "SUGGEST_RELATIONSHIPS",
+      "proposalId": "cmskh34u6000smkxpczhg4y9f",
+      "runId": "cmskh34h3000rmkxps7bvf3c2",
+      "status": "PENDING",
+      "promptVersion": "service.relations:v1",
+      "durationMs": 3922,
+      "fieldCount": 0,
+      "fields": [],
+      "reviewFindings": null,
+      "suggestedRelations": [
+        {
+          "kind": "solution",
+          "slug": "ecommerce-growth",
+          "title": "E-commerce Growth",
+          "reason": "May help visitors who arrive with a related problem while exploring Website Redesign."
+        },
+        {
+          "kind": "solution",
+          "slug": "local-business-visibility",
+          "title": "Local Business Visibility",
+          "reason": "May help visitors who arrive with a related problem while exploring Website Redesign."
+        },
+        {
+          "kind": "solution",
+          "slug": "low-website-conversions",
+          "title": "Low Website Conversions",
+          "reason": "May help visitors who arrive with a related problem while exploring Website Redesign."
+        },
+        {
+          "kind": "platform",
+          "slug": "bigcommerce",
+          "title": "BigCommerce",
+          "reason": "Relevant when Website Redesign work involves this platform."
+        },
+        {
+          "kind": "platform",
+          "slug": "clixlo",
+          "title": "Clixlo",
+          "reason": "Relevant when Website Redesign work involves this platform."
+        }
+      ],
+      "research": null,
+      "claims": null,
+      "error": null
+    },
+    {
+      "ok": true,
+      "label": "8 Comparison REVIEW",
+      "entityType": "COMPARISON",
+      "entityId": "cmsjj28p4006c5sxpy16dsali",
+      "action": "REVIEW_COMPARISON",
+      "proposalId": "cmskh38is000vmkxp2vk8vx43",
+      "runId": "cmskh3854000umkxp8y1m1f6d",
+      "status": "PENDING",
+      "promptVersion": "comparison.review:v1",
+      "durationMs": 6113,
+      "fieldCount": 0,
+      "fields": [],
+      "reviewFindings": [
+        {
+          "message": "No universal winner language found.",
+          "section": "NEUTRALITY",
+          "severity": "PASS"
+        },
+        {
+          "message": "No fabricated numeric ratings.",
+          "section": "DECISION MATRIX",
+          "severity": "PASS"
+        },
+        {
+          "message": "Research both options; avoid asymmetric sourcing.",
+          "section": "SOURCE BALANCE",
+          "severity": "WARNING"
+        },
+        {
+          "message": "Pricing, plans, and product limits need current official sources.",
+          "section": "FACTUAL FRESHNESS",
+          "severity": "REVIEW"
+        },
+        {
+          "message": "Recommendations must be scoped to who each option fits.",
+          "section": "USE-CASE FIT",
+          "severity": "REVIEW"
+        },
+        {
+          "message": "SEO present.",
+          "section": "SEO",
+          "severity": "PASS"
+        }
+      ],
+      "suggestedRelations": null,
+      "research": null,
+      "claims": null,
+      "error": null
+    },
+    {
+      "ok": true,
+      "label": "8b Comparison RESEARCH_OPTIONS",
+      "entityType": "COMPARISON",
+      "entityId": "cmsjj28p4006c5sxpy16dsali",
+      "action": "RESEARCH_OPTIONS",
+      "proposalId": "cmskh3cvi000ymkxpwkqnurss",
+      "runId": "cmskh3civ000xmkxpubr2xui5",
+      "status": "PENDING",
+      "promptVersion": "comparison.research:v1",
+      "durationMs": 5712,
+      "fieldCount": 0,
+      "fields": [],
+      "reviewFindings": null,
+      "suggestedRelations": null,
+      "research": {
+        "sources": [
+          {
+            "url": "https://wordpress.org/",
+            "title": "WordPress.org — Meet WordPress",
+            "domain": "wordpress.org",
+            "snippet": "Open source publishing platform. Block editor, themes, plugins. WordPress 7.0 emphasizes preferred AI providers, patterns, navigation overlays, visual revision history. Community and documentation via learn.wordpress.org / developer.wordpress.org.",
+            "sourceType": "OFFICIAL",
+            "retrievedAt": "2026-08-08T14:31:27.696Z"
+          },
+          {
+            "url": "https://wordpress.org/news/2026/08/wordpress-7-0-3-release/",
+            "title": "WordPress 7.0.3 release",
+            "domain": "wordpress.org",
+            "snippet": "Maintenance release in the 7.0 line (August 2026).",
+            "sourceType": "OFFICIAL",
+            "retrievedAt": "2026-08-08T14:31:27.696Z"
+          },
+          {
+            "url": "https://developer.wordpress.org/",
+            "title": "WordPress Developer Resources",
+            "domain": "developer.wordpress.org",
+            "snippet": "Official developer documentation for themes, plugins, REST API, and block editor.",
+            "sourceType": "OFFICIAL",
+            "retrievedAt": "2026-08-08T14:31:27.696Z"
+          },
+          {
+            "url": "https://webflow.com/",
+            "title": "Webflow",
+            "domain": "webflow.com",
+            "snippet": "Visual development platform for designing, building, and launching production websites. CMS, hosting, interactions, and collaboration features are part of the product surface. Evaluate fit for design-led marketing sites vs complex app-like requirements.",
+            "sourceType": "OFFICIAL",
+            "retrievedAt": "2026-08-08T14:31:27.696Z"
+          },
+          {
+            "url": "https://university.webflow.com/",
+            "title": "Webflow University",
+            "domain": "university.webflow.com",
+            "snippet": "Official learning and product education resources for Webflow.",
+            "sourceType": "OFFICIAL",
+            "retrievedAt": "2026-08-08T14:31:27.696Z"
+          }
+        ],
+        "required": true,
+        "checkedAt": "2026-08-08T14:32:28.937Z",
+        "performed": true,
+        "sourceCount": 5,
+        "officialOrPrimaryCount": 5,
+        "factualFreshnessReviewed": true
+      },
+      "claims": null,
+      "error": null
+    },
+    {
+      "ok": true,
+      "label": "8c Comparison CHECK_FRESHNESS",
+      "entityType": "COMPARISON",
+      "entityId": "cmsjj28p4006c5sxpy16dsali",
+      "action": "CHECK_FRESHNESS",
+      "proposalId": "cmskh3gsg0011mkxpsyki0l9s",
+      "runId": "cmskh3gfo0010mkxpfvjt88wy",
+      "status": "PENDING",
+      "promptVersion": "comparison.freshness:v1",
+      "durationMs": 4564,
+      "fieldCount": 0,
+      "fields": [],
+      "reviewFindings": [
+        {
+          "message": "No universal winner language found.",
+          "section": "NEUTRALITY",
+          "severity": "PASS"
+        },
+        {
+          "message": "No fabricated numeric ratings.",
+          "section": "DECISION MATRIX",
+          "severity": "PASS"
+        },
+        {
+          "message": "Multiple sources present — confirm both options covered.",
+          "section": "SOURCE BALANCE",
+          "severity": "PASS"
+        },
+        {
+          "message": "Pricing, plans, and product limits need current official sources.",
+          "section": "FACTUAL FRESHNESS",
+          "severity": "REVIEW"
+        },
+        {
+          "message": "Recommendations must be scoped to who each option fits.",
+          "section": "USE-CASE FIT",
+          "severity": "REVIEW"
+        },
+        {
+          "message": "SEO present.",
+          "section": "SEO",
+          "severity": "PASS"
+        }
+      ],
+      "suggestedRelations": null,
+      "research": {
+        "sources": [
+          {
+            "url": "https://wordpress.org/",
+            "title": "WordPress.org — Meet WordPress",
+            "domain": "wordpress.org",
+            "snippet": "Open source publishing platform. Block editor, themes, plugins. WordPress 7.0 emphasizes preferred AI providers, patterns, navigation overlays, visual revision history. Community and documentation via learn.wordpress.org / developer.wordpress.org.",
+            "sourceType": "OFFICIAL",
+            "retrievedAt": "2026-08-08T14:31:27.696Z"
+          },
+          {
+            "url": "https://wordpress.org/news/2026/08/wordpress-7-0-3-release/",
+            "title": "WordPress 7.0.3 release",
+            "domain": "wordpress.org",
+            "snippet": "Maintenance release in the 7.0 line (August 2026).",
+            "sourceType": "OFFICIAL",
+            "retrievedAt": "2026-08-08T14:31:27.696Z"
+          },
+          {
+            "url": "https://developer.wordpress.org/",
+            "title": "WordPress Developer Resources",
+            "domain": "developer.wordpress.org",
+            "snippet": "Official developer documentation for themes, plugins, REST API, and block editor.",
+            "sourceType": "OFFICIAL",
+            "retrievedAt": "2026-08-08T14:31:27.696Z"
+          },
+          {
+            "url": "https://webflow.com/",
+            "title": "Webflow",
+            "domain": "webflow.com",
+            "snippet": "Visual development platform for designing, building, and launching production websites. CMS, hosting, interactions, and collaboration features are part of the product surface. Evaluate fit for design-led marketing sites vs complex app-like requirements.",
+            "sourceType": "OFFICIAL",
+            "retrievedAt": "2026-08-08T14:31:27.696Z"
+          },
+          {
+            "url": "https://university.webflow.com/",
+            "title": "Webflow University",
+            "domain": "university.webflow.com",
+            "snippet": "Official learning and product education resources for Webflow.",
+            "sourceType": "OFFICIAL",
+            "retrievedAt": "2026-08-08T14:31:27.696Z"
+          }
+        ],
+        "required": true,
+        "checkedAt": "2026-08-08T14:32:34.005Z",
+        "performed": true,
+        "sourceCount": 5,
+        "officialOrPrimaryCount": 5,
+        "factualFreshnessReviewed": true
+      },
+      "claims": null,
+      "error": null
+    }
+  ]
+}
