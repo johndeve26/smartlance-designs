@@ -31,7 +31,7 @@ export function SiteImage({
     <Image
       {...props}
       unoptimized={skipOptimize || unoptimized}
-      quality={quality ?? (isScreenshot ? 100 : undefined)}
+      quality={quality ?? (isScreenshot || skipOptimize ? 100 : 90)}
       className={cn(
         isScreenshot && "object-contain object-top [image-rendering:-webkit-optimize-contrast]",
         className,

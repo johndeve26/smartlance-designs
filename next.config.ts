@@ -31,7 +31,6 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   images: {
     formats: ["image/avif", "image/webp"],
-    quality: 90,
     remotePatterns: mediaRemotePatterns(),
   },
   async headers() {
