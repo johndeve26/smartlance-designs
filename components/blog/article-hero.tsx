@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { SiteImage } from "@/components/ui/site-image";
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -78,7 +78,7 @@ export function ArticleHero({ post }: ArticleHeroProps) {
 
         <div className="relative mt-9 aspect-[16/10] max-w-5xl overflow-hidden rounded-2xl bg-surface-muted sm:mt-10 sm:aspect-[16/9]">
           {post.heroImage ? (
-            <Image
+            <SiteImage
               src={post.heroImage}
               alt={post.heroImageAlt || post.title}
               fill

@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { SiteImage } from "@/components/ui/site-image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
@@ -68,7 +68,7 @@ function IndustryHeroCollage({ projects }: { projects: Project[] }) {
       {primary ? (
         <div className="absolute inset-x-[8%] top-0 z-[1] overflow-hidden rounded-lg border border-border bg-surface shadow-md">
           <div className="relative aspect-[16/10]">
-            <Image
+            <SiteImage
               src={primary.image || primary.heroImage || ""}
               alt={primary.imageAlt ?? primary.name}
               fill
@@ -82,7 +82,7 @@ function IndustryHeroCollage({ projects }: { projects: Project[] }) {
       {secondary ? (
         <div className="absolute bottom-[6%] left-0 z-[2] w-[48%] overflow-hidden rounded-lg border border-border bg-surface shadow-lg">
           <div className="relative aspect-[4/3]">
-            <Image
+            <SiteImage
               src={secondary.image || secondary.heroImage || ""}
               alt={secondary.imageAlt ?? secondary.name}
               fill
@@ -95,7 +95,7 @@ function IndustryHeroCollage({ projects }: { projects: Project[] }) {
       {tertiary ? (
         <div className="absolute bottom-0 right-0 z-[3] w-[46%] overflow-hidden rounded-lg border border-border bg-surface shadow-lg">
           <div className="relative aspect-[4/3]">
-            <Image
+            <SiteImage
               src={tertiary.image || tertiary.heroImage || ""}
               alt={tertiary.imageAlt ?? tertiary.name}
               fill
@@ -215,7 +215,7 @@ function FeaturedIndustryBlock({
                   large ? "aspect-[16/10]" : "aspect-[16/10]",
                 )}
               >
-                <Image
+                <SiteImage
                   src={lead.heroImage || lead.image || ""}
                   alt={lead.imageAlt ?? lead.name}
                   fill
@@ -247,7 +247,7 @@ function FeaturedIndustryBlock({
                 >
                   <div className="overflow-hidden rounded-lg border border-border bg-surface shadow-sm">
                     <div className="relative aspect-[16/10]">
-                      <Image
+                      <SiteImage
                         src={project.image || project.heroImage || ""}
                         alt={project.imageAlt ?? project.name}
                         fill
@@ -274,7 +274,7 @@ function FeaturedIndustryBlock({
         >
           <div className="overflow-hidden rounded-lg border border-border bg-surface">
             <div className="relative aspect-[16/10]">
-              <Image
+              <SiteImage
                 src={supporting[0].image || supporting[0].heroImage || ""}
                 alt={supporting[0].imageAlt ?? supporting[0].name}
                 fill

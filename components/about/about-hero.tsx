@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { SiteImage } from "@/components/ui/site-image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
@@ -109,7 +109,7 @@ function AboutWorkCollage({
         <BrowserFrame className="shadow-lg ring-1 ring-black/5">
           <div className="relative aspect-[16/10] overflow-hidden bg-surface-muted">
             {primarySrc ? (
-              <Image
+              <SiteImage
                 src={primarySrc}
                 alt={primary.imageAlt || `${primary.name} website`}
                 fill
@@ -127,7 +127,7 @@ function AboutWorkCollage({
           <div className="overflow-hidden rounded-[1.1rem] border-[3px] border-foreground bg-foreground shadow-xl">
             <div className="mx-auto mt-1.5 h-1 w-8 rounded-full bg-white/25" />
             <div className="relative m-1 aspect-[9/16] overflow-hidden rounded-[0.85rem] bg-surface-muted">
-              <Image
+              <SiteImage
                 src={secondarySrc}
                 alt={secondary?.imageAlt || `${secondary?.name} mobile view`}
                 fill
@@ -148,7 +148,7 @@ function AboutWorkCollage({
         >
           <BrowserFrame className="opacity-95 shadow-md">
             <div className="relative aspect-[16/11] overflow-hidden bg-surface-muted">
-              <Image
+              <SiteImage
                 src={tertiarySrc}
                 alt={tertiary?.imageAlt || `${tertiary?.name} website`}
                 fill

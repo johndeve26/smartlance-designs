@@ -1,17 +1,38 @@
 import type { NextConfig } from "next";
+import { config as loadEnv } from "dotenv";
+
+loadEnv({ path: ".env.local" });
+loadEnv({ path: ".env" });
+
+function mediaRemotePatterns(): NonNullable<NextConfig["images"]>["remotePatterns"] {
+  const patterns: NonNullable<NextConfig["images"]>["remotePatterns"] = [
+    {
+      protocol: "https",
+      hostname: "*.r2.dev",
+    },
+  ];
+
+  const base = process.env.MEDIA_PUBLIC_BASE_URL?.trim();
+  if (base) {
+    try {
+      const hostname = new URL(base).hostname;
+      if (!patterns.some((pattern) => pattern.hostname === hostname)) {
+        patterns.unshift({ protocol: "https", hostname });
+      }
+    } catch {
+      // ignore invalid MEDIA_PUBLIC_BASE_URL
+    }
+  }
+
+  return patterns;
+}
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   images: {
     formats: ["image/avif", "image/webp"],
-    remotePatterns: process.env.MEDIA_PUBLIC_BASE_URL
-      ? [
-          {
-            protocol: "https",
-            hostname: new URL(process.env.MEDIA_PUBLIC_BASE_URL).hostname,
-          },
-        ]
-      : [],
+    quality: 90,
+    remotePatterns: mediaRemotePatterns(),
   },
   async headers() {
     return [

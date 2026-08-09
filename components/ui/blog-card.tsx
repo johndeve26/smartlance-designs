@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import Image from "next/image";
+import { SiteImage } from "@/components/ui/site-image";
 import type { BlogPostMeta } from "@/types";
 import { BlogFallbackImage } from "@/components/ui/blog-fallback-image";
 import { cn } from "@/lib/utils";
@@ -51,7 +51,7 @@ export function BlogCard({
         )}
       >
         {post.heroImage ? (
-          <Image
+          <SiteImage
             src={post.heroImage}
             alt={post.heroImageAlt || post.title}
             fill

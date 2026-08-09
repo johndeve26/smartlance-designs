@@ -15,6 +15,7 @@
     "db:seed": "npx tsx scripts/seed-from-typed-data.ts",
     "content:import:phase3": "npx tsx scripts/import-phase3-content.ts",
     "content:import:phase4": "npx tsx scripts/import-phase4-ops.ts",
+    "media:migrate:r2": "npx tsx scripts/migrate-media-to-r2.ts",
     "admin:setup:phase4": "npx tsx scripts/import-phase4-ops.ts",
     "admin:bootstrap": "npx tsx scripts/admin-bootstrap.ts",
     "admin:prune-sessions": "npx tsx scripts/prune-admin-sessions.ts",

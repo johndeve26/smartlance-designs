@@ -21,6 +21,7 @@ import {
   type ResolvedSitePresentation,
   type SiteSettingsExtras,
 } from "@/lib/site-settings-extras";
+import { resolveMediaUrl } from "@/lib/media/urls";
 
 export type PublicSiteSettings = {
   siteName: string;
@@ -78,7 +79,7 @@ export function fallbackPublicSiteSettings(): PublicSiteSettings {
     email: siteConfig.email,
     phone: siteConfig.phone,
     whatsapp: siteConfig.whatsapp,
-    ogImage: siteConfig.ogImage,
+    ogImage: resolveMediaUrl(siteConfig.ogImage),
     locale: siteConfig.locale,
     contactFormEnabled: true,
     freeReviewFormEnabled: true,
@@ -90,9 +91,9 @@ export function fallbackPublicSiteSettings(): PublicSiteSettings {
     gtmContainerId: process.env.NEXT_PUBLIC_GTM_ID || null,
     clarityProjectId: process.env.NEXT_PUBLIC_CLARITY_ID || null,
     analyticsEnabled: true,
-    primaryLogoPath: "/images/brand/smartlance-logo.png",
-    logoOnDarkPath: "/images/brand/smartlance-logo-on-dark.png",
-    faviconPath: "/images/brand/favicon-32.png",
+    primaryLogoPath: resolveMediaUrl("/images/brand/smartlance-logo.png"),
+    logoOnDarkPath: resolveMediaUrl("/images/brand/smartlance-logo-on-dark.png"),
+    faviconPath: resolveMediaUrl("/images/brand/favicon-32.png"),
     footerDescription: null,
     publisherName: siteConfig.name,
     defaultTitleTemplate: `%s | ${siteConfig.name}`,
@@ -146,7 +147,7 @@ function mapRow(row: {
     email: row.contactEmail || fallback.email,
     phone: row.contactPhone || fallback.phone,
     whatsapp: row.whatsapp || fallback.whatsapp,
-    ogImage: row.defaultOgImagePath || fallback.ogImage,
+    ogImage: resolveMediaUrl(row.defaultOgImagePath || fallback.ogImage),
     locale: row.defaultLocale === "en" ? "en_US" : row.defaultLocale,
     contactFormEnabled: row.contactFormEnabled,
     freeReviewFormEnabled: row.freeReviewFormEnabled,
@@ -158,9 +159,9 @@ function mapRow(row: {
     gtmContainerId: row.gtmContainerId || fallback.gtmContainerId,
     clarityProjectId: row.clarityProjectId || fallback.clarityProjectId,
     analyticsEnabled: row.analyticsEnabled,
-    primaryLogoPath: row.primaryLogoPath || fallback.primaryLogoPath,
-    logoOnDarkPath: row.logoOnDarkPath || fallback.logoOnDarkPath,
-    faviconPath: row.faviconPath || fallback.faviconPath,
+    primaryLogoPath: resolveMediaUrl(row.primaryLogoPath || fallback.primaryLogoPath),
+    logoOnDarkPath: resolveMediaUrl(row.logoOnDarkPath || fallback.logoOnDarkPath),
+    faviconPath: resolveMediaUrl(row.faviconPath || fallback.faviconPath),
     footerDescription: row.footerDescription,
     publisherName: row.publisherName || fallback.publisherName,
     defaultTitleTemplate: row.defaultTitleTemplate || fallback.defaultTitleTemplate,

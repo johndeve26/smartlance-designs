@@ -1,6 +1,7 @@
 import { hasDatabaseUrl, prisma } from "@/lib/db";
 import type { Project, ProjectCategory } from "@/types";
 import type { Prisma, PublishStatus, WorkProject } from "@prisma/client";
+import { resolveProjectMedia } from "@/lib/media/urls";
 import {
   createContentRevision,
   revalidateWork,
@@ -21,7 +22,7 @@ function asOptionalArray<T>(value: unknown): T[] | undefined {
 }
 
 export function toPublicProject(row: WorkProject): Project {
-  return {
+  return resolveProjectMedia({
     slug: row.slug,
     name: row.name,
     title: row.title ?? undefined,
@@ -68,7 +69,7 @@ export function toPublicProject(row: WorkProject): Project {
     highlights: asOptionalArray(row.highlights),
     platformContext: row.platformContext ?? undefined,
     outcomeHeading: row.outcomeHeading ?? undefined,
-  };
+  });
 }
 
 export async function listPublishedWork() {

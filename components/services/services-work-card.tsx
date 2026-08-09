@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { SiteImage } from "@/components/ui/site-image";
 import { ArrowRight } from "lucide-react";
 import type { Project } from "@/types";
 
@@ -18,7 +18,7 @@ export function ServicesWorkCard({ project }: ServicesWorkCardProps) {
         className="relative block aspect-[8/5] overflow-hidden bg-surface-muted"
       >
         {imageSrc ? (
-          <Image
+          <SiteImage
             src={imageSrc}
             alt={project.imageAlt || `${project.name} website`}
             fill

@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { SiteImage } from "@/components/ui/site-image";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
@@ -85,7 +85,7 @@ export function ServiceFeatureVisual({
             <BrowserChrome className="absolute inset-0 flex flex-col">
               <div className="relative min-h-0 flex-1 bg-surface-muted">
                 {projectImage ? (
-                  <Image
+                  <SiteImage
                     src={projectImage}
                     alt={projectImageAlt || title}
                     fill
@@ -104,7 +104,7 @@ export function ServiceFeatureVisual({
             <div className="absolute -bottom-1 -right-1 w-[28%] overflow-hidden rounded-lg border border-border bg-surface p-1 shadow-md sm:bottom-2 sm:right-2">
               <div className="relative aspect-[9/16] overflow-hidden rounded-md bg-surface-muted">
                 {projectImage ? (
-                  <Image
+                  <SiteImage
                     src={projectImage}
                     alt=""
                     fill
@@ -129,7 +129,7 @@ export function ServiceFeatureVisual({
           <BrowserChrome className="absolute inset-0 right-[18%] flex flex-col sm:right-[22%]">
             <div className="relative min-h-0 flex-1 bg-surface-muted">
               {projectImage ? (
-                <Image
+                <SiteImage
                   src={projectImage}
                   alt={projectImageAlt || title}
                   fill
@@ -151,7 +151,7 @@ export function ServiceFeatureVisual({
           <div className="absolute bottom-0 right-0 w-[34%] overflow-hidden rounded-xl border border-border bg-surface p-1.5 shadow-md sm:w-[30%]">
             <div className="relative aspect-[9/16] overflow-hidden rounded-lg bg-surface-muted">
               {projectImage ? (
-                <Image
+                <SiteImage
                   src={projectImage}
                   alt=""
                   fill
@@ -269,7 +269,7 @@ export function ServiceFeatureVisual({
         </div>
         <div className="relative bg-surface-muted">
           {projectImage ? (
-            <Image
+            <SiteImage
               src={projectImage}
               alt={projectImageAlt || `${title} redesign`}
               fill

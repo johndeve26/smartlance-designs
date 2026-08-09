@@ -1,5 +1,6 @@
 import type { Project } from "@/types";
 import { showDraftContent } from "@/lib/content-flags";
+import { resolveProjectMedia } from "@/lib/media/urls";
 
 /**
  * Portfolio migrated from live Smartlance Designs WordPress project pages.
@@ -835,13 +836,14 @@ export function getVisibleProjects() {
       const orderB = b.displayOrder ?? (b.featured ? 50 : 100);
       if (orderA !== orderB) return orderA - orderB;
       return a.name.localeCompare(b.name);
-    });
+    })
+    .map(resolveProjectMedia);
 }
 
 export function getProjectBySlug(slug: string) {
   const project = projects.find((item) => item.slug === slug);
   if (!project || !isVisible(project)) return undefined;
-  return project;
+  return resolveProjectMedia(project);
 }
 
 export function getFeaturedProjects() {

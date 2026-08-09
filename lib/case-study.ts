@@ -2,6 +2,7 @@ import type { Project, ProjectCaseStudyPoint } from "@/types";
 import { caseStudyNarratives } from "@/data/case-study-narratives";
 import { getVisibleProjects } from "@/data/portfolio";
 import { getPlatformHrefForName } from "@/data/platforms";
+import { resolveMediaUrl } from "@/lib/media/urls";
 
 const SERVICE_HREFS: Record<string, string> = {
   "Website Design": "/services/website-design",
@@ -148,8 +149,16 @@ export function resolveCaseStudyContent(project: Project) {
       project.heroSupportingCopy ?? narrative?.heroSupportingCopy,
     productPrinciples:
       project.productPrinciples ?? narrative?.productPrinciples ?? [],
-    productFeatures:
-      project.productFeatures ?? narrative?.productFeatures ?? [],
+    productFeatures: (
+      project.productFeatures ?? narrative?.productFeatures ?? []
+    ).map((feature) =>
+      feature.image
+        ? {
+            ...feature,
+            image: { ...feature.image, src: resolveMediaUrl(feature.image.src) },
+          }
+        : feature,
+    ),
     saasInfrastructure:
       project.saasInfrastructure ?? narrative?.saasInfrastructure ?? [],
     showArchitectureDiagram:

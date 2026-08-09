@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { resolveMediaUrl } from "@/lib/media/urls";
 import { cn } from "@/lib/utils";
 
 type LogoProps = {
@@ -23,7 +24,7 @@ export function Logo({
         aria-label="Smartlance Designs home"
       >
         <Image
-          src="/images/brand/smartlance-mark.png"
+          src={resolveMediaUrl("/images/brand/smartlance-mark.png")}
           alt=""
           width={36}
           height={36}
@@ -41,11 +42,11 @@ export function Logo({
       aria-label="Smartlance Designs home"
     >
       <Image
-        src={
+        src={resolveMediaUrl(
           onDark
             ? "/images/brand/smartlance-logo-dark.png"
-            : "/images/brand/smartlance-logo.png"
-        }
+            : "/images/brand/smartlance-logo.png",
+        )}
         alt="Smartlance Designs"
         width={180}
         height={39}

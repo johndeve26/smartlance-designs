@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { SiteImage } from "@/components/ui/site-image";
 import { ArrowRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
@@ -71,7 +71,7 @@ function PlatformHeroVisual({
           <span className="ml-2 h-3 flex-1 rounded bg-surface-muted" />
         </div>
         <div className="relative aspect-[16/10] bg-surface-muted">
-          <Image
+          <SiteImage
             src={imageSrc}
             alt={project?.imageAlt || `${platform.name} website example`}
             fill

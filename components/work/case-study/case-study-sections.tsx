@@ -202,7 +202,6 @@ export function CaseStudySolution({
                   alt={visual.alt}
                   fill
                   loading="eager"
-                  className="object-cover object-top"
                   sizes="(max-width: 1280px) 100vw, 1200px"
                 />
               </div>
@@ -552,14 +551,13 @@ function GalleryScreenshot({
 }) {
   return (
     <BrowserFrame className="shadow-md">
-      <div className="relative aspect-[16/10] overflow-hidden bg-surface-muted sm:aspect-[16/9]">
+      <div className="relative aspect-[16/9] overflow-hidden bg-surface-muted sm:aspect-[16/9]">
         <CaseStudyImage
           src={item.src}
           alt={item.alt}
           fill
           priority={priority}
           loading={priority ? undefined : "eager"}
-          className="object-cover object-top"
           sizes={
             item.layout === "half"
               ? "(max-width: 768px) 100vw, 50vw"
@@ -694,7 +692,6 @@ export function CaseStudyProductFeatures({
                         alt={feature.image.alt}
                         fill
                         loading="eager"
-                        className="object-cover object-top"
                         sizes="(max-width: 1024px) 100vw, 58vw"
                       />
                     </div>

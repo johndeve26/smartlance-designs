@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { PortfolioScreenshot } from "@/components/ui/site-image";
 import { ArrowRight } from "lucide-react";
 import type { Project } from "@/types";
 import { cn } from "@/lib/utils";
@@ -39,19 +39,13 @@ export function ProjectCard({
       <Link
         href={`/work/${project.slug}`}
         aria-label={`View case study: ${project.name}`}
-        className={cn(
-          "relative block overflow-hidden bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
-          isLead
-            ? "aspect-[16/10] sm:aspect-[3/2] lg:aspect-[16/10]"
-            : "aspect-[16/10]",
-        )}
+        className="relative block overflow-hidden bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       >
         {imageSrc ? (
-          <Image
+          <PortfolioScreenshot
             src={imageSrc}
             alt={project.imageAlt ?? `${project.name} website`}
-            fill
-            className="object-cover object-top transition-transform duration-700 group-hover:scale-[1.02] motion-reduce:transition-none"
+            maxWidthClassName="max-w-full"
             sizes={
               isLead
                 ? "(max-width: 1024px) 100vw, 66vw"
@@ -61,7 +55,7 @@ export function ProjectCard({
             }
           />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-neutral-200 to-neutral-300" />
+          <div className="aspect-[16/9] bg-gradient-to-br from-neutral-200 to-neutral-300" />
         )}
         <span
           className="pointer-events-none absolute inset-0 bg-foreground/0 transition-colors duration-500 group-hover:bg-foreground/[0.04] motion-reduce:transition-none"

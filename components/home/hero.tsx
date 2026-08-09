@@ -1,8 +1,8 @@
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
+import { PortfolioScreenshot } from "@/components/ui/site-image";
 import { getHeroShowcaseProject } from "@/lib/home/showcase";
 
 export type HomeHeroProps = {
@@ -78,21 +78,18 @@ export function HomeHero({
               className="absolute -left-4 top-0 hidden h-16 w-px bg-accent lg:block"
               aria-hidden
             />
-            <div className="relative aspect-[4/3] overflow-hidden border border-border bg-surface-muted shadow-md sm:aspect-[16/11]">
-              <Image
-                src={imageSrc}
-                alt={
-                  showcase.heroImageAlt ||
-                  showcase.imageAlt ||
-                  `${showcase.name} website designed and built by Smartlance Designs`
-                }
-                fill
-                priority
-                fetchPriority="high"
-                className="object-cover object-top"
-                sizes="(max-width: 1023px) 100vw, 46vw"
-              />
-            </div>
+            <PortfolioScreenshot
+              src={imageSrc}
+              alt={
+                showcase.heroImageAlt ||
+                showcase.imageAlt ||
+                `${showcase.name} website designed and built by Smartlance Designs`
+              }
+              priority
+              sizes="(max-width: 1023px) 100vw, 1280px"
+              maxWidthClassName="max-w-[1280px]"
+              frameClassName="border border-border shadow-md"
+            />
             <figcaption className="mt-4 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-t border-border pt-4">
               <span className="text-meta">
                 <span className="text-[0.8125rem] font-semibold uppercase tracking-[0.12em] text-muted">

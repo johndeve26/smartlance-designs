@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { SiteImage } from "@/components/ui/site-image";
 import { ArrowRight } from "lucide-react";
 import type { Project } from "@/types";
 import { cn } from "@/lib/utils";
@@ -33,7 +33,7 @@ export function ServiceProofCard({
         )}
       >
         {imageSrc ? (
-          <Image
+          <SiteImage
             src={imageSrc}
             alt={project.imageAlt || `${project.name} website`}
             fill

@@ -115,7 +115,6 @@ export function CaseStudyHero({
                     alt={image.alt}
                     fill
                     priority
-                    className="object-cover object-top"
                     sizes="(max-width: 1024px) 100vw, 50vw"
                   />
                 </div>
@@ -135,7 +134,6 @@ export function CaseStudyHero({
                       alt={supportingImage.alt}
                       fill
                       loading="eager"
-                      className="object-cover object-top"
                       sizes="180px"
                     />
                   </div>

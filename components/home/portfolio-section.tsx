@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { PortfolioScreenshot } from "@/components/ui/site-image";
 import { ArrowRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
@@ -27,16 +27,14 @@ function FeaturedProjectHero({ project }: { project: Project }) {
       <Link
         href={`/work/${project.slug}`}
         tabIndex={-1}
-        className="relative block aspect-[16/10] overflow-hidden bg-surface-muted sm:aspect-[16/9] lg:aspect-[2/1]"
+        className="block bg-surface-muted"
       >
         {imageSrc ? (
-          <Image
+          <PortfolioScreenshot
             src={imageSrc}
             alt={project.imageAlt || `${project.name} website`}
-            fill
             loading="lazy"
-            className="object-cover transition-transform duration-700 group-hover:scale-[1.02] motion-reduce:transition-none"
-            sizes="(max-width: 1280px) 100vw, 1216px"
+            sizes="(max-width: 1280px) 100vw, 1280px"
           />
         ) : null}
       </Link>
@@ -81,15 +79,14 @@ function SupportingProjectCard({ project }: { project: Project }) {
       <Link
         href={`/work/${project.slug}`}
         tabIndex={-1}
-        className="relative block aspect-[16/10] overflow-hidden bg-surface-muted"
+        className="block bg-surface-muted"
       >
         {imageSrc ? (
-          <Image
+          <PortfolioScreenshot
             src={imageSrc}
             alt={project.imageAlt || `${project.name} website`}
-            fill
             loading="lazy"
-            className="object-cover transition-transform duration-700 group-hover:scale-[1.02] motion-reduce:transition-none"
+            maxWidthClassName="max-w-full"
             sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 600px"
           />
         ) : null}

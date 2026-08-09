@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { SiteImage } from "@/components/ui/site-image";
 import type { ReactNode } from "react";
 import type { ServiceVisualVariant } from "@/types";
 import { cn } from "@/lib/utils";
@@ -70,7 +70,7 @@ function ProjectFill({
     );
   }
   return (
-    <Image
+    <SiteImage
       src={src}
       alt={alt}
       fill
@@ -126,7 +126,7 @@ export function ServiceDetailVisual({
             <div className="absolute bottom-2 right-2 w-[28%] overflow-hidden rounded-lg border border-border bg-surface p-1 shadow-md">
               <div className="relative aspect-[9/16] overflow-hidden rounded-md bg-surface-muted">
                 {projectImage ? (
-                  <Image
+                  <SiteImage
                     src={projectImage}
                     alt=""
                     fill
@@ -156,7 +156,7 @@ export function ServiceDetailVisual({
           <div className="absolute bottom-0 right-0 w-[34%] overflow-hidden rounded-xl border border-border bg-surface p-1.5 shadow-md sm:w-[30%]">
             <div className="relative aspect-[9/16] overflow-hidden rounded-lg bg-surface-muted">
               {projectImage ? (
-                <Image
+                <SiteImage
                   src={projectImage}
                   alt=""
                   fill

@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
 import readingTime from "reading-time";
+import { resolveMediaUrl } from "@/lib/media/urls";
 import type { BlogCategory, BlogPostMeta } from "@/types";
 
 const contentDirectory = path.join(process.cwd(), "content/blog");
@@ -69,7 +70,7 @@ export function getPostBySlug(
     publishedAt: String(data.publishedAt ?? new Date().toISOString()),
     updatedAt: data.updatedAt ? String(data.updatedAt) : undefined,
     readingTime: stats.text,
-    heroImage: data.heroImage ? String(data.heroImage) : undefined,
+    heroImage: data.heroImage ? resolveMediaUrl(String(data.heroImage)) : undefined,
     heroImageAlt: data.heroImageAlt ? String(data.heroImageAlt) : undefined,
     relatedServiceHrefs: Array.isArray(data.relatedServiceHrefs)
       ? data.relatedServiceHrefs.map(String)
