@@ -136,7 +136,7 @@ export const growthSystemSteps = [
  * Homepage hero showcase.
  * Curated separately from Selected Work so the two never share an image.
  */
-export const homepageHeroProjectSlug = "overlook-cabin-rentals";
+export const homepageHeroProjectSlug = "freelance-os";
 
 /** Homepage testimonials — strongest, scannable quotes */
 export const homepageTestimonialIds = [

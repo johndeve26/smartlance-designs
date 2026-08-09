@@ -236,33 +236,100 @@ export const caseStudyNarratives: Record<string, CaseStudyNarrative> = {
     gallery: [
       {
         src: "/images/projects/padeya/discovery.webp",
-        alt: "Pàdéyá event discovery interface",
+        alt: "Pàdéyá event platform homepage on mobile",
         layout: "full",
       },
       {
+        src: "/images/projects/padeya/event-marketplace.webp",
+        alt: "Pàdéyá events search and marketplace page",
+        layout: "half",
+      },
+      {
         src: "/images/projects/padeya/event-detail.webp",
-        alt: "Pàdéyá event detail page",
+        alt: "Pàdéyá event detail page for a past event",
         layout: "half",
       },
       {
         src: "/images/projects/padeya/host-dashboard.webp",
-        alt: "Pàdéyá host dashboard",
+        alt: "Pàdéyá host command center overview dashboard",
         layout: "half",
       },
       {
         src: "/images/projects/padeya/fan-passport.webp",
-        alt: "Pàdéyá Fan Passport",
+        alt: "Pàdéyá Fan Passport public profile page",
         layout: "full",
       },
       {
         src: "/images/projects/padeya/memories.webp",
-        alt: "Pàdéyá Event Memories interface",
+        alt: "Pàdéyá Event Memories gallery for a past event",
         layout: "half",
       },
       {
         src: "/images/projects/padeya/legacy.webp",
-        alt: "Pàdéyá Host Legacy interface",
+        alt: "Pàdéyá Host Legacy profile page for DJ Maze",
         layout: "half",
+      },
+    ],
+    productFeatures: [
+      {
+        title: "Event discovery",
+        heading: "Find events across the marketplace.",
+        body:
+          "Visitors can discover public events by location, category and other relevant criteria, view event information and move through structured ticket-purchase flows. Tickets are issued only after verified payment.",
+        image: {
+          src: "/images/projects/padeya/event-marketplace.webp",
+          alt: "Pàdéyá events search and marketplace page",
+        },
+      },
+      {
+        title: "Event pages",
+        heading: "Event detail for every stage of the lifecycle.",
+        body:
+          "Public event pages bring together ticketing, host information, memories and post-event engagement so fans can understand an event before, during and after it happens.",
+        image: {
+          src: "/images/projects/padeya/event-detail.webp",
+          alt: "Pàdéyá event detail page for a past event",
+        },
+      },
+      {
+        title: "Host workspace",
+        heading: "Run events from one command center.",
+        body:
+          "Hosts can create and manage events, ticket types, event media, attendees, check-ins, promotions and operational information from a dedicated workspace.",
+        image: {
+          src: "/images/projects/padeya/host-dashboard.webp",
+          alt: "Pàdéyá host command center overview dashboard",
+        },
+      },
+      {
+        title: "Fan Passport",
+        heading: "Give fans a persistent identity on the platform.",
+        body:
+          "Fans can build a persistent identity around the events, hosts and experiences they interact with rather than starting from zero after every event.",
+        image: {
+          src: "/images/projects/padeya/fan-passport.webp",
+          alt: "Pàdéyá Fan Passport public profile page",
+        },
+      },
+      {
+        title: "Event Memories",
+        heading: "Keep events alive after the last check-in.",
+        body:
+          "Events continue after the final check-in through Memories, allowing event photos and moments to become part of the event’s lasting experience.",
+        image: {
+          src: "/images/projects/padeya/memories.webp",
+          alt: "Pàdéyá Event Memories gallery for a past event",
+        },
+      },
+      {
+        title: "Host Legacy",
+        heading: "Turn verified hosting into long-term reputation.",
+        body:
+          "Pàdéyá Legacy turns verified hosting activity into a long-term reputation system based on factors such as ratings, completed events, ticket sales, verified check-ins and consistency.",
+        image: {
+          src: "/images/projects/padeya/legacy.webp",
+          alt: "Pàdéyá Host Legacy profile page for DJ Maze",
+        },
       },
     ],
     caseStudyCta: {
@@ -390,7 +457,7 @@ export const caseStudyNarratives: Record<string, CaseStudyNarrative> = {
           "The Today experience brings important actions and business context together so users can quickly understand what deserves attention — including follow-ups, high-fit opportunities, profile improvements and recent activity. It is designed as the user's starting point rather than another analytics dashboard.",
         image: {
           src: "/images/projects/freelance-os/today.webp",
-          alt: "Freelance OS freelancer dashboard",
+          alt: "Freelance OS Today dashboard with follow-ups and recommended next steps",
         },
       },
       {
@@ -400,7 +467,7 @@ export const caseStudyNarratives: Record<string, CaseStudyNarrative> = {
           "Freelance OS helps users evaluate opportunities before investing time and platform resources into an application. Opportunity analysis can consider job requirements alongside relevant freelancer information to surface useful context around fit, requirements and positioning. The goal is not simply to collect more opportunities — it is to support better application decisions.",
         image: {
           src: "/images/projects/freelance-os/opportunity-analyzer.webp",
-          alt: "Freelance OS opportunity analysis interface",
+          alt: "Freelance OS opportunity analyzer for pasting and analyzing new job postings",
         },
       },
       {
@@ -410,7 +477,7 @@ export const caseStudyNarratives: Record<string, CaseStudyNarrative> = {
           "The proposal system was designed to move beyond generic AI-generated pitches. Freelance OS can use structured freelancer context such as skills, experience, portfolio projects and relevant work history when helping create proposal drafts. Users remain responsible for reviewing and submitting their proposals.",
         image: {
           src: "/images/projects/freelance-os/proposal-generator.webp",
-          alt: "Freelance OS AI proposal generator",
+          alt: "Freelance OS AI proposal generator with cover letter variants and key selling points",
         },
       },
       {
@@ -420,7 +487,7 @@ export const caseStudyNarratives: Record<string, CaseStudyNarrative> = {
           "Applications can be organized through a structured workflow so freelancers can keep track of what they applied for, what needs follow-up and what eventually happened. Stages such as opportunity, proposal, viewed, interview, hired, won and lost help users understand where each application stands based on information they record in the platform.",
         image: {
           src: "/images/projects/freelance-os/pipeline.webp",
-          alt: "Freelance OS application pipeline",
+          alt: "Freelance OS proposal pipeline kanban board tracking application stages",
         },
       },
       {
@@ -430,7 +497,7 @@ export const caseStudyNarratives: Record<string, CaseStudyNarrative> = {
           "Freelance OS extends beyond applications by providing a structured place to manage prospects, clients, projects, contact information, notes and follow-ups. The CRM connects business development with the wider freelance workflow rather than requiring users to maintain a separate generic sales system.",
         image: {
           src: "/images/projects/freelance-os/crm.webp",
-          alt: "Freelance OS freelancer CRM",
+          alt: "Freelance OS client CRM with leads, revenue stats and client list",
         },
       },
       {
@@ -440,7 +507,7 @@ export const caseStudyNarratives: Record<string, CaseStudyNarrative> = {
           "Freelance OS helps users organize projects and transform their experience into stronger portfolio assets. Portfolio Studio supports the broader system by making previous work available as context when presenting services, improving positioning and preparing future proposals.",
         image: {
           src: "/images/projects/freelance-os/portfolio-studio.webp",
-          alt: "Freelance OS Portfolio Studio",
+          alt: "Freelance OS Portfolio Studio new project form with AI-assisted case study fields",
         },
       },
       {
@@ -462,7 +529,7 @@ export const caseStudyNarratives: Record<string, CaseStudyNarrative> = {
           "Freelance OS brings activity and outcome data together so users can understand their freelance workflow beyond raw application counts. Depending on the data available, analytics can include proposal activity, reported views, interviews, hires, wins and losses, funnel performance and performance trends.",
         image: {
           src: "/images/projects/freelance-os/analytics.webp",
-          alt: "Freelance OS analytics dashboard",
+          alt: "Freelance OS analytics dashboard with proposal funnel and performance insights",
         },
       },
       {
@@ -472,7 +539,7 @@ export const caseStudyNarratives: Record<string, CaseStudyNarrative> = {
           "The coaching experience is designed to understand more than the user's latest message. Where permitted by the application's architecture, guidance can draw from relevant Freelance OS context such as profile information, portfolio, services, proposals and business activity.",
         image: {
           src: "/images/projects/freelance-os/career-coach.webp",
-          alt: "Freelance OS Career Coach",
+          alt: "Freelance OS Career Coach chat with profile optimization guidance",
         },
       },
       {
@@ -482,7 +549,7 @@ export const caseStudyNarratives: Record<string, CaseStudyNarrative> = {
           "Freelance OS includes public-facing profile infrastructure that allows freelancers to present selected profile, portfolio and service information through a client-facing experience with hire actions, contact options and privacy controls managed by the user.",
         image: {
           src: "/images/projects/freelance-os/public-profile.webp",
-          alt: "Freelance OS public profile",
+          alt: "Freelance OS public profile preview as seen by clients",
         },
       },
     ],

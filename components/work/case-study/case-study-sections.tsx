@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import Image from "next/image";
 import type {
   ProductFeatureSection,
   ProjectCaseStudyPoint,
@@ -9,6 +8,7 @@ import type {
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { BrowserFrame } from "@/components/work/case-study/case-study-hero";
+import { CaseStudyImage } from "@/components/work/case-study/case-study-image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -197,10 +197,11 @@ export function CaseStudySolution({
           <div className="mt-14 sm:mt-16">
             <BrowserFrame className="shadow-md">
               <div className="relative aspect-[16/9] overflow-hidden bg-surface-muted">
-                <Image
+                <CaseStudyImage
                   src={visual.src}
                   alt={visual.alt}
                   fill
+                  loading="eager"
                   className="object-cover object-top"
                   sizes="(max-width: 1280px) 100vw, 1200px"
                 />
@@ -552,11 +553,12 @@ function GalleryScreenshot({
   return (
     <BrowserFrame className="shadow-md">
       <div className="relative aspect-[16/10] overflow-hidden bg-surface-muted sm:aspect-[16/9]">
-        <Image
+        <CaseStudyImage
           src={item.src}
           alt={item.alt}
           fill
           priority={priority}
+          loading={priority ? undefined : "eager"}
           className="object-cover object-top"
           sizes={
             item.layout === "half"
@@ -604,10 +606,7 @@ export function CaseStudyGallery({ items }: { items: ProjectGalleryItem[] }) {
 
         return (
           <CaseStudyVisualBreak key={key}>
-            <GalleryScreenshot
-              item={block[0]}
-              priority={blockIndex === 0}
-            />
+            <GalleryScreenshot item={block[0]} />
           </CaseStudyVisualBreak>
         );
       })}
@@ -690,10 +689,11 @@ export function CaseStudyProductFeatures({
                 <div className="min-w-0">
                   <BrowserFrame className="shadow-md">
                     <div className="relative aspect-[16/10] overflow-hidden bg-surface-muted sm:aspect-[16/9]">
-                      <Image
+                      <CaseStudyImage
                         src={feature.image.src}
                         alt={feature.image.alt}
                         fill
+                        loading="eager"
                         className="object-cover object-top"
                         sizes="(max-width: 1024px) 100vw, 58vw"
                       />

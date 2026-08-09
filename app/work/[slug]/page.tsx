@@ -163,7 +163,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
     (item) => item.src !== content.heroImage?.src,
   );
   const usesFeatureSections = content.productFeatures.length > 0;
-  const solutionItems = usesFeatureSections ? [] : content.solutionPoints;
+  const solutionItems = content.solutionPoints;
 
   return (
     <>

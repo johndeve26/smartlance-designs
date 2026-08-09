@@ -69,6 +69,10 @@ describe("Pàdéyá case study content", () => {
     expect(content.challenges).toHaveLength(5);
     expect(content.approachSteps).toHaveLength(5);
     expect(content.solutionPoints).toHaveLength(10);
+    expect(content.productFeatures).toHaveLength(6);
+    expect(content.productFeatures.every((feature) => feature.image?.src)).toBe(
+      true,
+    );
     expect(content.highlights.length).toBeGreaterThanOrEqual(10);
     expect(content.outcomes.length).toBeGreaterThanOrEqual(10);
     expect(content.engineeringStacks?.length).toBeGreaterThanOrEqual(6);

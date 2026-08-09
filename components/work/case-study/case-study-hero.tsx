@@ -1,9 +1,9 @@
-import Image from "next/image";
 import type { ReactNode } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
+import { CaseStudyImage } from "@/components/work/case-study/case-study-image";
 import type { Project } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -87,7 +87,7 @@ export function CaseStudyHero({
             </dl>
 
             {project.websiteUrl ? (
-              <div className="mt-8">
+              <div className="mt-8 max-w-md">
                 <Button asChild size="lg">
                   <a
                     href={project.websiteUrl}
@@ -98,6 +98,10 @@ export function CaseStudyHero({
                     <ArrowUpRight className="ml-1.5 h-4 w-4" />
                   </a>
                 </Button>
+                <p className="mt-3 max-w-sm text-xs leading-relaxed text-subtle sm:text-[0.8125rem]">
+                  The live website may have changed since this case study was
+                  published and may differ from the work shown here.
+                </p>
               </div>
             ) : null}
           </div>
@@ -106,7 +110,7 @@ export function CaseStudyHero({
             <BrowserFrame className="shadow-lg ring-1 ring-black/5">
               {image ? (
                 <div className="relative aspect-[16/10] overflow-hidden bg-surface-muted sm:aspect-[16/9]">
-                  <Image
+                  <CaseStudyImage
                     src={image.src}
                     alt={image.alt}
                     fill
@@ -126,10 +130,11 @@ export function CaseStudyHero({
               <div className="absolute -bottom-6 -left-4 hidden w-[38%] max-w-[11.5rem] sm:block lg:-left-8 xl:max-w-[13rem]">
                 <PhoneFrame>
                   <div className="relative aspect-[9/16] overflow-hidden bg-surface-muted">
-                    <Image
+                    <CaseStudyImage
                       src={supportingImage.src}
                       alt={supportingImage.alt}
                       fill
+                      loading="eager"
                       className="object-cover object-top"
                       sizes="180px"
                     />
