@@ -18,6 +18,7 @@ describe("admin navigation IA", () => {
       "Editorial",
       "Site Management",
       "Operations",
+      "Agency",
       "System",
     ]);
   });

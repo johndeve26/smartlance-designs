@@ -99,6 +99,36 @@ export const adminNavigation: AdminNavGroupDef[] = [
         capability: "view_enquiries",
         badge: "enquiries",
       },
+      {
+        id: "audience",
+        label: "Audience",
+        href: "/admin/audience",
+        capability: "view_audience",
+      },
+      {
+        id: "crm",
+        label: "CRM",
+        href: "/admin/crm",
+        capability: "view_crm",
+      },
+    ],
+  },
+  {
+    id: "agency",
+    label: "Agency",
+    items: [
+      {
+        id: "agency-projects",
+        label: "Projects",
+        href: "/admin/agency",
+        capability: "view_projects",
+      },
+      {
+        id: "agency-templates",
+        label: "Project Templates",
+        href: "/admin/agency/templates",
+        capability: "view_projects",
+      },
     ],
   },
   {

@@ -72,6 +72,14 @@ export function isAdminNavItemActive(pathname: string, itemId: string): boolean 
     return pathname === "/admin/enquiries" || pathname.startsWith("/admin/enquiries/");
   }
 
+  if (itemId === "crm") {
+    return pathname === "/admin/crm" || pathname.startsWith("/admin/crm/");
+  }
+
+  if (itemId === "agency-projects" || itemId === "agency-templates") {
+    return pathname === "/admin/agency" || pathname.startsWith("/admin/agency/");
+  }
+
   const item = adminNavigation
     .flatMap((g) => g.items)
     .find((i) => i.id === itemId);
@@ -106,6 +114,19 @@ const SEGMENT_LABELS: Record<string, string> = {
   "link-health": "Link Health",
   redirects: "Redirects",
   enquiries: "Enquiries",
+  crm: "CRM",
+  agency: "Agency",
+  projects: "Projects",
+  templates: "Templates",
+  contacts: "Contacts",
+  companies: "Companies",
+  leads: "Leads",
+  deals: "Deals",
+  tasks: "Tasks",
+  segments: "Segments",
+  sequences: "Sequences",
+  outreach: "Outreach",
+  "email-templates": "Email Templates",
   contact: "Contact",
   reviews: "Website Reviews",
   users: "Users",

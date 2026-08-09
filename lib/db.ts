@@ -18,9 +18,9 @@ const globalForPrisma = globalThis as unknown as {
  * Also used with delegate checks below — stale singletons after `prisma generate` are a common
  * Admin "Something went wrong" cause (undefined.findMany / undefined.findUnique).
  */
-const PRISMA_CLIENT_GENERATION = "ai-content-assistants-phase-e";
+const PRISMA_CLIENT_GENERATION = "agency-operations-v1";
 
-/** Delegates that must exist after AI Writer + Topic Intelligence + Content Assistants landed. */
+/** Delegates that must exist after CRM Outreach V2 landed. */
 const REQUIRED_DELEGATES = [
   "aIEditorialProject",
   "aIProviderAccount",
@@ -33,6 +33,50 @@ const REQUIRED_DELEGATES = [
   "topicSeed",
   "aIContentRun",
   "aIContentProposal",
+  "crmContact",
+  "crmCompany",
+  "crmLead",
+  "crmDeal",
+  "crmTask",
+  "crmActivity",
+  "crmSegment",
+  "crmSequence",
+  "crmSequenceEnrollment",
+  "crmSequenceExecution",
+  "inboundEmailSettings",
+  "inboundMailboxState",
+  "inboundMessageImport",
+  "crmEmailThread",
+  "crmTrackedLink",
+  "crmEmailEngagementEvent",
+  "crmContactImport",
+  "crmContactImportIssue",
+  "crmContactSocialProfile",
+  "crmPropertyDefinition",
+  "crmContactPropertyValue",
+  "crmContactView",
+  "crmEmailThreadUserState",
+  "agencyProjectCounter",
+  "agencyProject",
+  "agencyProjectMember",
+  "agencyProjectTemplate",
+  "agencyProjectTemplateMilestone",
+  "agencyProjectTemplateTask",
+  "agencyProjectTemplateRequirement",
+  "agencyProjectMilestone",
+  "agencyProjectTask",
+  "agencyClientRequirement",
+  "agencyDeliverable",
+  "agencyDeliverableVersion",
+  "agencyDeliverableReview",
+  "agencyProjectActivity",
+  "agencyProjectUpdate",
+  "agencyProjectNote",
+  "agencyProjectFile",
+  "agencyProjectClientAccess",
+  "clientPortalUser",
+  "clientPortalInvite",
+  "clientPortalSession",
 ] as const;
 
 /** Extra field checks on aIProviderAccount after schema bumps. */
@@ -43,21 +87,33 @@ export function hasDatabaseUrl(): boolean {
 }
 
 function clientHasRequiredDelegates(client: PrismaClient): boolean {
-  const okDelegates = REQUIRED_DELEGATES.every((name) => {
-    const delegate = (client as unknown as Record<string, unknown>)[name];
-    return Boolean(delegate && typeof (delegate as { findMany?: unknown }).findMany === "function");
-  });
-  if (!okDelegates) return false;
+  return getMissingDelegates(client).length === 0;
+}
 
-  // Prisma validates fields against the DMMF; missing fields throw at runtime on upsert.
+export function getMissingPrismaDelegates(client: PrismaClient): string[] {
+  return getMissingDelegates(client);
+}
+
+function getMissingDelegates(client: PrismaClient): string[] {
+  const missing: string[] = [];
+  for (const name of REQUIRED_DELEGATES) {
+    const delegate = (client as unknown as Record<string, unknown>)[name];
+    if (!delegate || typeof (delegate as { findMany?: unknown }).findMany !== "function") {
+      missing.push(name);
+    }
+  }
+  if (missing.length) return missing;
+
   const dmmf = (client as unknown as { _runtimeDataModel?: { models?: Record<string, { fields?: Array<{ name: string }> }> } })
     ._runtimeDataModel?.models?.AIProviderAccount?.fields;
   if (!dmmf?.length) {
-    // Older clients may not expose this shape — force recreate via fingerprint bump instead.
-    return true;
+    return [];
   }
   const names = new Set(dmmf.map((f) => f.name));
-  return REQUIRED_PROVIDER_ACCOUNT_FIELDS.every((f) => names.has(f));
+  for (const field of REQUIRED_PROVIDER_ACCOUNT_FIELDS) {
+    if (!names.has(field)) missing.push(`AIProviderAccount.${field}`);
+  }
+  return missing;
 }
 
 function createPrismaClient() {
@@ -122,8 +178,9 @@ function getPrismaClient(): PrismaClient {
     // Force a new instance; if still missing, generated client is out of date.
     client = createPrismaClient();
     if (!clientHasRequiredDelegates(client)) {
+      const missing = getMissingDelegates(client);
       throw new Error(
-        "PrismaClient is missing required Admin/AI models (including Topic Intelligence). Run `npx prisma generate` and restart `npm run dev`.",
+        `PrismaClient is missing required models (${missing.join(", ") || "unknown"}). Run \`npx prisma generate\` and restart \`npm run dev\`.`,
       );
     }
   }

@@ -89,6 +89,8 @@ export default async function RootLayout({
   const settings = await getPublicSettings();
   const headerList = await headers();
   const isAdminRoute = headerList.get("x-smartlance-admin") === "1";
+  const isPortalRoute = headerList.get("x-smartlance-portal") === "1";
+  const hidePublicChrome = isAdminRoute || isPortalRoute;
   const org = organizationJsonLd({
     name: settings.siteName,
     legalName: settings.businessName,
@@ -107,20 +109,20 @@ export default async function RootLayout({
   });
 
   return (
-    <html lang="en" className={`${syne.variable} ${figtree.variable} h-full`}>
+    <html lang="en" className={`${syne.variable} ${figtree.variable} h-full`} suppressHydrationWarning>
       <body className="min-h-full flex flex-col antialiased">
-        {!isAdminRoute ? <StructuredData data={[org, website]} /> : null}
-        {!isAdminRoute && settings.analyticsEnabled ? (
+        {!hidePublicChrome ? <StructuredData data={[org, website]} /> : null}
+        {!hidePublicChrome && settings.analyticsEnabled ? (
           <AnalyticsScripts
             gaId={settings.gaMeasurementId || ""}
             gtmId={settings.gtmContainerId || ""}
             clarityId={settings.clarityProjectId || ""}
           />
         ) : null}
-        {!isAdminRoute ? <SiteHeader /> : null}
+        {!hidePublicChrome ? <SiteHeader /> : null}
         <main className="flex-1">{children}</main>
-        {!isAdminRoute ? <SitePreFooter /> : null}
-        {!isAdminRoute ? <SiteFooter /> : null}
+        {!hidePublicChrome ? <SitePreFooter /> : null}
+        {!hidePublicChrome ? <SiteFooter /> : null}
       </body>
     </html>
   );

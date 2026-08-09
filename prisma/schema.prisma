@@ -163,6 +163,46 @@ model AdminUser {
   aiContentRunsCreated      AIContentRun[]           @relation("AIContentRunCreator")
   aiContentProposalsCreated AIContentProposal[]      @relation("AIContentProposalCreator")
   aiContentProposalsAccepted AIContentProposal[]     @relation("AIContentProposalAcceptor")
+  emailSettingsUpdated      EmailSettings[]          @relation("EmailSettingsUpdater")
+  inboundEmailSettingsUpdated InboundEmailSettings[] @relation("InboundEmailSettingsUpdater")
+  inboundEmailSyncActor     InboundEmailSettings[]   @relation("InboundEmailSyncActor")
+  subscribersUnsubscribed   Subscriber[]             @relation("SubscriberUnsubscriber")
+  crmContactsOwned          CrmContact[]             @relation("CrmContactOwner")
+  crmContactsCreated        CrmContact[]             @relation("CrmContactCreator")
+  crmCompaniesOwned         CrmCompany[]             @relation("CrmCompanyOwner")
+  crmLeadsOwned             CrmLead[]                @relation("CrmLeadOwner")
+  crmDealsOwned             CrmDeal[]                @relation("CrmDealOwner")
+  crmTasksAssigned          CrmTask[]                @relation("CrmTaskAssignee")
+  crmTasksCreated           CrmTask[]                @relation("CrmTaskCreator")
+  crmActivitiesCreated      CrmActivity[]            @relation("CrmActivityCreator")
+  crmEmailsCreated          CrmEmail[]               @relation("CrmEmailCreator")
+  crmEmailTemplatesCreated  CrmEmailTemplate[]       @relation("CrmEmailTemplateCreator")
+  crmEmailTemplatesUpdated  CrmEmailTemplate[]       @relation("CrmEmailTemplateUpdater")
+  crmSegmentsCreated        CrmSegment[]               @relation("CrmSegmentCreator")
+  crmSequencesCreated       CrmSequence[]              @relation("CrmSequenceCreator")
+  crmSequencesUpdated       CrmSequence[]              @relation("CrmSequenceUpdater")
+  crmSequenceEnrollmentsCreated CrmSequenceEnrollment[] @relation("CrmEnrollmentCreator")
+  crmContactImportsCreated    CrmContactImport[]      @relation("CrmContactImportCreator")
+  crmContactViewsCreated      CrmContactView[]        @relation("CrmContactViewCreator")
+  crmPropertyDefinitionsCreated CrmPropertyDefinition[] @relation("CrmPropertyDefinitionCreator")
+  crmPropertyDefinitionsUpdated CrmPropertyDefinition[] @relation("CrmPropertyDefinitionUpdater")
+  crmThreadsAssigned            CrmEmailThread[]        @relation("CrmThreadAssignee")
+  crmThreadUserStates           CrmEmailThreadUserState[] @relation("CrmThreadUserState")
+  agencyProjectsOwned           AgencyProject[]           @relation("AgencyProjectOwner")
+  agencyProjectsCreated         AgencyProject[]           @relation("AgencyProjectCreator")
+  agencyProjectMemberships      AgencyProjectMember[]     @relation("AgencyProjectMember")
+  agencyTasksAssigned           AgencyProjectTask[]       @relation("AgencyTaskAssignee")
+  agencyTasksCreated            AgencyProjectTask[]       @relation("AgencyTaskCreator")
+  agencyTemplatesCreated        AgencyProjectTemplate[]   @relation("AgencyTemplateCreator")
+  agencyTemplatesUpdated        AgencyProjectTemplate[]   @relation("AgencyTemplateUpdater")
+  agencyDeliverablesCreated     AgencyDeliverable[]       @relation("AgencyDeliverableCreator")
+  agencyDeliverableVersionsCreated AgencyDeliverableVersion[] @relation("AgencyDeliverableVersionCreator")
+  agencyActivities              AgencyProjectActivity[]   @relation("AgencyActivityAdmin")
+  agencyUpdatesCreated          AgencyProjectUpdate[]     @relation("AgencyUpdateCreator")
+  agencyNotesCreated            AgencyProjectNote[]       @relation("AgencyNoteCreator")
+  agencyFilesCreated            AgencyProjectFile[]       @relation("AgencyFileCreator")
+  portalInvitesCreated          ClientPortalInvite[]      @relation("PortalInviteCreator")
+  agencyClientAccessGranted     AgencyProjectClientAccess[] @relation("AgencyClientAccessGranter")
 
   @@index([status])
   @@index([role])
@@ -262,6 +302,8 @@ model SiteSettings {
   analyticsEnabled       Boolean  @default(true)
   contactFormEnabled     Boolean  @default(true)
   freeReviewFormEnabled  Boolean  @default(true)
+  audienceEnabled             Boolean  @default(true)
+  audienceRequireConfirmation Boolean  @default(true)
   formSuccessMessage     String?
   formFallbackMessage    String?
   showPublicPricing      Boolean  @default(false)
@@ -272,6 +314,138 @@ model SiteSettings {
   extras                 Json     @default("{}")
   updatedAt              DateTime @updatedAt
   updatedById            String?
+}
+
+/// Site-wide SMTP configuration (singleton). Password stored encrypted — never plaintext.
+model EmailSettings {
+  id                     String    @id @default("site")
+  enabled                Boolean   @default(false)
+  host                   String?
+  port                   Int?
+  /// AUTO | TLS | STARTTLS | NONE
+  securityMode           String    @default("STARTTLS")
+  username               String?
+  passwordCiphertext     String?   @db.Text
+  passwordIv             String?
+  passwordTag            String?
+  passwordLast4          String?
+  fromName               String?
+  fromEmail              String?
+  replyToEmail           String?
+  /// Validated notification recipient emails (bounded list)
+  notificationRecipients Json      @default("[]")
+  testRecipient          String?
+  lastTestedAt           DateTime?
+  lastTestSucceededAt    DateTime?
+  lastTestErrorSafe      String?
+  updatedAt              DateTime  @updatedAt
+  updatedById            String?
+
+  updatedBy AdminUser? @relation("EmailSettingsUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+}
+
+model InboundEmailSettings {
+  id                    String    @id @default("inbound")
+  enabled               Boolean   @default(false)
+  providerType          String    @default("IMAP")
+  host                  String?
+  port                  Int?
+  securityMode          String    @default("TLS")
+  username              String?
+  passwordCiphertext    String?   @db.Text
+  passwordIv            String?
+  passwordTag           String?
+  passwordLast4         String?
+  mailboxFolder         String    @default("INBOX")
+  crmReplyToEmail       String?
+  syncEnabledAt         DateTime?
+  syncActorId           String?
+  lastSyncedAt          DateTime?
+  lastSuccessfulSyncAt  DateTime?
+  lastSyncErrorSafe     String?
+  lastImportCount       Int       @default(0)
+  updatedAt             DateTime  @updatedAt
+  updatedById           String?
+
+  updatedBy  AdminUser? @relation("InboundEmailSettingsUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  syncActor  AdminUser? @relation("InboundEmailSyncActor", fields: [syncActorId], references: [id], onDelete: SetNull)
+}
+
+model InboundMailboxState {
+  id             String   @id @default("primary")
+  mailboxKey     String   @unique
+  uidValidity    BigInt?
+  lastSeenUid    BigInt   @default(0)
+  lastSyncedAt   DateTime?
+  lastErrorSafe  String?
+  updatedAt      DateTime @updatedAt
+}
+
+model CrmEmailThread {
+  id                String                   @id @default(cuid())
+  contactId         String?
+  leadId            String?
+  dealId            String?
+  subjectNormalized String?
+  snippet           String?                  @db.VarChar(280)
+  workflowStatus    CrmThreadWorkflowStatus  @default(CLOSED)
+  assignedToId      String?
+  snoozedUntil      DateTime?
+  closedAt          DateTime?
+  lastInboundAt     DateTime?
+  lastOutboundAt    DateTime?
+  lastActivityAt    DateTime?
+  needsReplySince   DateTime?
+  lastMessageAt     DateTime?
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+
+  contact    CrmContact?              @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  lead       CrmLead?                 @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  deal       CrmDeal?                 @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  assignedTo AdminUser?               @relation("CrmThreadAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  emails     CrmEmail[]
+  tasks      CrmTask[]
+  userStates CrmEmailThreadUserState[]
+
+  @@index([contactId, lastMessageAt])
+  @@index([workflowStatus, lastActivityAt])
+  @@index([assignedToId, workflowStatus, lastActivityAt])
+  @@index([snoozedUntil])
+}
+
+model CrmEmailThreadUserState {
+  id         String   @id @default(cuid())
+  threadId   String
+  userId     String
+  lastReadAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  thread CrmEmailThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  user   AdminUser      @relation("CrmThreadUserState", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([threadId, userId])
+  @@index([userId, lastReadAt])
+}
+
+model InboundMessageImport {
+  id                String   @id @default(cuid())
+  mailboxKey        String
+  uidValidity       BigInt
+  mailboxUid        BigInt
+  internetMessageId String?
+  crmEmailId        String?  @unique
+  status            String   @default("SUCCESS")
+  failureSafe       String?
+  attemptCount      Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  crmEmail CrmEmail? @relation(fields: [crmEmailId], references: [id], onDelete: SetNull)
+
+  @@unique([mailboxKey, uidValidity, mailboxUid])
+  @@index([internetMessageId])
 }
 
 model HomepageContent {
@@ -1039,6 +1213,76 @@ model EnquiryNote {
   @@index([enquiryId, createdAt])
 }
 
+enum SubscriberStatus {
+  PENDING
+  ACTIVE
+  UNSUBSCRIBED
+  BOUNCED
+  COMPLAINED
+}
+
+enum SubscriberSource {
+  FOOTER
+  INSIGHT
+  RESOURCE
+  GUIDE
+  CHECKLIST
+  TEMPLATE
+  CONTACT
+  WEBSITE_REVIEW
+  PROJECT_PLANNER
+  OTHER
+}
+
+enum SubscriberEventType {
+  SUBSCRIBED
+  CONFIRMATION_SENT
+  CONFIRMED
+  UNSUBSCRIBED
+  RESUBSCRIBED
+}
+
+model Subscriber {
+  id                         String           @id @default(cuid())
+  email                      String
+  emailNormalized            String           @unique
+  name                       String?
+  status                     SubscriberStatus @default(PENDING)
+  primarySource              SubscriberSource
+  primarySourceUrl           String?
+  consentAt                  DateTime?
+  consentText                String?
+  consentVersion             String?
+  subscribedAt               DateTime?
+  confirmedAt                DateTime?
+  unsubscribedAt             DateTime?
+  confirmationTokenHash      String?
+  confirmationTokenExpiresAt DateTime?
+  unsubscribeTokenHash       String?
+  unsubscribedById           String?
+  createdAt                  DateTime         @default(now())
+  updatedAt                  DateTime         @updatedAt
+
+  events           SubscriberEvent[]
+  unsubscribedBy   AdminUser?        @relation("SubscriberUnsubscriber", fields: [unsubscribedById], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([primarySource, createdAt])
+}
+
+model SubscriberEvent {
+  id           String              @id @default(cuid())
+  subscriberId String
+  type         SubscriberEventType
+  source       SubscriberSource?
+  sourceUrl    String?
+  createdAt    DateTime            @default(now())
+
+  subscriber Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+
+  @@index([subscriberId, createdAt])
+}
+
 // ---------------------------------------------------------------------------
 // AI Editorial Studio
 // ---------------------------------------------------------------------------
@@ -1800,4 +2044,1480 @@ model EditorialOpportunity {
   @@index([mergeKey])
   @@index([priority, status])
   @@index([market])
+}
+
+// ---------------------------------------------------------------------------
+// CRM Foundation V1
+// ---------------------------------------------------------------------------
+
+enum CrmContactLifecycleStage {
+  PROSPECT
+  LEAD
+  OPPORTUNITY
+  CLIENT
+  PAST_CLIENT
+  OTHER
+}
+
+enum CrmContactSource {
+  MANUAL
+  CONTACT_FORM
+  WEBSITE_REVIEW
+  PROJECT_PLANNER
+  REFERRAL
+  INBOUND_EMAIL
+  OUTBOUND
+  UPWORK
+  SOCIAL
+  OTHER
+}
+
+enum CrmContactEmailStatus {
+  SENDABLE
+  DO_NOT_EMAIL
+  UNSUBSCRIBED
+  BOUNCED
+  COMPLAINED
+  INVALID
+  SUPPRESSED
+}
+
+enum CrmLeadStatus {
+  NEW
+  ATTEMPTING
+  CONNECTED
+  QUALIFIED
+  UNQUALIFIED
+  BAD_TIMING
+  CLOSED
+}
+
+enum CrmLeadTemperature {
+  COLD
+  WARM
+  HOT
+}
+
+enum CrmLeadDisqualificationReason {
+  NO_BUDGET
+  NOT_A_FIT
+  NO_RESPONSE
+  BAD_TIMING
+  DUPLICATE
+  SPAM
+  OTHER
+}
+
+enum CrmDealStage {
+  NEW_OPPORTUNITY
+  DISCOVERY
+  QUALIFIED
+  PROPOSAL
+  NEGOTIATION
+  WON
+  LOST
+}
+
+enum CrmDealLostReason {
+  PRICE
+  NO_RESPONSE
+  COMPETITOR
+  TIMING
+  INTERNAL_DECISION
+  NOT_A_FIT
+  OTHER
+}
+
+enum CrmActivityType {
+  CONTACT_CREATED
+  LEAD_CREATED
+  STATUS_CHANGED
+  TEMPERATURE_CHANGED
+  EMAIL_SENT
+  CALL
+  MEETING
+  NOTE
+  TASK_CREATED
+  TASK_COMPLETED
+  FORM_SUBMISSION
+  PROPOSAL_SENT
+  DEAL_CREATED
+  DEAL_STAGE_CHANGED
+  DEAL_WON
+  DEAL_LOST
+  LIFECYCLE_CHANGED
+  EMAIL_STATUS_CHANGED
+  SEQUENCE_ENROLLED
+  SEQUENCE_PAUSED
+  SEQUENCE_COMPLETED
+  SEQUENCE_STOPPED
+  MANUAL_REPLY_RECORDED
+  EMAIL_RECEIVED
+  EMAIL_OPEN_DETECTED
+  EMAIL_LINK_CLICKED
+  CONTACT_IMPORTED
+}
+
+enum CrmEmailOrigin {
+  MANUAL
+  SEQUENCE
+  INBOUND_SYNC
+  THREAD_REPLY
+}
+
+enum CrmTaskStatus {
+  OPEN
+  COMPLETED
+  CANCELLED
+}
+
+enum CrmTaskPriority {
+  LOW
+  NORMAL
+  HIGH
+}
+
+enum CrmTaskType {
+  GENERAL
+  REPLY_REQUIRED
+  FOLLOW_UP
+}
+
+enum CrmThreadWorkflowStatus {
+  NEEDS_REPLY
+  WAITING_ON_CONTACT
+  SNOOZED
+  CLOSED
+  NEEDS_REVIEW
+}
+
+enum CrmEmailDirection {
+  OUTBOUND
+  INBOUND
+}
+
+enum CrmEmailDeliveryStatus {
+  DRAFT
+  PENDING
+  QUEUED
+  SENDING
+  SENT
+  SENT_UNCONFIRMED
+  FAILED
+  SKIPPED
+  RECEIVED
+}
+
+enum CrmInboundReviewStatus {
+  NEEDS_REVIEW
+  REVIEWED
+  IGNORED
+  AUTOMATED
+  UNMATCHED
+  MATCHED
+}
+
+enum CrmEmailMatchConfidence {
+  EXACT_THREAD
+  EXACT_EMAIL
+  UNMATCHED
+}
+
+enum CrmEmailEngagementEventType {
+  OPEN_DETECTED
+  LINK_CLICKED
+}
+
+enum CrmEngagementClassification {
+  UNKNOWN
+  LIKELY_HUMAN
+  POSSIBLE_AUTOMATED
+}
+
+model CrmCompany {
+  id          String   @id @default(cuid())
+  name        String
+  website     String?
+  domain      String?
+  industry    String?
+  phone       String?
+  location    String?
+  address     String?  @db.Text
+  sizeLabel   String?
+  description String?  @db.Text
+  ownerId     String?
+  isArchived  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner    AdminUser?   @relation("CrmCompanyOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  contacts CrmContact[]
+  leads    CrmLead[]
+  deals    CrmDeal[]
+  tasks    CrmTask[]
+  activities CrmActivity[]
+  agencyProjects AgencyProject[]
+
+  @@index([name])
+  @@index([domain])
+  @@index([ownerId])
+  @@index([isArchived, updatedAt])
+}
+
+model CrmContact {
+  id               String                   @id @default(cuid())
+  firstName        String?
+  lastName         String?
+  displayName      String?
+  email            String?
+  emailNormalized  String?                  @unique
+  phone            String?
+  jobTitle         String?
+  companyId        String?
+  lifecycleStage   CrmContactLifecycleStage @default(PROSPECT)
+  source           CrmContactSource         @default(MANUAL)
+  sourceDetail     String?
+  sourceUrl        String?
+  ownerId          String?
+  emailStatus      CrmContactEmailStatus    @default(SENDABLE)
+  lastContactedAt  DateTime?
+  nextActivityAt   DateTime?
+  outreachPaused   Boolean                  @default(false)
+  outreachPausedAt DateTime?
+  manualRepliedAt  DateTime?
+  countryCode      String?
+  countryName      String?
+  stateRegion      String?
+  city             String?
+  postalCode       String?
+  timezone         String?
+  isArchived       Boolean                  @default(false)
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  createdById      String?
+
+  company   CrmCompany? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  owner     AdminUser?  @relation("CrmContactOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  createdBy AdminUser?  @relation("CrmContactCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  leads     CrmLead[]
+  deals     CrmDeal[]
+  tasks     CrmTask[]
+  activities CrmActivity[]
+  emails    CrmEmail[]
+  emailThreads CrmEmailThread[]
+  sequenceEnrollments CrmSequenceEnrollment[]
+  outreachOptOut      CrmOutreachOptOut?
+  socialProfiles      CrmContactSocialProfile[]
+  propertyValues      CrmContactPropertyValue[]
+  agencyProjects      AgencyProject[]
+  portalUser          ClientPortalUser?
+  deliverableReviews  AgencyDeliverableReview[]
+  clientProjectAccess AgencyProjectClientAccess[]
+
+  @@index([companyId])
+  @@index([lifecycleStage])
+  @@index([source])
+  @@index([ownerId])
+  @@index([emailStatus])
+  @@index([isArchived, updatedAt])
+  @@index([nextActivityAt])
+  @@index([countryCode])
+  @@index([city])
+}
+
+model CrmLead {
+  id                     String                          @id @default(cuid())
+  contactId              String
+  companyId              String?
+  status                 CrmLeadStatus                   @default(NEW)
+  temperature            CrmLeadTemperature              @default(COLD)
+  source                 CrmContactSource                @default(MANUAL)
+  ownerId                String?
+  interestSummary        String?                         @db.Text
+  servicesInterested     String[]                        @default([])
+  estimatedValue         Decimal?                        @db.Decimal(12, 2)
+  currency               String?                         @default("USD")
+  nextFollowUpAt         DateTime?
+  qualifiedAt            DateTime?
+  disqualifiedAt         DateTime?
+  disqualificationReason CrmLeadDisqualificationReason?
+  disqualificationNote   String?                         @db.Text
+  createdAt              DateTime                        @default(now())
+  updatedAt              DateTime                        @updatedAt
+
+  contact CrmContact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  company CrmCompany? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  owner   AdminUser?  @relation("CrmLeadOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  deals   CrmDeal[]
+  tasks   CrmTask[]
+  activities CrmActivity[]
+  emails     CrmEmail[]
+  emailThreads CrmEmailThread[]
+  enrollments CrmSequenceEnrollment[]
+
+  @@index([contactId, status])
+  @@index([status])
+  @@index([temperature])
+  @@index([ownerId])
+  @@index([source])
+  @@index([nextFollowUpAt])
+}
+
+model CrmDeal {
+  id                 String         @id @default(cuid())
+  title              String
+  contactId          String
+  companyId          String?
+  leadId             String?
+  ownerId            String?
+  stage              CrmDealStage   @default(NEW_OPPORTUNITY)
+  amount             Decimal?       @db.Decimal(12, 2)
+  currency           String?        @default("USD")
+  probability        Int?
+  expectedCloseAt    DateTime?
+  servicesInterested String[]       @default([])
+  proposalSentAt     DateTime?
+  wonAt              DateTime?
+  lostAt             DateTime?
+  lostReason         CrmDealLostReason?
+  lostNote           String?        @db.Text
+  isArchived         Boolean        @default(false)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  contact CrmContact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  company CrmCompany? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  lead    CrmLead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  owner   AdminUser?  @relation("CrmDealOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  tasks   CrmTask[]
+  activities CrmActivity[]
+  emails  CrmEmail[]
+  emailThreads CrmEmailThread[]
+  agencyProject AgencyProject?
+
+  @@index([contactId])
+  @@index([companyId])
+  @@index([leadId])
+  @@index([stage])
+  @@index([ownerId])
+  @@index([isArchived, updatedAt])
+  @@index([expectedCloseAt])
+}
+
+model CrmActivity {
+  id          String          @id @default(cuid())
+  contactId   String
+  companyId   String?
+  leadId      String?
+  dealId      String?
+  type        CrmActivityType
+  subject     String?
+  body        String?         @db.Text
+  metadata    Json?
+  occurredAt  DateTime        @default(now())
+  createdById String?
+  createdAt   DateTime        @default(now())
+
+  contact   CrmContact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  company   CrmCompany? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  lead      CrmLead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  deal      CrmDeal?    @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  createdBy AdminUser?  @relation("CrmActivityCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([contactId, occurredAt])
+  @@index([companyId, occurredAt])
+  @@index([leadId, occurredAt])
+  @@index([dealId, occurredAt])
+  @@index([type, occurredAt])
+}
+
+model CrmTask {
+  id           String          @id @default(cuid())
+  title        String
+  description  String?         @db.Text
+  contactId    String?
+  companyId    String?
+  leadId       String?
+  dealId       String?
+  emailThreadId String?
+  taskType     CrmTaskType     @default(GENERAL)
+  assignedToId String?
+  priority     CrmTaskPriority @default(NORMAL)
+  status       CrmTaskStatus   @default(OPEN)
+  dueAt        DateTime?
+  completedAt  DateTime?
+  createdById  String
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  contact     CrmContact?     @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  company     CrmCompany?     @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  lead        CrmLead?        @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  deal        CrmDeal?        @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  emailThread CrmEmailThread? @relation(fields: [emailThreadId], references: [id], onDelete: SetNull)
+  assignedTo  AdminUser?      @relation("CrmTaskAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy   AdminUser       @relation("CrmTaskCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([status, dueAt])
+  @@index([assignedToId, status, dueAt])
+  @@index([contactId])
+  @@index([leadId])
+  @@index([dealId])
+  @@index([emailThreadId, status, taskType])
+}
+
+model CrmEmail {
+  id                  String                    @id @default(cuid())
+  contactId           String?
+  dealId              String?
+  leadId              String?
+  threadId            String?
+  enrollmentId        String?
+  executionId         String?                   @unique
+  replyToOutboundId   String?
+  origin              CrmEmailOrigin            @default(MANUAL)
+  direction           CrmEmailDirection         @default(OUTBOUND)
+  subject             String
+  bodyText            String                    @db.Text
+  bodyHtml            String?                   @db.Text
+  deliveryStatus      CrmEmailDeliveryStatus    @default(PENDING)
+  reviewStatus        CrmInboundReviewStatus?
+  matchConfidence     CrmEmailMatchConfidence?
+  providerMessageId   String?
+  internetMessageId   String?                   @unique
+  inReplyToMessageId  String?
+  referencesHeader    String?                   @db.Text
+  fromAddress         String?
+  toAddresses         Json?
+  ccAddresses         Json?
+  mailboxKey          String?
+  mailboxUid          BigInt?
+  mailboxUidValidity  BigInt?
+  isAutomated         Boolean                   @default(false)
+  bodyTruncated       Boolean                   @default(false)
+  attachmentMeta      Json?
+  sentAt              DateTime?
+  receivedAt          DateTime?
+  failedAt            DateTime?
+  safeFailureCode     String?
+  openTrackingEnabled Boolean                   @default(false)
+  clickTrackingEnabled Boolean                  @default(false)
+  openTokenHash       String?                   @unique
+  firstOpenDetectedAt DateTime?
+  lastOpenDetectedAt  DateTime?
+  openDetectedCount   Int                       @default(0)
+  firstClickDetectedAt DateTime?
+  lastClickDetectedAt DateTime?
+  clickDetectedCount  Int                       @default(0)
+  likelyHumanClickCount Int                     @default(0)
+  clientRequestId     String?                   @unique
+  createdById         String
+  createdAt           DateTime                  @default(now())
+
+  contact           CrmContact?            @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  deal              CrmDeal?               @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  lead              CrmLead?               @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  thread            CrmEmailThread?        @relation(fields: [threadId], references: [id], onDelete: SetNull)
+  enrollment        CrmSequenceEnrollment? @relation(fields: [enrollmentId], references: [id], onDelete: SetNull)
+  execution         CrmSequenceExecution?  @relation(fields: [executionId], references: [id], onDelete: SetNull)
+  replyToOutbound   CrmEmail?              @relation("EmailReplyThread", fields: [replyToOutboundId], references: [id], onDelete: SetNull)
+  inboundReplies    CrmEmail[]             @relation("EmailReplyThread")
+  inboundImport     InboundMessageImport?
+  trackedLinks      CrmTrackedLink[]
+  engagementEvents  CrmEmailEngagementEvent[]
+  createdBy         AdminUser              @relation("CrmEmailCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@unique([mailboxKey, mailboxUidValidity, mailboxUid])
+  @@index([contactId, createdAt])
+  @@index([contactId, receivedAt])
+  @@index([contactId, firstOpenDetectedAt])
+  @@index([contactId, firstClickDetectedAt])
+  @@index([dealId])
+  @@index([leadId])
+  @@index([enrollmentId])
+  @@index([origin, createdAt])
+  @@index([direction, receivedAt])
+  @@index([reviewStatus, receivedAt])
+  @@index([threadId, receivedAt])
+  @@index([inReplyToMessageId])
+}
+
+model CrmTrackedLink {
+  id              String   @id @default(cuid())
+  crmEmailId      String
+  destinationUrl  String   @db.Text
+  tokenHash       String   @unique
+  label           String?
+  position        Int      @default(0)
+  firstClickAt    DateTime?
+  lastClickAt     DateTime?
+  clickCount      Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  crmEmail CrmEmail @relation(fields: [crmEmailId], references: [id], onDelete: Cascade)
+  events   CrmEmailEngagementEvent[]
+
+  @@index([crmEmailId])
+}
+
+model CrmEmailEngagementEvent {
+  id             String                      @id @default(cuid())
+  crmEmailId     String
+  trackedLinkId  String?
+  type           CrmEmailEngagementEventType
+  classification CrmEngagementClassification @default(UNKNOWN)
+  occurredAt     DateTime                    @default(now())
+  userAgentHash  String?
+  ipHash         String?
+  metadataJson   Json?
+  createdAt      DateTime                    @default(now())
+
+  crmEmail    CrmEmail       @relation(fields: [crmEmailId], references: [id], onDelete: Cascade)
+  trackedLink CrmTrackedLink? @relation(fields: [trackedLinkId], references: [id], onDelete: SetNull)
+
+  @@index([crmEmailId, occurredAt])
+  @@index([type, occurredAt])
+  @@index([trackedLinkId, occurredAt])
+}
+
+model CrmEmailTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  subject     String
+  body        String   @db.Text
+  category    String?
+  isActive    Boolean  @default(true)
+  createdById String
+  updatedById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy AdminUser  @relation("CrmEmailTemplateCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  updatedBy AdminUser? @relation("CrmEmailTemplateUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  sequenceSteps CrmSequenceStep[]
+
+  @@index([isActive, name])
+}
+
+// ---------------------------------------------------------------------------
+// CRM Outreach V2 — Segments & Sequences
+// ---------------------------------------------------------------------------
+
+enum CrmSequenceStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum CrmSequenceStepType {
+  EMAIL
+  TASK
+  WAIT
+}
+
+enum CrmSequenceTaskAdvanceMode {
+  AUTO_CONTINUE
+  WAIT_FOR_TASK_COMPLETION
+}
+
+enum CrmSequenceEnrollmentStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+  STOPPED
+  FAILED
+}
+
+enum CrmSequenceStopReason {
+  SUPPRESSED
+  ARCHIVED
+  LEAD_DISQUALIFIED
+  DEAL_WON
+  MANUAL
+  OPT_OUT
+  MANUAL_REPLY
+  OUTREACH_PAUSED
+  ERROR
+  REPLY_RECEIVED
+  AUTOMATED_REPLY
+}
+
+enum CrmSequenceExecutionStatus {
+  PENDING
+  PROCESSING
+  SENT
+  COMPLETED
+  FAILED
+  SKIPPED
+  AMBIGUOUS
+}
+
+model CrmSegment {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?  @db.Text
+  filterJson    Json
+  filterVersion Int      @default(1)
+  isDynamic     Boolean  @default(true)
+  createdById   String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  createdBy AdminUser @relation("CrmSegmentCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([updatedAt])
+  @@index([createdById])
+}
+
+model CrmSequence {
+  id          String            @id @default(cuid())
+  name        String
+  description String?           @db.Text
+  status      CrmSequenceStatus @default(DRAFT)
+  version     Int               @default(1)
+  createdById String
+  updatedById String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  createdBy   AdminUser              @relation("CrmSequenceCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  updatedBy   AdminUser?             @relation("CrmSequenceUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  steps       CrmSequenceStep[]
+  enrollments CrmSequenceEnrollment[]
+
+  @@index([status, updatedAt])
+}
+
+model CrmSequenceStep {
+  id               String                     @id @default(cuid())
+  sequenceId       String
+  position         Int
+  type             CrmSequenceStepType
+  delayDays        Int                        @default(0)
+  delayMinutes     Int                        @default(0)
+  emailTemplateId  String?
+  subject          String?
+  body             String?                    @db.Text
+  taskTitle        String?
+  taskDescription  String?                    @db.Text
+  taskAdvanceMode  CrmSequenceTaskAdvanceMode @default(AUTO_CONTINUE)
+  createdAt        DateTime                   @default(now())
+  updatedAt        DateTime                   @updatedAt
+
+  sequence      CrmSequence       @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
+  emailTemplate CrmEmailTemplate? @relation(fields: [emailTemplateId], references: [id], onDelete: SetNull)
+  executions    CrmSequenceExecution[]
+
+  @@unique([sequenceId, position])
+  @@index([sequenceId])
+}
+
+model CrmSequenceEnrollment {
+  id              String                      @id @default(cuid())
+  sequenceId      String
+  sequenceVersion Int
+  contactId       String
+  leadId          String?
+  status          CrmSequenceEnrollmentStatus @default(ACTIVE)
+  currentStep     Int                         @default(0)
+  nextRunAt       DateTime?
+  startedAt       DateTime                    @default(now())
+  pausedAt        DateTime?
+  completedAt     DateTime?
+  stoppedAt       DateTime?
+  stopReason      CrmSequenceStopReason?
+  stopNote        String?
+  createdById     String
+  createdAt       DateTime                    @default(now())
+  updatedAt       DateTime                    @updatedAt
+
+  sequence   CrmSequence            @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
+  contact    CrmContact             @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  lead       CrmLead?               @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  createdBy  AdminUser              @relation("CrmEnrollmentCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  executions CrmSequenceExecution[]
+  emails     CrmEmail[]
+
+  @@index([status, nextRunAt])
+  @@index([contactId])
+  @@index([sequenceId, status])
+}
+
+model CrmSequenceExecution {
+  id             String                     @id @default(cuid())
+  enrollmentId   String
+  stepId         String
+  status         CrmSequenceExecutionStatus @default(PENDING)
+  scheduledAt    DateTime
+  claimedAt      DateTime?
+  claimExpiresAt DateTime?
+  executedAt     DateTime?
+  failureCode    String?
+  failureCategory String?
+  attemptCount   Int                        @default(0)
+  skipReason     String?
+  subjectSnap    String?
+  bodySnap       String?                    @db.Text
+  createdTaskId  String?
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
+
+  enrollment CrmSequenceEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  step       CrmSequenceStep       @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  email      CrmEmail?
+
+  @@unique([enrollmentId, stepId])
+  @@index([status, scheduledAt])
+  @@index([enrollmentId])
+}
+
+model CrmOutreachSettings {
+  id                        String   @id @default("outreach")
+  maxDailySequenceEmails    Int      @default(50)
+  minContactEmailGapHours   Int      @default(24)
+  minStepDelayMinutes       Int      @default(60)
+  sendWeekdaysOnly          Boolean  @default(true)
+  sendWindowStartUtc        Int      @default(8)
+  sendWindowEndUtc          Int      @default(18)
+  outreachFooter            String?  @db.Text
+  outreachPaused            Boolean  @default(false)
+  trackEmailOpens           Boolean  @default(false)
+  trackEmailClicks          Boolean  @default(true)
+  engagementTrackingUpdatedAt DateTime?
+  updatedAt                 DateTime @updatedAt
+}
+
+model CrmOutreachOptOut {
+  id        String    @id @default(cuid())
+  contactId String    @unique
+  tokenHash String    @unique
+  createdAt DateTime  @default(now())
+  usedAt    DateTime?
+
+  contact CrmContact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+}
+
+enum CrmSocialPlatform {
+  LINKEDIN
+  X
+  FACEBOOK
+  INSTAGRAM
+  GITHUB
+  YOUTUBE
+  TIKTOK
+  OTHER
+}
+
+enum CrmPropertyObjectType {
+  CONTACT
+  COMPANY
+  LEAD
+  DEAL
+}
+
+enum CrmPropertyFieldType {
+  TEXT
+  MULTILINE_TEXT
+  NUMBER
+  BOOLEAN
+  DATE
+  SINGLE_SELECT
+  MULTI_SELECT
+  URL
+  EMAIL
+  PHONE
+}
+
+model CrmContactSocialProfile {
+  id        String            @id @default(cuid())
+  contactId String
+  platform  CrmSocialPlatform
+  url       String
+  username  String?
+  label     String?
+  isPrimary Boolean           @default(false)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  contact CrmContact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@index([contactId, platform])
+}
+
+model CrmPropertyDefinition {
+  id           String                @id @default(cuid())
+  objectType   CrmPropertyObjectType
+  label        String
+  key          String
+  fieldType    CrmPropertyFieldType
+  description  String?               @db.Text
+  isActive     Boolean               @default(true)
+  isRequired   Boolean               @default(false)
+  optionsJson  Json?
+  displayOrder Int                   @default(0)
+  createdById  String?
+  updatedById  String?
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  createdBy      AdminUser?               @relation("CrmPropertyDefinitionCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy      AdminUser?               @relation("CrmPropertyDefinitionUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  contactValues  CrmContactPropertyValue[]
+
+  @@unique([objectType, key])
+  @@index([objectType, isActive, displayOrder])
+}
+
+model CrmContactPropertyValue {
+  id           String    @id @default(cuid())
+  definitionId String
+  contactId    String
+  textValue    String?   @db.Text
+  numberValue  Decimal?  @db.Decimal(18, 4)
+  booleanValue Boolean?
+  dateValue    DateTime?
+  jsonValue    Json?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  definition CrmPropertyDefinition @relation(fields: [definitionId], references: [id], onDelete: Restrict)
+  contact    CrmContact            @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@unique([definitionId, contactId])
+  @@index([definitionId, textValue])
+  @@index([definitionId, numberValue])
+  @@index([definitionId, dateValue])
+  @@index([contactId])
+}
+
+model CrmContactView {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?  @db.Text
+  filterJson    Json
+  filterVersion Int      @default(3)
+  sortJson      Json?
+  createdById   String
+  isShared      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  createdBy AdminUser @relation("CrmContactViewCreator", fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([createdById, updatedAt])
+  @@index([isShared, updatedAt])
+}
+
+enum CrmContactImportStatus {
+  PREVIEWED
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum CrmContactImportIssueSeverity {
+  ERROR
+  WARNING
+}
+
+model CrmContactImport {
+  id               String                 @id @default(cuid())
+  fileName         String
+  fileHash         String
+  status           CrmContactImportStatus @default(PREVIEWED)
+  totalRows        Int                    @default(0)
+  validRows        Int                    @default(0)
+  invalidRows      Int                    @default(0)
+  createdContacts  Int                    @default(0)
+  updatedContacts  Int                    @default(0)
+  skippedContacts  Int                    @default(0)
+  duplicateRows    Int                    @default(0)
+  createdCompanies Int                    @default(0)
+  createdLeads     Int                    @default(0)
+  mappingJson      Json
+  optionsJson      Json
+  summaryJson      Json?
+  createdById      String
+  startedAt        DateTime?
+  completedAt      DateTime?
+  failedAt         DateTime?
+  failureSafe      String?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+
+  createdBy AdminUser              @relation("CrmContactImportCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  issues    CrmContactImportIssue[]
+
+  @@index([createdById, createdAt])
+  @@index([fileHash, createdAt])
+  @@index([status, createdAt])
+}
+
+model CrmContactImportIssue {
+  id            String                        @id @default(cuid())
+  importId      String
+  rowNumber     Int
+  severity      CrmContactImportIssueSeverity
+  code          String
+  field         String?
+  message       String
+  rowSnapshotJson Json?
+  createdAt     DateTime                      @default(now())
+
+  import CrmContactImport @relation(fields: [importId], references: [id], onDelete: Cascade)
+
+  @@index([importId, rowNumber])
+  @@index([importId, severity])
+}
+
+enum AgencyProjectStatus {
+  PLANNING
+  ONBOARDING
+  IN_PROGRESS
+  CLIENT_REVIEW
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+enum AgencyProjectHealth {
+  ON_TRACK
+  AT_RISK
+  BLOCKED
+}
+
+enum AgencyServiceType {
+  WEBSITE_DESIGN
+  WEBSITE_REDESIGN
+  LANDING_PAGE
+  ECOMMERCE
+  SEO
+  BRANDING
+  WEBSITE_MAINTENANCE
+  DIGITAL_STRATEGY
+  OTHER
+}
+
+enum AgencyProjectMemberRole {
+  OWNER
+  MEMBER
+  VIEWER
+}
+
+enum AgencyMilestoneStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  BLOCKED
+  CLIENT_REVIEW
+  COMPLETED
+}
+
+enum AgencyProjectTaskStatus {
+  TODO
+  IN_PROGRESS
+  BLOCKED
+  REVIEW
+  DONE
+}
+
+enum AgencyProjectTaskPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum AgencyRequirementType {
+  CONTENT
+  BRAND_ASSET
+  ACCESS
+  APPROVAL
+  INFORMATION
+  OTHER
+}
+
+enum AgencyRequirementStatus {
+  REQUESTED
+  RECEIVED
+  ACCEPTED
+  NOT_NEEDED
+}
+
+enum AgencyDeliverableType {
+  DESIGN
+  DOCUMENT
+  WEBSITE_PREVIEW
+  COPY
+  REPORT
+  BRAND_ASSET
+  OTHER
+}
+
+enum AgencyDeliverableStatus {
+  DRAFT
+  READY_FOR_REVIEW
+  CHANGES_REQUESTED
+  APPROVED
+  ARCHIVED
+}
+
+enum AgencyDeliverableReviewDecision {
+  APPROVED
+  CHANGES_REQUESTED
+}
+
+enum AgencyProjectActivityType {
+  PROJECT_CREATED
+  STATUS_CHANGED
+  HEALTH_CHANGED
+  MILESTONE_COMPLETED
+  TASK_COMPLETED
+  DELIVERABLE_SUBMITTED
+  DELIVERABLE_APPROVED
+  DELIVERABLE_CHANGES_REQUESTED
+  REQUIREMENT_RECEIVED
+  UPDATE_POSTED
+  MEMBER_ADDED
+  CLIENT_ACCESS_GRANTED
+}
+
+enum AgencyCommentVisibility {
+  CLIENT
+  INTERNAL
+}
+
+enum ClientPortalUserStatus {
+  INVITED
+  ACTIVE
+  DISABLED
+}
+
+enum ClientPortalInviteStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+  EXPIRED
+}
+
+enum AgencyProjectClientRole {
+  CLIENT_ADMIN
+  CLIENT_MEMBER
+  VIEWER
+}
+
+model AgencyProjectCounter {
+  year       Int @id
+  lastNumber Int @default(0)
+}
+
+model AgencyProject {
+  id                     String              @id @default(cuid())
+  projectNumber          String              @unique
+  name                   String
+  clientCompanyId        String?
+  primaryContactId       String
+  sourceDealId           String?             @unique
+  serviceType            AgencyServiceType
+  customServiceName      String?
+  cmsServiceSlug         String?
+  status                 AgencyProjectStatus @default(PLANNING)
+  health                 AgencyProjectHealth @default(ON_TRACK)
+  ownerId                String
+  startDate              DateTime?
+  targetDueDate            DateTime?
+  completedAt            DateTime?
+  cancelledAt            DateTime?
+  budgetSnapshot         Decimal?            @db.Decimal(12, 2)
+  currency               String?             @default("USD")
+  summary                String?             @db.Text
+  internalNotes          String?             @db.Text
+  clientVisibilityEnabled Boolean            @default(true)
+  caseStudyCandidate     Boolean             @default(false)
+  createdById            String
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+
+  clientCompany   CrmCompany?  @relation(fields: [clientCompanyId], references: [id], onDelete: SetNull)
+  primaryContact  CrmContact   @relation(fields: [primaryContactId], references: [id], onDelete: Restrict)
+  sourceDeal      CrmDeal?     @relation(fields: [sourceDealId], references: [id], onDelete: SetNull)
+  owner           AdminUser    @relation("AgencyProjectOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  createdBy       AdminUser    @relation("AgencyProjectCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  members       AgencyProjectMember[]
+  milestones    AgencyProjectMilestone[]
+  tasks         AgencyProjectTask[]
+  requirements  AgencyClientRequirement[]
+  deliverables  AgencyDeliverable[]
+  activities    AgencyProjectActivity[]
+  updates       AgencyProjectUpdate[]
+  notes         AgencyProjectNote[]
+  clientAccess  AgencyProjectClientAccess[]
+  files         AgencyProjectFile[]
+  portalInvites ClientPortalInvite[]
+
+  @@index([status, targetDueDate])
+  @@index([ownerId, status])
+  @@index([clientCompanyId])
+  @@index([primaryContactId])
+  @@index([createdAt])
+}
+
+model AgencyProjectMember {
+  id        String                  @id @default(cuid())
+  projectId String
+  userId    String
+  role      AgencyProjectMemberRole @default(MEMBER)
+  createdAt DateTime                @default(now())
+
+  project AgencyProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    AdminUser     @relation("AgencyProjectMember", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@index([userId])
+}
+
+model AgencyProjectTemplate {
+  id          String           @id @default(cuid())
+  name        String
+  description String?          @db.Text
+  serviceType AgencyServiceType
+  isArchived  Boolean          @default(false)
+  isSystem    Boolean          @default(false)
+  createdById String
+  updatedById String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  createdBy AdminUser  @relation("AgencyTemplateCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  updatedBy AdminUser? @relation("AgencyTemplateUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  milestones   AgencyProjectTemplateMilestone[]
+  tasks        AgencyProjectTemplateTask[]
+  requirements AgencyProjectTemplateRequirement[]
+
+  @@index([isArchived, serviceType])
+}
+
+model AgencyProjectTemplateMilestone {
+  id              String  @id @default(cuid())
+  templateId      String
+  title           String
+  description     String? @db.Text
+  position        Int
+  offsetDaysStart Int?
+  offsetDaysDue   Int?
+  clientVisible   Boolean @default(true)
+
+  template AgencyProjectTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  tasks    AgencyProjectTemplateTask[]
+
+  @@index([templateId, position])
+}
+
+model AgencyProjectTemplateTask {
+  id              String                    @id @default(cuid())
+  templateId      String
+  milestoneId     String?
+  title           String
+  description     String?                   @db.Text
+  position        Int
+  priority        AgencyProjectTaskPriority @default(NORMAL)
+  offsetDaysDue   Int?
+  clientVisible   Boolean                   @default(false)
+  defaultRole     AgencyProjectMemberRole?
+
+  template  AgencyProjectTemplate         @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  milestone AgencyProjectTemplateMilestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+
+  @@index([templateId, position])
+}
+
+model AgencyProjectTemplateRequirement {
+  id            String                @id @default(cuid())
+  templateId    String
+  title         String
+  description   String?               @db.Text
+  type          AgencyRequirementType @default(OTHER)
+  offsetDaysDue Int?
+  clientVisible Boolean               @default(true)
+
+  template AgencyProjectTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@index([templateId])
+}
+
+model AgencyProjectMilestone {
+  id            String                @id @default(cuid())
+  projectId     String
+  title         String
+  description   String?               @db.Text
+  status        AgencyMilestoneStatus @default(NOT_STARTED)
+  position      Int
+  startDate     DateTime?
+  dueDate       DateTime?
+  completedAt   DateTime?
+  clientVisible Boolean               @default(true)
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+
+  project      AgencyProject           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks        AgencyProjectTask[]
+  requirements AgencyClientRequirement[]
+  deliverables AgencyDeliverable[]
+
+  @@index([projectId, position])
+  @@index([projectId, status])
+}
+
+model AgencyProjectTask {
+  id             String                    @id @default(cuid())
+  projectId      String
+  milestoneId    String?
+  title          String
+  description    String?                   @db.Text
+  status         AgencyProjectTaskStatus   @default(TODO)
+  priority       AgencyProjectTaskPriority @default(NORMAL)
+  assigneeId     String?
+  createdById    String
+  startDate      DateTime?
+  dueDate        DateTime?
+  completedAt    DateTime?
+  clientVisible  Boolean                   @default(false)
+  position       Int                       @default(0)
+  blockedReason  String?                   @db.Text
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+
+  project   AgencyProject          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  milestone AgencyProjectMilestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+  assignee  AdminUser?             @relation("AgencyTaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  createdBy AdminUser              @relation("AgencyTaskCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([projectId, status])
+  @@index([assigneeId, status, dueDate])
+  @@index([projectId, position])
+}
+
+model AgencyClientRequirement {
+  id            String                  @id @default(cuid())
+  projectId     String
+  milestoneId   String?
+  title         String
+  description   String?                 @db.Text
+  type          AgencyRequirementType   @default(OTHER)
+  status        AgencyRequirementStatus @default(REQUESTED)
+  dueDate       DateTime?
+  clientVisible Boolean                 @default(true)
+  fulfilledAt   DateTime?
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+
+  project   AgencyProject           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  milestone AgencyProjectMilestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+
+  @@index([projectId, status])
+}
+
+model AgencyDeliverable {
+  id            String                  @id @default(cuid())
+  projectId     String
+  milestoneId   String?
+  title         String
+  description   String?                 @db.Text
+  type          AgencyDeliverableType   @default(OTHER)
+  status        AgencyDeliverableStatus @default(DRAFT)
+  clientVisible Boolean                 @default(true)
+  createdById   String
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+
+  project   AgencyProject           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  milestone AgencyProjectMilestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+  createdBy AdminUser               @relation("AgencyDeliverableCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  versions AgencyDeliverableVersion[]
+  reviews  AgencyDeliverableReview[]
+
+  @@index([projectId, status])
+}
+
+model AgencyDeliverableVersion {
+  id            String    @id @default(cuid())
+  deliverableId String
+  versionNumber Int
+  externalUrl   String?
+  notes         String?   @db.Text
+  submittedAt   DateTime?
+  createdById   String
+  createdAt     DateTime  @default(now())
+
+  deliverable AgencyDeliverable @relation(fields: [deliverableId], references: [id], onDelete: Cascade)
+  createdBy   AdminUser         @relation("AgencyDeliverableVersionCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  file        AgencyProjectFile?
+  reviews     AgencyDeliverableReview[]
+
+  @@unique([deliverableId, versionNumber])
+  @@index([deliverableId])
+}
+
+model AgencyDeliverableReview {
+  id                  String                          @id @default(cuid())
+  deliverableId       String
+  versionId           String
+  reviewerContactId   String?
+  reviewerPortalUserId String?
+  decision            AgencyDeliverableReviewDecision
+  comment             String?                         @db.Text
+  isAdminOverride     Boolean                         @default(false)
+  createdAt           DateTime                        @default(now())
+
+  deliverable        AgencyDeliverable        @relation(fields: [deliverableId], references: [id], onDelete: Cascade)
+  version            AgencyDeliverableVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  reviewerContact    CrmContact?              @relation(fields: [reviewerContactId], references: [id], onDelete: SetNull)
+  reviewerPortalUser ClientPortalUser?        @relation(fields: [reviewerPortalUserId], references: [id], onDelete: SetNull)
+
+  @@index([deliverableId, createdAt])
+}
+
+model AgencyProjectActivity {
+  id                 String                    @id @default(cuid())
+  projectId          String
+  type               AgencyProjectActivityType
+  summary            String
+  actorUserId        String?
+  actorPortalUserId  String?
+  entityType         String?
+  entityId           String?
+  metadata           Json?
+  clientVisible      Boolean                   @default(false)
+  createdAt          DateTime                  @default(now())
+
+  project           AgencyProject    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  actorUser         AdminUser?       @relation("AgencyActivityAdmin", fields: [actorUserId], references: [id], onDelete: SetNull)
+  actorPortalUser   ClientPortalUser? @relation(fields: [actorPortalUserId], references: [id], onDelete: SetNull)
+
+  @@index([projectId, createdAt])
+}
+
+model AgencyProjectUpdate {
+  id            String   @id @default(cuid())
+  projectId     String
+  title         String
+  body          String   @db.Text
+  clientVisible Boolean  @default(true)
+  createdById   String
+  createdAt     DateTime @default(now())
+
+  project   AgencyProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy AdminUser     @relation("AgencyUpdateCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([projectId, createdAt])
+}
+
+model AgencyProjectNote {
+  id          String   @id @default(cuid())
+  projectId   String
+  body        String   @db.Text
+  createdById String
+  createdAt   DateTime @default(now())
+
+  project   AgencyProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy AdminUser     @relation("AgencyNoteCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([projectId, createdAt])
+}
+
+model AgencyProjectFile {
+  id              String   @id @default(cuid())
+  projectId       String
+  versionId       String?  @unique
+  filename        String
+  mimeType        String
+  byteSize        Int
+  storageProvider String
+  storageKey      String   @unique
+  createdById     String
+  createdAt       DateTime @default(now())
+
+  project   AgencyProject             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  version   AgencyDeliverableVersion? @relation(fields: [versionId], references: [id], onDelete: SetNull)
+  createdBy AdminUser                 @relation("AgencyFileCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([projectId])
+}
+
+model ClientPortalUser {
+  id          String                 @id @default(cuid())
+  contactId   String                 @unique
+  email       String
+  status      ClientPortalUserStatus @default(INVITED)
+  lastLoginAt DateTime?
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  contact  CrmContact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  invites  ClientPortalInvite[]
+  sessions ClientPortalSession[]
+  projectAccess AgencyProjectClientAccess[]
+  reviews  AgencyDeliverableReview[]
+  activities AgencyProjectActivity[]
+
+  @@index([email])
+  @@index([status])
+}
+
+model ClientPortalInvite {
+  id           String                 @id @default(cuid())
+  portalUserId String
+  projectId    String?
+  tokenHash    String                 @unique
+  status       ClientPortalInviteStatus @default(PENDING)
+  expiresAt    DateTime
+  acceptedAt   DateTime?
+  revokedAt    DateTime?
+  createdById  String
+  createdAt    DateTime               @default(now())
+
+  portalUser ClientPortalUser @relation(fields: [portalUserId], references: [id], onDelete: Cascade)
+  project    AgencyProject?   @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  createdBy  AdminUser        @relation("PortalInviteCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([portalUserId, status])
+  @@index([expiresAt])
+}
+
+model ClientPortalSession {
+  id           String    @id @default(cuid())
+  portalUserId String
+  tokenHash    String    @unique
+  expiresAt    DateTime
+  createdAt    DateTime  @default(now())
+  revokedAt    DateTime?
+
+  portalUser ClientPortalUser @relation(fields: [portalUserId], references: [id], onDelete: Cascade)
+
+  @@index([portalUserId])
+  @@index([expiresAt])
+}
+
+model AgencyProjectClientAccess {
+  id           String                  @id @default(cuid())
+  projectId    String
+  contactId    String
+  portalUserId String?
+  role         AgencyProjectClientRole @default(CLIENT_MEMBER)
+  grantedAt    DateTime                @default(now())
+  revokedAt    DateTime?
+  grantedById  String
+
+  project    AgencyProject     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  contact    CrmContact        @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  portalUser ClientPortalUser? @relation(fields: [portalUserId], references: [id], onDelete: SetNull)
+  grantedBy  AdminUser         @relation("AgencyClientAccessGranter", fields: [grantedById], references: [id], onDelete: Restrict)
+
+  @@unique([projectId, contactId])
+  @@index([portalUserId, projectId])
+  @@index([contactId])
 }

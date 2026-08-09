@@ -24,6 +24,16 @@ export type AdminCapability =
   | "manage_enquiries"
   | "export_enquiries"
   | "enquiry_destructive"
+  | "view_audience"
+  | "manage_audience"
+  | "export_audience"
+  | "view_crm"
+  | "manage_crm"
+  | "export_crm"
+  | "send_crm_email"
+  | "view_projects"
+  | "manage_projects"
+  | "manage_project_templates"
   | "use_ai_writer"
   | "manage_ai_settings"
   | "approve_ai_cms";
@@ -52,6 +62,16 @@ const ROLE_CAPABILITIES: Record<AdminRole, ReadonlySet<AdminCapability>> = {
     "manage_enquiries",
     "export_enquiries",
     "enquiry_destructive",
+    "view_audience",
+    "manage_audience",
+    "export_audience",
+    "view_crm",
+    "manage_crm",
+    "export_crm",
+    "send_crm_email",
+    "view_projects",
+    "manage_projects",
+    "manage_project_templates",
     "use_ai_writer",
     "manage_ai_settings",
     "approve_ai_cms",
@@ -74,6 +94,14 @@ const ROLE_CAPABILITIES: Record<AdminRole, ReadonlySet<AdminCapability>> = {
     "view_system",
     "view_enquiries",
     "manage_enquiries",
+    "view_audience",
+    "manage_audience",
+    "view_crm",
+    "manage_crm",
+    "send_crm_email",
+    "view_projects",
+    "manage_projects",
+    "manage_project_templates",
     "use_ai_writer",
     "manage_ai_settings",
     "approve_ai_cms",

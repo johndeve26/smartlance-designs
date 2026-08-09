@@ -180,6 +180,17 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
+  if (pathname.startsWith("/portal")) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-smartlance-portal", "1");
+    const response = NextResponse.next({
+      request: { headers: requestHeaders },
+    });
+    response.headers.set("Cache-Control", "no-store");
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+    return response;
+  }
+
   // Static legacy redirects (WordPress era)
   const normalized = pathname.replace(/\/$/, "") || "/";
   const target = redirects[normalized];
@@ -207,6 +218,8 @@ export const config = {
   matcher: [
     "/admin",
     "/admin/:path*",
+    "/portal",
+    "/portal/:path*",
     "/services/:path*",
     "/solutions/:path*",
     "/platforms/:path*",
