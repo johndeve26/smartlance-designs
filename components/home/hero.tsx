@@ -3,7 +3,7 @@ import { ArrowUpRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { PortfolioScreenshot } from "@/components/ui/site-image";
-import { getHeroShowcaseProject } from "@/lib/home/showcase";
+import type { Project } from "@/types";
 
 export type HomeHeroProps = {
   eyebrow: string;
@@ -14,6 +14,7 @@ export type HomeHeroProps = {
   primaryCtaHref: string;
   secondaryCtaLabel: string;
   secondaryCtaHref: string;
+  heroProject?: Project | null;
 };
 
 function renderHeadline(headline: string, accent?: string | null) {
@@ -41,8 +42,9 @@ export function HomeHero({
   primaryCtaHref,
   secondaryCtaLabel,
   secondaryCtaHref,
+  heroProject,
 }: HomeHeroProps) {
-  const showcase = getHeroShowcaseProject();
+  const showcase = heroProject ?? undefined;
   const imageSrc = showcase?.heroImage || showcase?.image;
 
   return (

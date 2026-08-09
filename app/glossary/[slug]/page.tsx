@@ -9,15 +9,17 @@ import { StructuredData } from "@/components/ui/structured-data";
 import { BlogMarkdown } from "@/components/blog/blog-markdown";
 import { GlossaryVisual } from "@/components/glossary/glossary-visuals";
 import {
-  getAdjacentGlossaryEntries,
-  getGlossaryEntryBySlug,
-  getPublishedGlossaryEntries,
-  getRelatedGlossaryEntries,
-  glossaryTopicGroups,
-} from "@/data/glossary";
+  loadGlossaryBySlug,
+  loadGuideBySlug,
+  loadPublishedGlossary,
+} from "@/lib/content/phase3-public";
+import {
+  resolveAdjacentGlossaryEntries,
+  resolveRelatedGlossaryEntries,
+} from "@/lib/resources/discovery";
+import { glossaryTopicGroups } from "@/data/glossary";
 import { getSolutionBySlug, getSolutionHref } from "@/data/solutions";
 import { getServiceBySlug } from "@/data/services";
-import { getGuideBySlug } from "@/data/guides";
 import { buildResourcePageMetadata } from "@/lib/seo/resource-metadata";
 import {
   breadcrumbJsonLd,
@@ -28,15 +30,16 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export function generateStaticParams() {
-  return getPublishedGlossaryEntries().map((entry) => ({ slug: entry.slug }));
+export async function generateStaticParams() {
+  const entries = await loadPublishedGlossary();
+  return entries.map((entry) => ({ slug: entry.slug }));
 }
 
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const entry = getGlossaryEntryBySlug(slug);
+  const entry = await loadGlossaryBySlug(slug);
   if (!entry) return {};
   return buildResourcePageMetadata({
     kind: "glossary",
@@ -57,14 +60,18 @@ function formatDate(value: string) {
 
 export default async function GlossaryTermPage({ params }: PageProps) {
   const { slug } = await params;
-  const entry = getGlossaryEntryBySlug(slug);
+  const entry = await loadGlossaryBySlug(slug);
   if (!entry) notFound();
 
+  const publishedGlossary = await loadPublishedGlossary();
   const topicLabel =
     glossaryTopicGroups.find((group) => group.id === entry.glossaryTopicGroup)
       ?.label ?? "";
-  const relatedTerms = getRelatedGlossaryEntries(entry);
-  const { previous, next } = getAdjacentGlossaryEntries(entry.slug);
+  const relatedTerms = resolveRelatedGlossaryEntries(entry, publishedGlossary);
+  const { previous, next } = resolveAdjacentGlossaryEntries(
+    entry.slug,
+    publishedGlossary,
+  );
 
   const relatedSolutions = (entry.relatedSolutionSlugs ?? [])
     .map((solutionSlug) => getSolutionBySlug(solutionSlug))
@@ -76,8 +83,11 @@ export default async function GlossaryTermPage({ params }: PageProps) {
     .filter((service): service is NonNullable<typeof service> => Boolean(service))
     .slice(0, 2);
 
-  const relatedGuides = (entry.relatedGuideSlugs ?? [])
-    .map((guideSlug) => getGuideBySlug(guideSlug))
+  const relatedGuides = (
+    await Promise.all(
+      (entry.relatedGuideSlugs ?? []).map((guideSlug) => loadGuideBySlug(guideSlug)),
+    )
+  )
     .filter((guide): guide is NonNullable<typeof guide> => Boolean(guide))
     .slice(0, 1);
 

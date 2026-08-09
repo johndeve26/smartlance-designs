@@ -9,8 +9,10 @@ import { CTASection } from "@/components/ui/cta-section";
 import { StructuredData } from "@/components/ui/structured-data";
 import { GuideCard } from "@/components/guides/guide-body";
 import { ComparisonCard } from "@/components/comparisons/comparison-hero";
-import { getPublishedComparisons } from "@/data/comparisons";
-import { getPublishedGuides } from "@/data/guides";
+import {
+  loadGuideBySlug,
+  loadPublishedComparisons,
+} from "@/lib/content/phase3-public";
 import { buildMetadata } from "@/lib/seo";
 import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data";
 
@@ -21,12 +23,10 @@ export const metadata: Metadata = buildMetadata({
   path: "/compare",
 });
 
-export default function CompareArchivePage() {
-  const comparisons = getPublishedComparisons();
+export default async function CompareArchivePage() {
+  const comparisons = await loadPublishedComparisons();
   const featured = comparisons[0];
-  const redesignGuide = getPublishedGuides().find(
-    (guide) => guide.slug === "website-redesign-guide",
-  );
+  const redesignGuide = await loadGuideBySlug("website-redesign-guide");
 
   return (
     <>

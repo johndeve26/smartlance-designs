@@ -7,9 +7,12 @@ import { SectionHeader } from "@/components/ui/section-header";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { CTASection } from "@/components/ui/cta-section";
 import { StructuredData } from "@/components/ui/structured-data";
-import { getPublishedTools, getToolQuestionCount } from "@/data/tools";
-import { getPublishedComparisons } from "@/data/comparisons";
-import { getPublishedTemplates } from "@/data/templates";
+import {
+  loadComparisonBySlug,
+  loadPublishedTools,
+  loadTemplateBySlug,
+} from "@/lib/content/phase3-public";
+import type { ToolListingContent } from "@/lib/resources/discovery";
 import { buildMetadata } from "@/lib/seo";
 import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data";
 
@@ -20,15 +23,17 @@ export const metadata: Metadata = buildMetadata({
   path: "/tools",
 });
 
-export default function ToolsArchivePage() {
-  const tools = getPublishedTools();
-  const featured = tools.find((item) => item.featured) ?? tools[0];
-  const comparison = getPublishedComparisons().find(
-    (item) => item.slug === "wordpress-vs-webflow",
-  );
-  const briefTemplate = getPublishedTemplates().find(
-    (item) => item.slug === "website-project-brief-template",
-  );
+function toolQuestionCount(tool: ToolListingContent) {
+  return tool.listingQuestionCount ?? 0;
+}
+
+export default async function ToolsArchivePage() {
+  const tools = await loadPublishedTools();
+  const featured =
+    (tools.find((item) => item.featured) as ToolListingContent | undefined) ??
+    (tools[0] as ToolListingContent | undefined);
+  const comparison = await loadComparisonBySlug("wordpress-vs-webflow");
+  const briefTemplate = await loadTemplateBySlug("website-project-brief-template");
 
   return (
     <>
@@ -95,7 +100,7 @@ export default function ToolsArchivePage() {
                 {featured.description}
               </p>
               <p className="mt-4 text-sm text-subtle">
-                {getToolQuestionCount(featured)} questions
+                {toolQuestionCount(featured)} questions
               </p>
               <Link
                 href={`/tools/${featured.slug}`}

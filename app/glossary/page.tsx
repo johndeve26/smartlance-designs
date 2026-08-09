@@ -8,14 +8,13 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { CTASection } from "@/components/ui/cta-section";
 import { StructuredData } from "@/components/ui/structured-data";
 import { GlossaryArchiveClient } from "@/components/glossary/glossary-archive-client";
+import { loadPublishedGlossary } from "@/lib/content/phase3-public";
 import {
-  getFeaturedGlossaryEntries,
-  getGlossaryAlphabeticalGroups,
-  getGlossaryCount,
-  getGlossaryEntriesByTopicGroup,
-  getGlossarySearchIndex,
-  glossaryTopicGroups,
-} from "@/data/glossary";
+  buildGlossaryAlphabeticalGroups,
+  buildGlossarySearchIndex,
+  buildGlossaryTopicGroupArchive,
+  getFeaturedGlossaryListingEntries,
+} from "@/lib/resources/discovery";
 import { buildMetadata } from "@/lib/seo";
 import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data";
 
@@ -26,52 +25,13 @@ export const metadata: Metadata = buildMetadata({
   path: "/glossary",
 });
 
-export default function GlossaryArchivePage() {
-  const count = getGlossaryCount();
-  const searchIndex = getGlossarySearchIndex();
-  const featured = getFeaturedGlossaryEntries(4).map((entry) => ({
-    slug: entry.slug,
-    term: entry.term,
-    acronym: entry.acronym,
-    expansion: entry.expansion,
-    aliases: entry.aliases ?? [],
-    shortDefinition: entry.shortDefinition,
-    topicGroup: entry.glossaryTopicGroup,
-    topicLabel:
-      glossaryTopicGroups.find((group) => group.id === entry.glossaryTopicGroup)
-        ?.label ?? "",
-  }));
-
-  const alphabetical = getGlossaryAlphabeticalGroups().map((group) => ({
-    letter: group.letter,
-    terms: group.terms.map((entry) => ({
-      slug: entry.slug,
-      term: entry.term,
-      acronym: entry.acronym,
-      expansion: entry.expansion,
-      aliases: entry.aliases ?? [],
-      shortDefinition: entry.shortDefinition,
-      topicGroup: entry.glossaryTopicGroup,
-      topicLabel:
-        glossaryTopicGroups.find(
-          (topic) => topic.id === entry.glossaryTopicGroup,
-        )?.label ?? "",
-    })),
-  }));
-
-  const topicGroups = glossaryTopicGroups.map((group) => ({
-    ...group,
-    terms: getGlossaryEntriesByTopicGroup(group.id).map((entry) => ({
-      slug: entry.slug,
-      term: entry.term,
-      acronym: entry.acronym,
-      expansion: entry.expansion,
-      aliases: entry.aliases ?? [],
-      shortDefinition: entry.shortDefinition,
-      topicGroup: entry.glossaryTopicGroup,
-      topicLabel: group.label,
-    })),
-  }));
+export default async function GlossaryArchivePage() {
+  const entries = await loadPublishedGlossary();
+  const count = entries.length;
+  const searchIndex = buildGlossarySearchIndex(entries);
+  const featured = getFeaturedGlossaryListingEntries(entries, 4);
+  const alphabetical = buildGlossaryAlphabeticalGroups(entries);
+  const topicGroups = buildGlossaryTopicGroupArchive(entries);
 
   return (
     <>

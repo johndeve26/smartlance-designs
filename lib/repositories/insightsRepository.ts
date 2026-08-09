@@ -35,6 +35,38 @@ export type InsightPublic = {
   content: string;
 };
 
+/** Public fields for Homepage Insight cards — no article body. */
+export type HomepageInsightCard = Omit<InsightPublic, "content">;
+
+const homepageInsightSelect = {
+  id: true,
+  slug: true,
+  title: true,
+  description: true,
+  categoryLabel: true,
+  author: true,
+  readingTime: true,
+  heroImagePath: true,
+  heroImageAlt: true,
+  featured: true,
+  originalPublishedAt: true,
+  publishedAt: true,
+  materialUpdatedAt: true,
+  relatedServiceHrefs: true,
+  tags: true,
+  seoTitle: true,
+  seoDescription: true,
+  legacyUrl: true,
+  canonicalOverride: true,
+  status: true,
+} as const;
+
+export function toHomepageInsightCard(row: Insight): HomepageInsightCard {
+  const full = toPublicInsight(row);
+  const { content: _content, ...card } = full;
+  return card;
+}
+
 export function toPublicInsight(row: Insight): InsightPublic {
   return {
     slug: row.slug,
@@ -103,6 +135,28 @@ export async function listPublishedInsights() {
   const rows = await listPublishedInsightsMeta();
   return rows.map((row) =>
     toPublicInsight({
+      ...(row as unknown as Insight),
+      bodyMarkdown: "",
+    } as Insight),
+  );
+}
+
+/** Homepage strip: published only, featured-first, capped — no full bodies loaded. */
+export async function listHomepageInsights(limit = 3): Promise<HomepageInsightCard[]> {
+  if (!hasDatabaseUrl()) return [];
+  const rows = await prisma.insight.findMany({
+    where: { status: published },
+    orderBy: [
+      { featured: "desc" },
+      { publishedAt: "desc" },
+      { originalPublishedAt: "desc" },
+      { slug: "asc" },
+    ],
+    take: limit,
+    select: homepageInsightSelect,
+  });
+  return rows.map((row) =>
+    toHomepageInsightCard({
       ...(row as unknown as Insight),
       bodyMarkdown: "",
     } as Insight),

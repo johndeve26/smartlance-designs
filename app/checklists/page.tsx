@@ -9,8 +9,10 @@ import { CTASection } from "@/components/ui/cta-section";
 import { StructuredData } from "@/components/ui/structured-data";
 import { ChecklistCard } from "@/components/checklists/checklist-card";
 import { GuideCard } from "@/components/guides/guide-body";
-import { getPublishedChecklists } from "@/data/checklists";
-import { getPublishedGuides } from "@/data/guides";
+import {
+  loadGuideBySlug,
+  loadPublishedChecklists,
+} from "@/lib/content/phase3-public";
 import { buildMetadata } from "@/lib/seo";
 import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data";
 
@@ -21,12 +23,10 @@ export const metadata: Metadata = buildMetadata({
   path: "/checklists",
 });
 
-export default function ChecklistsArchivePage() {
-  const checklists = getPublishedChecklists();
+export default async function ChecklistsArchivePage() {
+  const checklists = await loadPublishedChecklists();
   const featured = checklists[0];
-  const redesignGuide = getPublishedGuides().find(
-    (guide) => guide.slug === "website-redesign-guide",
-  );
+  const redesignGuide = await loadGuideBySlug("website-redesign-guide");
 
   return (
     <>

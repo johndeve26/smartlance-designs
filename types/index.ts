@@ -275,6 +275,9 @@ export type Project = {
   productFeatures?: ProductFeatureSection[];
   saasInfrastructure?: ProjectEngineeringStack[];
   showArchitectureDiagram?: boolean;
+  solutionIntro?: string;
+  /** True when structured case study content is stored in the database. */
+  usesDbCaseStudyContent?: boolean;
   metaTitle: string;
   metaDescription: string;
   noIndex?: boolean;

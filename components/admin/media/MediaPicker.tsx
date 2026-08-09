@@ -1,6 +1,7 @@
 "use client";
 
-import { useId, useState, useTransition } from "react";
+import { useId, useRef, useState, useTransition, type ReactNode } from "react";
+import { uploadMediaAction } from "@/lib/admin/phase4-actions";
 
 type MediaItem = {
   id: string;
@@ -14,17 +15,39 @@ export function MediaPicker({
   name,
   label,
   defaultValue,
+  value: controlledValue,
+  onValueChange,
+  hideLabel = false,
+  storageConfigured = true,
+  header,
+  includeHiddenInput = true,
 }: {
   name: string;
   label: string;
   defaultValue?: string | null;
+  value?: string;
+  onValueChange?: (value: string) => void;
+  hideLabel?: boolean;
+  storageConfigured?: boolean;
+  header?: ReactNode;
+  /** When false, omits the named hidden input (for nested gallery rows). */
+  includeHiddenInput?: boolean;
 }) {
   const dialogId = useId();
-  const [value, setValue] = useState(defaultValue || "");
+  const uploadInputRef = useRef<HTMLInputElement>(null);
+  const [internalValue, setInternalValue] = useState(defaultValue || "");
+  const value = controlledValue ?? internalValue;
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const [items, setItems] = useState<MediaItem[]>([]);
   const [pending, start] = useTransition();
+  const [uploadPending, startUpload] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  function setValue(next: string) {
+    if (onValueChange) onValueChange(next);
+    else setInternalValue(next);
+  }
 
   function load(search: string) {
     start(async () => {
@@ -37,19 +60,41 @@ export function MediaPicker({
     });
   }
 
+  function handleUpload(file: File) {
+    setError(null);
+    startUpload(async () => {
+      const fd = new FormData();
+      fd.set("file", file);
+      const res = await uploadMediaAction(fd);
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      setValue(res.publicUrl);
+      load(q);
+    });
+  }
+
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-neutral-800" htmlFor={name}>
-        {label}
-      </label>
+      {hideLabel ? null : (
+        <div className="flex items-center justify-between gap-2">
+          <label className="block text-sm font-medium text-neutral-800" htmlFor={name}>
+            {label}
+          </label>
+          {header}
+        </div>
+      )}
+      {hideLabel && header ? <div>{header}</div> : null}
+      {includeHiddenInput ? <input type="hidden" name={name} value={value} /> : null}
       <div className="flex flex-wrap gap-2">
         <input
           id={name}
-          name={name}
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="min-w-[16rem] flex-1 rounded border border-neutral-300 px-3 py-2 text-sm"
-          placeholder="/images/…"
+          className="min-w-[16rem] flex-1 rounded border border-neutral-300 px-3 py-2 font-mono text-xs"
+          placeholder="/images/… or uploaded URL"
+          aria-label={hideLabel ? label : undefined}
         />
         <button
           type="button"
@@ -61,8 +106,31 @@ export function MediaPicker({
           aria-haspopup="dialog"
           aria-controls={dialogId}
         >
-          Browse media
+          Browse
         </button>
+        {storageConfigured ? (
+          <>
+            <button
+              type="button"
+              className="rounded border border-neutral-300 px-3 py-2 text-sm"
+              disabled={uploadPending}
+              onClick={() => uploadInputRef.current?.click()}
+            >
+              {uploadPending ? "Uploading…" : "Upload"}
+            </button>
+            <input
+              ref={uploadInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) handleUpload(file);
+                event.target.value = "";
+              }}
+            />
+          </>
+        ) : null}
         {value ? (
           <button
             type="button"
@@ -73,6 +141,17 @@ export function MediaPicker({
           </button>
         ) : null}
       </div>
+      {!storageConfigured ? (
+        <p className="text-xs text-neutral-500">
+          Upload requires configured object storage. Browse indexed media or paste a
+          site path such as <code>/images/projects/…</code>.
+        </p>
+      ) : null}
+      {error ? (
+        <p className="text-sm text-red-700" role="alert">
+          {error}
+        </p>
+      ) : null}
       {value ? (
         <div className="h-24 w-40 overflow-hidden rounded border bg-neutral-50">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -139,7 +218,9 @@ export function MediaPicker({
                     role="option"
                     aria-selected={selected}
                     className={`overflow-hidden rounded border text-left focus:outline-none focus:ring-2 focus:ring-[#F47A48] ${
-                      selected ? "border-[#F47A48] ring-2 ring-[#F47A48]" : "border-neutral-200"
+                      selected
+                        ? "border-[#F47A48] ring-2 ring-[#F47A48]"
+                        : "border-neutral-200"
                     }`}
                     onClick={() => {
                       setValue(item.publicUrl);

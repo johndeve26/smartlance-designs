@@ -9,6 +9,7 @@ import {
   updateMediaMetadata,
   uploadMediaAsset,
 } from "@/lib/repositories/mediaRepository";
+import { syncStaticMediaAssets } from "@/lib/media/sync-static";
 import {
   publishNavigationMenu,
   saveNavigationDraft,
@@ -110,6 +111,26 @@ export async function deleteMediaAction(formData: FormData) {
     return {
       ok: false as const,
       error: err instanceof Error ? err.message : "Delete failed",
+    };
+  }
+}
+
+export async function syncStaticMediaAction(input?: { dryRun?: boolean }) {
+  await assertSameOrigin();
+  const user = await requireAdminUser("manage_media");
+  try {
+    const result = await syncStaticMediaAssets({
+      dryRun: input?.dryRun ?? false,
+      actorId: user.id,
+    });
+    if (!input?.dryRun) {
+      revalidatePath("/admin/media");
+    }
+    return { ok: true as const, result };
+  } catch (err) {
+    return {
+      ok: false as const,
+      error: err instanceof Error ? err.message : "Static media sync failed",
     };
   }
 }
@@ -259,10 +280,15 @@ export async function saveManagedPageAction(formData: FormData) {
       data: {
         seoTitle: String(formData.get("seoTitle") || "") || null,
         seoDescription: String(formData.get("seoDescription") || "") || null,
+        ogTitle: String(formData.get("ogTitle") || "") || null,
+        ogDescription: String(formData.get("ogDescription") || "") || null,
         ogImagePath: String(formData.get("ogImagePath") || "") || null,
         noIndex,
         canonicalOverride:
           String(formData.get("canonicalOverride") || "") || null,
+        heroEyebrow: String(formData.get("heroEyebrow") || "") || null,
+        heroHeadline: String(formData.get("heroHeadline") || "") || null,
+        heroSupporting: String(formData.get("heroSupporting") || "") || null,
       },
     });
     revalidatePath("/admin/seo");

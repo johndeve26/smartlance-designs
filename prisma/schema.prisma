@@ -558,6 +558,11 @@ model Industry {
   @@index([hasVerifiedProjectExperience])
 }
 
+enum CaseStudyKind {
+  WEBSITE
+  PRODUCT
+}
+
 model WorkProject {
   id                   String        @id @default(cuid())
   slug                 String        @unique
@@ -604,6 +609,15 @@ model WorkProject {
   highlights           Json?
   platformContext      String?       @db.Text
   outcomeHeading       String?
+  caseStudyKind        CaseStudyKind @default(WEBSITE)
+  /// Versioned structured case-study presentation ({ version: 1, ... })
+  caseStudyContent     Json?
+  heroEyebrow          String?
+  heroSupportingCopy   String?       @db.Text
+  externalLinkLabel    String?
+  draftJson            Json?
+  draftUpdatedAt       DateTime?
+  draftUpdatedById     String?
   seoTitle             String
   seoDescription       String
   ogTitle              String?

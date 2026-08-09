@@ -10,6 +10,8 @@ import {
 } from "@/lib/admin/phase3-actions";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { TestimonialAiPanel } from "@/components/admin/content-assistants/AiPanels";
+import { MediaPicker } from "@/components/admin/media/MediaPicker";
+import { isMediaStorageConfigured } from "@/lib/media/storage";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +24,7 @@ export default async function AdminTestimonialEditorPage({ params }: PageProps) 
   if (!item) notFound();
   const canPublish = userCan(user, "publish");
   const canVerify = userCan(user, "verify_testimonial");
+  const storageConfigured = isMediaStorageConfigured();
   const originalQuote = item.originalQuote || item.quote;
   const hasQuote = Boolean(originalQuote?.trim());
 
@@ -89,11 +92,30 @@ export default async function AdminTestimonialEditorPage({ params }: PageProps) 
         <label className="block text-sm">Role<input name="role" defaultValue={item.role ?? ""} className="mt-1 w-full rounded border px-3 py-2" /></label>
         <label className="block text-sm">Service label<input name="serviceLabel" defaultValue={item.serviceLabel ?? ""} className="mt-1 w-full rounded border px-3 py-2" /></label>
         <label className="block text-sm">Work project ID<input name="workProjectId" defaultValue={item.workProjectId ?? ""} className="mt-1 w-full rounded border px-3 py-2 font-mono text-xs" /></label>
+
+        <fieldset className="space-y-3 rounded border border-neutral-200 bg-neutral-50 p-4">
+          <legend className="px-1 text-sm font-semibold text-neutral-900">Avatar</legend>
+          <MediaPicker
+            name="avatarPath"
+            label="Avatar image"
+            defaultValue={item.avatarPath}
+            storageConfigured={storageConfigured}
+          />
+        </fieldset>
+
         <label className="block text-sm">Themes JSON (editorial)<textarea name="themesJson" defaultValue={JSON.stringify(item.themesJson ?? [], null, 2)} rows={2} className="mt-1 w-full rounded border px-3 py-2 font-mono text-xs" /></label>
         <label className="block text-sm">Internal source<input name="internalSource" defaultValue={item.internalSource ?? ""} className="mt-1 w-full rounded border px-3 py-2" /></label>
         <label className="block text-sm">Internal verification note (never public)<textarea name="internalVerificationNote" defaultValue={item.internalVerificationNote ?? ""} rows={2} className="mt-1 w-full rounded border px-3 py-2" /></label>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="featured" defaultChecked={item.featured} /> Featured</label>
-        <input type="hidden" name="displayOrder" value={item.displayOrder} />
+        <label className="block text-sm">
+          Display order
+          <input
+            name="displayOrder"
+            type="number"
+            defaultValue={item.displayOrder}
+            className="mt-1 w-full rounded border px-3 py-2"
+          />
+        </label>
         <button type="submit" className="rounded bg-neutral-900 px-4 py-2 text-sm text-white">Save</button>
       </form>
 

@@ -3,7 +3,6 @@ import { PortfolioScreenshot } from "@/components/ui/site-image";
 import { ArrowRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
-import { getSelectedWorkProjects } from "@/lib/home/showcase";
 import type { Project } from "@/types";
 
 function ProjectMeta({ project }: { project: Project }) {
@@ -117,8 +116,12 @@ function SupportingProjectCard({ project }: { project: Project }) {
   );
 }
 
-export function HomePortfolio() {
-  const projects = getSelectedWorkProjects();
+export function HomePortfolio({
+  selectedProjects,
+}: {
+  selectedProjects: Project[];
+}) {
+  const projects = selectedProjects;
   if (projects.length === 0) return null;
 
   const [featured, ...rest] = projects;

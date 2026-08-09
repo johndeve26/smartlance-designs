@@ -2,10 +2,14 @@ import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { BlogCard } from "@/components/ui/blog-card";
 import { Button } from "@/components/ui/button";
-import { getLatestPosts } from "@/lib/blog";
+import type { HomepageInsightCard } from "@/lib/repositories/insightsRepository";
 
-export function HomeBlogSection() {
-  const posts = getLatestPosts(3);
+type HomeBlogSectionProps = {
+  posts: HomepageInsightCard[];
+};
+
+export function HomeBlogSection({ posts }: HomeBlogSectionProps) {
+  if (posts.length === 0) return null;
 
   return (
     <section className="section-padding bg-surface">

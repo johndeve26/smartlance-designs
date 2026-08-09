@@ -53,8 +53,15 @@ export function getUniqueProjectImages(project: Project) {
   return images;
 }
 
+export function getLegacyCaseStudyNarrative(slug: string) {
+  return caseStudyNarratives[slug];
+}
+
 export function resolveCaseStudyContent(project: Project) {
-  const narrative = caseStudyNarratives[project.slug];
+  const useLegacyNarrative = !project.usesDbCaseStudyContent;
+  const narrative = useLegacyNarrative
+    ? getLegacyCaseStudyNarrative(project.slug)
+    : undefined;
   const images = getUniqueProjectImages(project);
   const heroImage = images[0];
   const galleryImages = images.slice(1);
@@ -117,7 +124,7 @@ export function resolveCaseStudyContent(project: Project) {
     approachSteps,
     solutionPoints,
     solutionSummary:
-      narrative?.solutionIntro || project.solution,
+      project.solutionIntro || narrative?.solutionIntro || project.solution,
     highlights,
     outcomes,
     resultSummary: project.resultSummary || "",
@@ -169,6 +176,7 @@ export function resolveCaseStudyContent(project: Project) {
   };
 }
 
+/** STATIC / PRE-IMPORT FALLBACK ONLY — uses typed portfolio ordering. */
 export function getAdjacentProjects(slug: string) {
   const list = getVisibleProjects();
   const index = list.findIndex((project) => project.slug === slug);

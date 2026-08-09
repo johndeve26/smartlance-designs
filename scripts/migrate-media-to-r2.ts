@@ -241,36 +241,64 @@ async function rewriteDatabasePaths(
     bump();
   }
 
-  const cmsTables = [
-    prisma.service,
-    prisma.solution,
-    prisma.platform,
-    prisma.industry,
-    prisma.cmsResource,
-    prisma.testimonial,
-  ] as const;
+  type ImagePatch = {
+    ogImagePath?: string | null;
+    heroImagePath?: string | null;
+    avatarPath?: string | null;
+  };
 
-  for (const table of cmsTables) {
-    const rows = await table.findMany();
+  async function rewriteImageRows<T extends { id: string } & ImagePatch>(
+    findMany: () => Promise<T[]>,
+    update: (args: {
+      where: { id: string };
+      data: Partial<ImagePatch>;
+    }) => Promise<unknown>,
+  ) {
+    const rows = await findMany();
     for (const row of rows) {
-      const patch: Record<string, unknown> = {};
-      if ("ogImagePath" in row && row.ogImagePath) {
-        patch.ogImagePath = replacePath(String(row.ogImagePath), map);
+      const patch: Partial<ImagePatch> = {};
+      if (row.ogImagePath) {
+        patch.ogImagePath = replacePath(row.ogImagePath, map);
       }
-      if ("heroImagePath" in row && row.heroImagePath) {
-        patch.heroImagePath = replacePath(String(row.heroImagePath), map);
+      if (row.heroImagePath) {
+        patch.heroImagePath = replacePath(row.heroImagePath, map);
       }
-      if ("avatarPath" in row && row.avatarPath) {
-        patch.avatarPath = replacePath(String(row.avatarPath), map);
+      if (row.avatarPath) {
+        patch.avatarPath = replacePath(row.avatarPath, map);
       }
       if (Object.keys(patch).length) {
         if (!dryRun) {
-          await table.update({ where: { id: row.id }, data: patch as never });
+          await update({ where: { id: row.id }, data: patch });
         }
         bump();
       }
     }
   }
+
+  await rewriteImageRows(
+    () => prisma.service.findMany(),
+    (args) => prisma.service.update(args),
+  );
+  await rewriteImageRows(
+    () => prisma.solution.findMany(),
+    (args) => prisma.solution.update(args),
+  );
+  await rewriteImageRows(
+    () => prisma.platform.findMany(),
+    (args) => prisma.platform.update(args),
+  );
+  await rewriteImageRows(
+    () => prisma.industry.findMany(),
+    (args) => prisma.industry.update(args),
+  );
+  await rewriteImageRows(
+    () => prisma.cmsResource.findMany(),
+    (args) => prisma.cmsResource.update(args),
+  );
+  await rewriteImageRows(
+    () => prisma.testimonial.findMany(),
+    (args) => prisma.testimonial.update(args),
+  );
 
   return count;
 }

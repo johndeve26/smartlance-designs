@@ -34,8 +34,9 @@ export type CaseStudyNarrative = {
 };
 
 /**
- * Editorial case-study narratives derived from verified project facts only.
- * Does not invent metrics, quotes, platforms or services.
+ * STATIC / PRE-IMPORT / MIGRATION FALLBACK ONLY.
+ * Production case study content is DB-authoritative after Phase 3 import
+ * (marker: phase3-work-case-study). Do not treat this file as a shadow CMS.
  */
 export const caseStudyNarratives: Record<string, CaseStudyNarrative> = {
   padeya: {

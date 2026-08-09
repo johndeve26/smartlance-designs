@@ -11,16 +11,29 @@ import { writeAuditLog } from "@/lib/repositories/auditRepository";
 const published: PublishStatus = "PUBLISHED";
 
 export function toPublicTestimonial(row: Testimonial): PublicTestimonial {
+  const publicQuote = row.displayExcerpt?.trim() || row.quote;
   return {
     id: row.legacyId,
     name: row.name,
     company: row.company,
     role: row.role ?? undefined,
     service: row.serviceLabel ?? "",
-    quote: row.quote,
+    quote: publicQuote,
     avatar: row.avatarPath ?? undefined,
     projectSlug: undefined,
     published: row.status === published && row.verified,
+  };
+}
+
+function mapPublishedTestimonialRow(
+  row: Testimonial & { workProject?: { slug: string; status: PublishStatus } | null },
+): PublicTestimonial & { projectSlug?: string } {
+  const base = toPublicTestimonial(row);
+  const workSlug =
+    row.workProject?.status === published ? row.workProject.slug : undefined;
+  return {
+    ...base,
+    projectSlug: workSlug,
   };
 }
 
@@ -29,25 +42,62 @@ export async function listPublishedTestimonials() {
   const rows = await prisma.testimonial.findMany({
     where: { status: published, verified: true },
     orderBy: [{ displayOrder: "asc" }, { name: "asc" }],
-    include: { workProject: { select: { slug: true } } },
+    include: { workProject: { select: { slug: true, status: true } } },
   });
-  return rows.map((row) => ({
-    ...toPublicTestimonial(row),
-    projectSlug: row.workProject?.slug,
-  }));
+  return rows.map((row) => mapPublishedTestimonialRow(row));
 }
 
 export async function getPublishedTestimonialByLegacyId(legacyId: string) {
   if (!hasDatabaseUrl()) return null;
   const row = await prisma.testimonial.findFirst({
     where: { legacyId, status: published, verified: true },
-    include: { workProject: { select: { slug: true } } },
+    include: { workProject: { select: { slug: true, status: true } } },
   });
   if (!row) return null;
-  return {
-    ...toPublicTestimonial(row),
-    projectSlug: row.workProject?.slug,
-  };
+  return mapPublishedTestimonialRow(row);
+}
+
+export async function getPublishedTestimonialByReference(reference: string) {
+  if (!hasDatabaseUrl() || !reference.trim()) return null;
+  const row = await prisma.testimonial.findFirst({
+    where: {
+      status: published,
+      verified: true,
+      OR: [{ legacyId: reference }, { id: reference }],
+    },
+    include: { workProject: { select: { slug: true, status: true } } },
+  });
+  return row ? mapPublishedTestimonialRow(row) : null;
+}
+
+/** Resolve Homepage curation order; skips invalid/unverified/unpublished references. */
+export async function listCuratedHomepageTestimonials(
+  references: string[],
+): Promise<(PublicTestimonial & { projectSlug?: string })[]> {
+  if (!hasDatabaseUrl() || !references.length) return [];
+
+  const uniqueRefs = [...new Set(references.filter(Boolean))];
+  const rows = await prisma.testimonial.findMany({
+    where: {
+      status: published,
+      verified: true,
+      OR: [{ legacyId: { in: uniqueRefs } }, { id: { in: uniqueRefs } }],
+    },
+    include: { workProject: { select: { slug: true, status: true } } },
+  });
+
+  const byReference = new Map<string, PublicTestimonial & { projectSlug?: string }>();
+  for (const row of rows) {
+    const mapped = mapPublishedTestimonialRow(row);
+    byReference.set(row.legacyId, mapped);
+    byReference.set(row.id, mapped);
+  }
+
+  return references
+    .map((ref) => byReference.get(ref))
+    .filter((item): item is PublicTestimonial & { projectSlug?: string } =>
+      Boolean(item),
+    );
 }
 
 export async function getTestimonialForWorkSlug(workSlug: string) {
@@ -226,5 +276,6 @@ export async function setTestimonialVerified(input: {
     entityId: row.id,
     metadata: { verified: input.verified },
   });
+  revalidateTestimonials();
   return row;
 }

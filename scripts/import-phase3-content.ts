@@ -32,6 +32,7 @@ import { getPublishedTemplates } from "../data/templates";
 import { getPublishedTools } from "../data/tools";
 import { resourceTopics } from "../data/resources";
 import { legacyBlogRedirects } from "../data/legacy-blog-redirects";
+import { homepageHeroProjectSlug } from "../data/home";
 import { resourceHref } from "../lib/content-routes";
 
 const FORCE = process.argv.includes("--force");
@@ -157,9 +158,9 @@ async function main() {
               ? json(project.relatedSlugs)
               : undefined,
             featured: Boolean(project.featured),
-            featuredHomepage: Boolean(project.featured),
+            featuredHomepage: project.slug === homepageHeroProjectSlug,
             featuredWorkArchive: Boolean(project.featured),
-            displayOrder: index,
+            displayOrder: project.displayOrder ?? index,
             heroStatement: project.heroStatement ?? null,
             challenges: project.challenges ? json(project.challenges) : undefined,
             approachSteps: project.approachSteps

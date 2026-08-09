@@ -9,7 +9,8 @@ import { getSessionUser } from "@/lib/admin/session";
 import { getServiceForPreview } from "@/lib/repositories/servicesRepository";
 import { getSolutionForPreview } from "@/lib/repositories/solutionsRepository";
 import { getPlatformForPreview } from "@/lib/repositories/platformsRepository";
-import { getWorkByIdAdmin, toPublicProject } from "@/lib/repositories/workRepository";
+import { getWorkForPreview } from "@/lib/repositories/workRepository";
+import { CaseStudyPageBody } from "@/components/work/case-study/case-study-page-body";
 import { getInsightByIdAdmin, toPublicInsight } from "@/lib/repositories/insightsRepository";
 import { getResourceByIdAdmin } from "@/lib/repositories/resourcesRepository";
 import { getIndustryByIdAdmin } from "@/lib/repositories/industriesRepository";
@@ -170,20 +171,9 @@ export default async function AdminPreviewPage({
   }
 
   if (entityType === "WorkProject") {
-    const row = await getWorkByIdAdmin(id);
-    if (!row) notFound();
-    const project = toPublicProject(row);
-    return (
-      <div className="mx-auto max-w-3xl px-4 py-12">
-        <p className="text-xs uppercase tracking-wide text-amber-700">Draft preview</p>
-        <h1 className="mt-2 text-3xl font-semibold">{project.name}</h1>
-        <p className="mt-4 text-neutral-600">{project.shortDescription}</p>
-        <h2 className="mt-8 text-xl font-semibold">Challenge</h2>
-        <p className="mt-2 whitespace-pre-wrap">{project.challenge}</p>
-        <h2 className="mt-8 text-xl font-semibold">Solution</h2>
-        <p className="mt-2 whitespace-pre-wrap">{project.solution}</p>
-      </div>
-    );
+    const project = await getWorkForPreview(id);
+    if (!project) notFound();
+    return <CaseStudyPageBody project={project} preview />;
   }
 
   if (entityType === "Insight") {

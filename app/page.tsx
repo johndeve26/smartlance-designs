@@ -29,6 +29,11 @@ import { HomeSeoSection } from "@/components/home/seo-section";
 import { HomeBlogSection } from "@/components/home/blog-section";
 import { getHomepageContent } from "@/lib/repositories/homepageRepository";
 import {
+  loadHomepageWorkShowcase,
+} from "@/lib/home/showcase";
+import { loadHomepageEditorialSections } from "@/lib/home/editorial";
+import { loadPublishedIndustries } from "@/lib/content/phase3-public";
+import {
   proofBarItems as typedProofBar,
   problemPoints as typedProblemPoints,
   growthSystemSteps as typedGrowthSteps,
@@ -37,9 +42,7 @@ import {
   reviewChecklist as typedReviewChecklist,
   seoHighlights as typedSeoHighlights,
   homepageServiceItems as typedServiceItems,
-  homepageTestimonialIds as typedTestimonialIds,
 } from "@/data/home";
-import { getTestimonialById } from "@/data/testimonials";
 import { buildPageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 import type { ProcessStep } from "@/types";
@@ -77,6 +80,15 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function HomePage() {
   const home = await getHomepageContent();
+  const [workShowcase, editorial, industries] = await Promise.all([
+    loadHomepageWorkShowcase(),
+    loadHomepageEditorialSections({
+      curatedTestimonialIds: home?.curatedTestimonialIds ?? [],
+    }),
+    loadPublishedIndustries(),
+  ]);
+  const { heroProject, selectedProjects } = workShowcase;
+  const { insights, testimonials } = editorial;
   const sections = home?.sections ?? {};
   const visibility = home?.sectionVisibility ?? {};
 
@@ -121,18 +133,6 @@ export default async function HomePage() {
       typeof item.title === "string",
   );
 
-  const testimonialIds =
-    (home?.curatedTestimonialIds?.length ?? 0) > 0
-      ? home!.curatedTestimonialIds
-      : typedTestimonialIds;
-
-  const testimonials = testimonialIds
-    .map((id) => getTestimonialById(id))
-    .filter(
-      (item): item is NonNullable<ReturnType<typeof getTestimonialById>> =>
-        Boolean(item),
-    );
-
   const hero = home?.hero ?? {
     eyebrow: "Website design, development & SEO",
     headline: "Websites Built to Rank, Convert and Grow.",
@@ -155,6 +155,7 @@ export default async function HomePage() {
         primaryCtaHref={hero.primaryCtaHref}
         secondaryCtaLabel={hero.secondaryCtaLabel}
         secondaryCtaHref={hero.secondaryCtaHref}
+        heroProject={heroProject}
       />
       {isVisible(visibility, "proofBarItems") ? (
         <TrustStrip items={proofBarItems} />
@@ -169,8 +170,8 @@ export default async function HomePage() {
       {isVisible(visibility, "growthSystemSteps") ? (
         <GrowthSystemSection steps={growthSystemSteps} />
       ) : null}
-      <HomePortfolio />
-      <HomeIndustriesTeaser />
+      <HomePortfolio selectedProjects={selectedProjects} />
+      <HomeIndustriesTeaser industries={industries} />
       {isVisible(visibility, "whySmartlanceItems") ? (
         <WhySmartlance items={whySmartlanceItems} />
       ) : null}
@@ -186,7 +187,9 @@ export default async function HomePage() {
       {isVisible(visibility, "seoHighlights") ? (
         <HomeSeoSection highlights={seoHighlights} />
       ) : null}
-      <HomeBlogSection />
+      {isVisible(visibility, "insights") ? (
+        <HomeBlogSection posts={insights} />
+      ) : null}
       {/* Page ends on the global pre-footer CTA — no second closing CTA here. */}
     </>
   );

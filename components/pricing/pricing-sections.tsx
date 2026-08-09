@@ -28,6 +28,7 @@ import {
   type ScopeMatrixRow,
 } from "@/data/pricing";
 import { cn } from "@/lib/utils";
+import type { ManagedPageHeroCopy } from "@/lib/managed-pages/hero";
 
 const ENGAGEMENT_COLUMNS = [
   { key: "improve" as const, label: "Focused improvement" },
@@ -36,7 +37,7 @@ const ENGAGEMENT_COLUMNS = [
   { key: "grow" as const, label: "Growth / ongoing" },
 ];
 
-export function PricingHero() {
+export function PricingHero({ hero }: { hero: ManagedPageHeroCopy }) {
   return (
     <section className="border-b border-border bg-surface-muted">
       <Container className="!pt-10 !pb-12 sm:!pb-14 lg:!pb-16">
@@ -46,15 +47,12 @@ export function PricingHero() {
 
         <div className="mt-8 grid items-center gap-10 lg:grid-cols-[minmax(0,0.58fr)_minmax(0,0.42fr)] lg:gap-14">
           <div className="min-w-0">
-            <p className="eyebrow">Pricing &amp; project scope</p>
+            <p className="eyebrow">{hero.eyebrow}</p>
             <h1 className="mt-4 max-w-2xl font-display text-[clamp(2.5rem,4.5vw,4rem)] font-semibold leading-[1.06] tracking-tight text-foreground">
-              What Will Your Website Project Actually Involve?
+              {hero.headline}
             </h1>
             <p className="mt-5 max-w-xl text-base leading-[1.7] text-muted sm:text-lg">
-              Website costs depend on more than page count. We scope projects
-              around the strategy, content, design, development, SEO,
-              integrations and ongoing needs required to make the site work
-              properly.
+              {hero.supporting}
             </p>
             <p className="mt-4 max-w-xl text-base font-medium leading-relaxed text-foreground">
               You should understand what you&apos;re paying for before the

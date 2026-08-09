@@ -8,11 +8,11 @@ import { CTASection } from "@/components/ui/cta-section";
 import { StructuredData } from "@/components/ui/structured-data";
 import { Button } from "@/components/ui/button";
 import { PlatformSelector } from "@/components/tools/platform-selector";
+import { getToolQuestionCount } from "@/data/tools";
 import {
-  getPublishedTools,
-  getToolBySlug,
-  getToolQuestionCount,
-} from "@/data/tools";
+  loadPublishedTools,
+  loadToolBySlug,
+} from "@/lib/content/phase3-public";
 import { buildResourcePageMetadata } from "@/lib/seo/resource-metadata";
 import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data";
 
@@ -20,15 +20,16 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export function generateStaticParams() {
-  return getPublishedTools().map((item) => ({ slug: item.slug }));
+export async function generateStaticParams() {
+  const tools = await loadPublishedTools();
+  return tools.map((item) => ({ slug: item.slug }));
 }
 
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const tool = getToolBySlug(slug);
+  const tool = await loadToolBySlug(slug);
   if (!tool) return {};
   return buildResourcePageMetadata({
     kind: "tool",
@@ -49,7 +50,7 @@ function formatDate(value: string) {
 
 export default async function ToolDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const tool = getToolBySlug(slug);
+  const tool = await loadToolBySlug(slug);
   if (!tool) notFound();
 
   const questionCount = getToolQuestionCount(tool);

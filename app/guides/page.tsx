@@ -8,7 +8,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { CTASection } from "@/components/ui/cta-section";
 import { StructuredData } from "@/components/ui/structured-data";
 import { GuideCard } from "@/components/guides/guide-body";
-import { getPublishedGuides } from "@/data/guides";
+import { loadPublishedGuides } from "@/lib/content/phase3-public";
 import { buildMetadata } from "@/lib/seo";
 import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data";
 
@@ -19,8 +19,8 @@ export const metadata: Metadata = buildMetadata({
   path: "/guides",
 });
 
-export default function GuidesArchivePage() {
-  const guides = getPublishedGuides();
+export default async function GuidesArchivePage() {
+  const guides = await loadPublishedGuides();
   const featured = guides[0];
 
   return (

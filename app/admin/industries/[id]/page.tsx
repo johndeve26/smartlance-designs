@@ -80,17 +80,43 @@ function IndustryEditorForm({
           className="mt-1 w-full rounded border px-3 py-2 font-mono text-xs"
         />
       </label>
+      <label className="block text-sm">
+        Icon
+        <input
+          name="icon"
+          defaultValue={item.icon}
+          placeholder="building"
+          className="mt-1 w-full rounded border px-3 py-2 font-mono text-sm"
+        />
+        <span className="mt-1 block text-xs text-neutral-500">
+          Lucide icon name used on the public industry page.
+        </span>
+      </label>
+      <label className="block text-sm">
+        Display order
+        <input
+          name="displayOrder"
+          type="number"
+          defaultValue={item.displayOrder}
+          className="mt-1 w-full rounded border px-3 py-2"
+        />
+      </label>
+      <label className="block text-sm">
+        Related service links (JSON array)
+        <textarea
+          name="relatedServiceLinks"
+          defaultValue={JSON.stringify(item.relatedServiceLinks ?? [], null, 2)}
+          rows={4}
+          className="mt-1 w-full rounded border px-3 py-2 font-mono text-xs"
+        />
+        <span className="mt-1 block text-xs text-neutral-500">
+          Objects with label, href, and optional description.
+        </span>
+      </label>
       <p className="text-xs text-neutral-500">
         Available work:{" "}
         {work.map((w) => `${w.name} (${w.id.slice(0, 8)})`).join(" · ")}
       </p>
-      <input type="hidden" name="icon" value={item.icon} />
-      <input type="hidden" name="displayOrder" value={item.displayOrder} />
-      <input
-        type="hidden"
-        name="relatedServiceLinks"
-        value={JSON.stringify(item.relatedServiceLinks ?? [])}
-      />
 
       <SeoFields
         disabled={false}

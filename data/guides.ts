@@ -1,6 +1,6 @@
 /**
- * Published Guides registry.
- * Only include Guides that are ready to ship — no placeholders.
+ * Published Guides registry — STATIC/PRE_IMPORT fallback only.
+ * Public discovery uses `loadPublishedGuides()` from phase3-public.
  */
 
 import type { GuideContent } from "@/data/resource-content-types";

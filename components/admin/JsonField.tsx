@@ -1,3 +1,5 @@
+import { ImproveFieldButton } from "@/components/admin/content-assistants/ImproveFieldButton";
+
 type JsonFieldProps = {
   name: string;
   label: string;
@@ -5,6 +7,9 @@ type JsonFieldProps = {
   hint?: string;
   rows?: number;
   disabled?: boolean;
+  /** When set, shows Improve with AI for Work draft fields. */
+  improveField?: string;
+  improveEntityId?: string;
 };
 
 function stringifyJson(value: unknown): string {
@@ -23,10 +28,21 @@ export function JsonField({
   hint,
   rows = 8,
   disabled,
+  improveField,
+  improveEntityId,
 }: JsonFieldProps) {
   return (
     <label className="admin-field block">
-      <span className="admin-label">{label}</span>
+      <span className="admin-label flex items-center justify-between gap-2">
+        {label}
+        {improveField && improveEntityId ? (
+          <ImproveFieldButton
+            entityType="WORK"
+            entityId={improveEntityId}
+            field={improveField}
+          />
+        ) : null}
+      </span>
       {hint ? <span className="admin-hint">{hint}</span> : null}
       <textarea
         name={name}

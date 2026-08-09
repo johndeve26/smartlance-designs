@@ -22,11 +22,11 @@ import {
 } from "@/components/comparisons/comparison-sections";
 import { BlogMarkdown } from "@/components/blog/blog-markdown";
 import {
-  getComparisonBySlug,
-  getPublishedComparisons,
-  getRelatedPublishedComparisons,
-} from "@/data/comparisons";
-import { getGuideBySlug } from "@/data/guides";
+  loadComparisonBySlug,
+  loadGuideBySlug,
+  loadPublishedComparisons,
+} from "@/lib/content/phase3-public";
+import { resolveRelatedPublishedComparisons } from "@/lib/resources/discovery";
 import { getSolutionBySlug, getSolutionHref } from "@/data/solutions";
 import { getServiceBySlug } from "@/data/services";
 import { getPostBySlug } from "@/lib/blog";
@@ -42,15 +42,16 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export function generateStaticParams() {
-  return getPublishedComparisons().map((item) => ({ slug: item.slug }));
+export async function generateStaticParams() {
+  const comparisons = await loadPublishedComparisons();
+  return comparisons.map((item) => ({ slug: item.slug }));
 }
 
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const comparison = getComparisonBySlug(slug);
+  const comparison = await loadComparisonBySlug(slug);
   if (!comparison) return {};
   return buildResourcePageMetadata({
     kind: "comparison",
@@ -64,13 +65,22 @@ export async function generateMetadata({
 
 export default async function ComparisonDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const comparison = getComparisonBySlug(slug);
+  const comparison = await loadComparisonBySlug(slug);
   if (!comparison) notFound();
 
-  const relatedComparisons = getRelatedPublishedComparisons(comparison.slug, 3);
-  const relatedGuides = (comparison.relatedGuideSlugs ?? [])
-    .map((guideSlug) => getGuideBySlug(guideSlug))
-    .filter((guide): guide is NonNullable<typeof guide> => Boolean(guide));
+  const publishedComparisons = await loadPublishedComparisons();
+  const relatedComparisons = resolveRelatedPublishedComparisons(
+    comparison.slug,
+    publishedComparisons,
+    3,
+  );
+  const relatedGuides = (
+    await Promise.all(
+      (comparison.relatedGuideSlugs ?? []).map((guideSlug) =>
+        loadGuideBySlug(guideSlug),
+      ),
+    )
+  ).filter((guide): guide is NonNullable<typeof guide> => Boolean(guide));
 
   const relatedSolutions = (comparison.relatedSolutionSlugs ?? [])
     .map((solutionSlug) => getSolutionBySlug(solutionSlug))

@@ -7,6 +7,12 @@ import {
 import { writeAuditLog } from "@/lib/repositories/auditRepository";
 import { upsertSlugRedirect } from "@/lib/repositories/redirectsRepository";
 import { resourceHref } from "@/lib/content-routes";
+import { resolvePublicResourceContent } from "@/lib/resources/canonical";
+import {
+  RESOURCE_LISTING_SELECT,
+  resourceListingOrder,
+  type ResourceListingRow,
+} from "@/lib/resources/discovery";
 
 const published: PublishStatus = "PUBLISHED";
 
@@ -14,7 +20,29 @@ export async function listPublishedResourcesByType(type: ResourceKind) {
   if (!hasDatabaseUrl()) return [];
   return prisma.cmsResource.findMany({
     where: { type, status: published },
-    orderBy: [{ featuredOrder: "asc" }, { title: "asc" }],
+    orderBy: resourceListingOrder(type),
+  });
+}
+
+export async function listPublishedResourceListingRows(
+  type: ResourceKind,
+): Promise<ResourceListingRow[]> {
+  if (!hasDatabaseUrl()) return [];
+  return prisma.cmsResource.findMany({
+    where: { type, status: published },
+    select: RESOURCE_LISTING_SELECT,
+    orderBy: resourceListingOrder(type),
+  });
+}
+
+export async function listAllPublishedResourceListingRows(): Promise<
+  ResourceListingRow[]
+> {
+  if (!hasDatabaseUrl()) return [];
+  return prisma.cmsResource.findMany({
+    where: { status: published },
+    select: RESOURCE_LISTING_SELECT,
+    orderBy: [{ type: "asc" }, { featured: "desc" }, { featuredOrder: "asc" }, { publishedAt: "desc" }, { title: "asc" }],
   });
 }
 
@@ -64,7 +92,7 @@ export async function countResourcesByType() {
 }
 
 export function resourcePayload<T>(row: CmsResource): T {
-  return row.payload as T;
+  return resolvePublicResourceContent<T>(row);
 }
 
 export async function saveResourceDraft(input: {

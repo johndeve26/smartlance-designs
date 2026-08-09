@@ -2,20 +2,33 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import type { ChecklistContent } from "@/data/resource-content-types";
 import { getChecklistItemCount } from "@/data/checklists";
+import type { ChecklistListingContent } from "@/lib/resources/discovery";
 import { cn } from "@/lib/utils";
+
+function checklistCounts(checklist: ChecklistContent | ChecklistListingContent) {
+  if ("listingSectionCount" in checklist) {
+    return {
+      sectionCount: checklist.listingSectionCount,
+      itemCount: checklist.listingItemCount,
+    };
+  }
+  return {
+    sectionCount: checklist.sections.length,
+    itemCount: getChecklistItemCount(checklist),
+  };
+}
 
 export function ChecklistCard({
   checklist,
   variant = "featured",
   className,
 }: {
-  checklist: ChecklistContent;
+  checklist: ChecklistContent | ChecklistListingContent;
   variant?: "featured" | "compact";
   className?: string;
 }) {
   const featured = variant === "featured";
-  const itemCount = getChecklistItemCount(checklist);
-  const sectionCount = checklist.sections.length;
+  const { sectionCount, itemCount } = checklistCounts(checklist);
 
   return (
     <article className={cn("group flex flex-col", className)}>

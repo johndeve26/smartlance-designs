@@ -77,7 +77,10 @@ export default async function WorkPage({
 
       <Section className="!pt-0 !pb-12 sm:!pb-14 lg:!pb-16">
         <Container>
-          <PortfolioFilters initialPlatform={params.platform} />
+          <PortfolioFilters
+            projects={projects}
+            initialPlatform={params.platform}
+          />
         </Container>
       </Section>
 

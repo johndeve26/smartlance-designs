@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ProjectCard } from "@/components/ui/project-card";
-import { getVisibleProjects } from "@/data/portfolio";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Project } from "@/types";
@@ -26,11 +25,13 @@ function sortProjects(projects: Project[]) {
 }
 
 export function PortfolioFilters({
+  projects: inputProjects,
   initialPlatform,
 }: {
+  projects: Project[];
   initialPlatform?: string;
 }) {
-  const projects = useMemo(() => sortProjects(getVisibleProjects()), []);
+  const projects = useMemo(() => sortProjects(inputProjects), [inputProjects]);
   const [filters, setFilters] = useState<FilterState>({
     industry: ALL,
     platform: initialPlatform || ALL,

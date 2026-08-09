@@ -185,7 +185,8 @@ export function getFeaturedInsightsPosts(count = 3): BlogPostMeta[] {
   return chosen.slice(0, count);
 }
 
-/** Homepage: prefer featured posts, then fill with newest non-vacation if needed */
+/** Homepage: prefer featured posts, then fill with newest non-vacation if needed.
+ * STATIC / PRE-IMPORT FALLBACK ONLY — production Homepage uses DB Insights loader. */
 export function getLatestPosts(count = 3): BlogPostMeta[] {
   const all = getAllPosts();
   const featured = all.filter((post) => post.featured);

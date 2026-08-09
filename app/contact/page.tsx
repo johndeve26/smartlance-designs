@@ -12,6 +12,11 @@ import { companyDetails } from "@/data/navigation";
 import { buildManagedPageMetadata } from "@/lib/seo";
 import { breadcrumbJsonLd, faqJsonLd } from "@/lib/structured-data";
 import { getPublicSettings } from "@/lib/repositories/siteSettingsRepository";
+import { getPublishedManagedPageByKey } from "@/lib/managed-pages/public";
+import {
+  MANAGED_PAGE_HERO_DEFAULTS,
+  resolveManagedPageHero,
+} from "@/lib/managed-pages/hero";
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildManagedPageMetadata("contact", {
@@ -30,6 +35,11 @@ const goodToKnow = [
 
 export default async function ContactPage() {
   const settings = await getPublicSettings();
+  const managedPage = await getPublishedManagedPageByKey("contact");
+  const hero = resolveManagedPageHero(
+    MANAGED_PAGE_HERO_DEFAULTS.contact,
+    managedPage,
+  );
   const formEnabled = settings.contactFormEnabled;
   return (
     <>
@@ -51,14 +61,12 @@ export default async function ContactPage() {
 
           <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,0.42fr)_minmax(0,0.58fr)] lg:items-start lg:gap-14 xl:gap-16">
             <div className="min-w-0">
-              <p className="eyebrow">Contact</p>
+              <p className="eyebrow">{hero.eyebrow}</p>
               <h1 className="mt-3 font-display text-[clamp(2.5rem,4.5vw,4.5rem)] font-semibold leading-[1.05] tracking-tight text-foreground">
-                Let&apos;s Talk About Your Website
+                {hero.headline}
               </h1>
               <p className="mt-5 max-w-md text-lg leading-relaxed text-muted sm:text-xl">
-                Tell us what you&apos;re planning, what isn&apos;t working, or
-                what you&apos;d like to improve. We&apos;ll use that information
-                to recommend the most useful next step.
+                {hero.supporting}
               </p>
 
               <dl className="mt-9 space-y-6 border-t border-border pt-8">

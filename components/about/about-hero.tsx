@@ -9,15 +9,16 @@ import {
   aboutCapabilities,
   aboutSnapshot,
 } from "@/data/about";
-import { siteConfig } from "@/lib/site";
+import type { ManagedPageHeroCopy } from "@/lib/managed-pages/hero";
 import type { Project } from "@/types";
 import { cn } from "@/lib/utils";
 
 type AboutHeroProps = {
   projects: Project[];
+  hero: ManagedPageHeroCopy;
 };
 
-export function AboutHero({ projects }: AboutHeroProps) {
+export function AboutHero({ projects, hero }: AboutHeroProps) {
   return (
     <section className="border-b border-border bg-surface-muted">
       <Container className="!pt-10 !pb-12 sm:!pb-14 lg:!pb-16">
@@ -27,14 +28,12 @@ export function AboutHero({ projects }: AboutHeroProps) {
 
         <div className="mt-8 grid items-center gap-10 lg:grid-cols-[minmax(0,0.52fr)_minmax(0,0.48fr)] lg:gap-12 xl:gap-14">
           <div className="min-w-0">
-            <p className="eyebrow">About Smartlance</p>
+            <p className="eyebrow">{hero.eyebrow}</p>
             <h1 className="mt-4 max-w-xl font-display text-[clamp(2.75rem,5vw,5rem)] font-semibold leading-[1.05] tracking-tight text-foreground">
-              We Build Websites Around What Businesses Actually Need.
+              {hero.headline}
             </h1>
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted sm:text-xl">
-              {siteConfig.name} is a website, SEO and digital-growth agency
-              helping businesses build clearer, faster and more discoverable
-              online experiences — with {siteConfig.experienceClaim.toLowerCase()}.
+              {hero.supporting}
             </p>
 
             <ul className="mt-6 flex flex-wrap gap-x-3 gap-y-2">

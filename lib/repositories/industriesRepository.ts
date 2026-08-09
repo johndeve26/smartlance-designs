@@ -1,17 +1,32 @@
 import { hasDatabaseUrl, prisma } from "@/lib/db";
-import type { Industry as PublicIndustry, IndustryPublicDetail } from "@/types";
+import type {
+  Industry as PublicIndustry,
+  IndustryPublicDetail,
+  IndustryServiceLink,
+} from "@/types";
 import type { Prisma, PublishStatus } from "@prisma/client";
 import {
   createContentRevision,
   revalidateIndustries,
 } from "@/lib/admin/publishing";
 import { writeAuditLog } from "@/lib/repositories/auditRepository";
-import { industriesCatalog } from "@/data/industries";
 
 const published: PublishStatus = "PUBLISHED";
 
-function asArray<T>(value: unknown): T[] {
-  return Array.isArray(value) ? (value as T[]) : [];
+function asStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === "string");
+}
+
+function parseRelatedServiceLinks(value: unknown): IndustryServiceLink[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(
+    (item): item is IndustryServiceLink =>
+      typeof item === "object" &&
+      item !== null &&
+      typeof (item as IndustryServiceLink).label === "string" &&
+      typeof (item as IndustryServiceLink).href === "string",
+  );
 }
 
 export function catalogToDetail(item: PublicIndustry): IndustryPublicDetail {
@@ -50,7 +65,7 @@ export function toPublicIndustry(
     group: row.group,
     featured: row.featured || undefined,
     projectSlugs: projectSlugs.length ? projectSlugs : undefined,
-    relatedServices: asArray(row.relatedServiceLinks),
+    relatedServices: parseRelatedServiceLinks(row.relatedServiceLinks),
   };
 }
 
@@ -80,15 +95,15 @@ export function toPublicIndustryDetail(row: {
     canonicalOverride: row.canonicalOverride,
     ogImagePath: row.ogImagePath,
     hasVerifiedProjectExperience: row.hasVerifiedProjectExperience,
-    relatedSolutionSlugs: asArray<string>(row.relatedSolutionSlugs),
+    relatedSolutionSlugs: asStringArray(row.relatedSolutionSlugs),
   };
 }
 
-export async function getPublishedIndustryBySlug(slug: string) {
-  if (!hasDatabaseUrl()) {
-    const item = industriesCatalog.find((i) => i.slug === slug);
-    return item ? catalogToDetail(item) : null;
-  }
+export async function getPublishedIndustryBySlug(
+  slug: string,
+): Promise<IndustryPublicDetail | null> {
+  if (!hasDatabaseUrl()) return null;
+
   const row = await prisma.industry.findFirst({
     where: { slug, status: published },
     include: {
@@ -98,13 +113,8 @@ export async function getPublishedIndustryBySlug(slug: string) {
       },
     },
   });
-  if (row) return toPublicIndustryDetail(row);
-  const probe = await prisma.industry.count({ where: { status: published } });
-  if (!probe) {
-    const item = industriesCatalog.find((i) => i.slug === slug);
-    return item ? catalogToDetail(item) : null;
-  }
-  return null;
+
+  return row ? toPublicIndustryDetail(row) : null;
 }
 
 export async function listPublishedIndustries() {

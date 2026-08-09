@@ -9,13 +9,15 @@ import { StructuredData } from "@/components/ui/structured-data";
 import { BlogCard } from "@/components/ui/blog-card";
 import { ChecklistInteractive } from "@/components/checklists/checklist-interactive";
 import {
-  getChecklistBySlug,
+  loadChecklistBySlug,
+  loadPublishedChecklists,
+  loadComparisonBySlug,
+  loadGuideBySlug,
+} from "@/lib/content/phase3-public";
+import {
   getChecklistItemCount,
   getChecklistNav,
-  getPublishedChecklists,
 } from "@/data/checklists";
-import { getGuideBySlug } from "@/data/guides";
-import { getComparisonBySlug } from "@/data/comparisons";
 import { getSolutionBySlug, getSolutionHref } from "@/data/solutions";
 import { getServiceBySlug } from "@/data/services";
 import { getPostBySlug } from "@/lib/blog";
@@ -27,15 +29,16 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export function generateStaticParams() {
-  return getPublishedChecklists().map((item) => ({ slug: item.slug }));
+export async function generateStaticParams() {
+  const checklists = await loadPublishedChecklists();
+  return checklists.map((item) => ({ slug: item.slug }));
 }
 
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const checklist = getChecklistBySlug(slug);
+  const checklist = await loadChecklistBySlug(slug);
   if (!checklist) return {};
   return buildResourcePageMetadata({
     kind: "checklist",
@@ -57,18 +60,18 @@ function formatDate(value: string) {
 
 export default async function ChecklistDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const checklist = getChecklistBySlug(slug);
+  const checklist = await loadChecklistBySlug(slug);
   if (!checklist) notFound();
 
   const itemCount = getChecklistItemCount(checklist);
   const nav = getChecklistNav(checklist);
 
   const relatedGuide = checklist.relatedGuideSlugs?.[0]
-    ? getGuideBySlug(checklist.relatedGuideSlugs[0])
+    ? await loadGuideBySlug(checklist.relatedGuideSlugs[0])
     : undefined;
 
   const relatedComparison = checklist.relatedComparisonSlugs?.[0]
-    ? getComparisonBySlug(checklist.relatedComparisonSlugs[0])
+    ? await loadComparisonBySlug(checklist.relatedComparisonSlugs[0])
     : undefined;
 
   const relatedSolutions = (checklist.relatedSolutionSlugs ?? [])

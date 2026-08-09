@@ -132,6 +132,7 @@ export function revalidateInsight(slug: string) {
   revalidatePath(`/blog/${slug}`);
   revalidatePath("/resources");
   revalidatePath("/sitemap.xml");
+  revalidateHomepage();
 }
 
 export function revalidateCmsResource(

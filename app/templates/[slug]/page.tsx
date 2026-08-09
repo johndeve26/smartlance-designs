@@ -10,14 +10,16 @@ import { BlogCard } from "@/components/ui/blog-card";
 import { Button } from "@/components/ui/button";
 import { ProjectBriefForm } from "@/components/templates/project-brief-form";
 import {
-  getPublishedTemplates,
-  getTemplateBySlug,
   getTemplateNav,
   getTemplateSectionCount,
 } from "@/data/templates";
-import { getGuideBySlug } from "@/data/guides";
-import { getComparisonBySlug } from "@/data/comparisons";
-import { getChecklistBySlug } from "@/data/checklists";
+import {
+  loadChecklistBySlug,
+  loadComparisonBySlug,
+  loadGuideBySlug,
+  loadPublishedTemplates,
+  loadTemplateBySlug,
+} from "@/lib/content/phase3-public";
 import { getSolutionBySlug, getSolutionHref } from "@/data/solutions";
 import { getServiceBySlug } from "@/data/services";
 import { getPostBySlug } from "@/lib/blog";
@@ -29,15 +31,16 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export function generateStaticParams() {
-  return getPublishedTemplates().map((item) => ({ slug: item.slug }));
+export async function generateStaticParams() {
+  const templates = await loadPublishedTemplates();
+  return templates.map((item) => ({ slug: item.slug }));
 }
 
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const template = getTemplateBySlug(slug);
+  const template = await loadTemplateBySlug(slug);
   if (!template) return {};
   return buildResourcePageMetadata({
     kind: "template",
@@ -58,22 +61,22 @@ function formatDate(value: string) {
 
 export default async function TemplateDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const template = getTemplateBySlug(slug);
+  const template = await loadTemplateBySlug(slug);
   if (!template) notFound();
 
   const sectionCount = getTemplateSectionCount(template);
   const nav = getTemplateNav(template);
 
   const relatedGuide = template.relatedGuideSlugs?.[0]
-    ? getGuideBySlug(template.relatedGuideSlugs[0])
+    ? await loadGuideBySlug(template.relatedGuideSlugs[0])
     : undefined;
 
   const relatedComparison = template.relatedComparisonSlugs?.[0]
-    ? getComparisonBySlug(template.relatedComparisonSlugs[0])
+    ? await loadComparisonBySlug(template.relatedComparisonSlugs[0])
     : undefined;
 
   const relatedChecklist = template.relatedChecklistSlugs?.[0]
-    ? getChecklistBySlug(template.relatedChecklistSlugs[0])
+    ? await loadChecklistBySlug(template.relatedChecklistSlugs[0])
     : undefined;
 
   const relatedSolutions = (template.relatedSolutionSlugs ?? [])

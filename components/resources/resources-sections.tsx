@@ -11,32 +11,25 @@ import { GuideCard } from "@/components/guides/guide-body";
 import { ComparisonCard } from "@/components/comparisons/comparison-hero";
 import {
   explainedResourceTypes,
-  getGuideCount,
-  getInsightCount,
-  getComparisonCount,
-  getChecklistCount,
-  getGlossaryCount,
-  getTemplateCount,
-  getToolCount,
   getPublishedResourceTypes,
   getResourceTypeConfig,
   getTopicHref,
   resourceGoals,
   resourceTopics,
 } from "@/data/resources";
+import type { ResourceDiscoveryCounts } from "@/lib/resources/discovery";
 import type { BlogPostMeta } from "@/types";
 import type { GuideContent, ComparisonContent } from "@/data/resource-content-types";
 import { cn } from "@/lib/utils";
 
-export function ResourcesHero() {
+export function ResourcesHero({
+  counts,
+  insightCount,
+}: {
+  counts: ResourceDiscoveryCounts;
+  insightCount: number;
+}) {
   const publishedTypes = getPublishedResourceTypes();
-  const insightCount = getInsightCount();
-  const guideCount = getGuideCount();
-  const comparisonCount = getComparisonCount();
-  const checklistCount = getChecklistCount();
-  const glossaryCount = getGlossaryCount();
-  const templateCount = getTemplateCount();
-  const toolCount = getToolCount();
 
   return (
     <section className="border-b border-border bg-surface-muted">
@@ -72,17 +65,17 @@ export function ResourcesHero() {
                   type.type === "insight"
                     ? insightCount
                     : type.type === "guide"
-                      ? guideCount
+                      ? counts.guide
                       : type.type === "comparison"
-                        ? comparisonCount
+                        ? counts.comparison
                         : type.type === "checklist"
-                          ? checklistCount
+                          ? counts.checklist
                           : type.type === "glossary"
-                            ? glossaryCount
+                            ? counts.glossary
                             : type.type === "template"
-                              ? templateCount
+                              ? counts.template
                               : type.type === "tool"
-                                ? toolCount
+                                ? counts.tool
                                 : 0;
                 return (
                 <Link
@@ -239,7 +232,13 @@ export function ResourcesFeatured({
   );
 }
 
-export function ResourcesPlatformSelectorCallout() {
+export function ResourcesPlatformSelectorCallout({
+  toolHref,
+}: {
+  toolHref?: string | null;
+}) {
+  if (!toolHref) return null;
+
   return (
     <section className="border-b border-border">
       <Container className="py-8 sm:py-10">
@@ -257,7 +256,7 @@ export function ResourcesPlatformSelectorCallout() {
             </p>
           </div>
           <Link
-            href="/tools/website-platform-selector"
+            href={toolHref}
             className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-accent-text hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
             Try the Website Platform Selector

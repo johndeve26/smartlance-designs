@@ -4,7 +4,7 @@
  */
 
 import { createHash, randomBytes } from "crypto";
-import type { CmsResource, Prisma, ResourceKind } from "@prisma/client";
+import type { CmsResource, ResourceKind } from "@prisma/client";
 import {
   formatContextBlocks,
   loadBrandVoiceBlock,
@@ -19,6 +19,11 @@ import {
 import { prisma } from "@/lib/db";
 import { saveResourceDraft } from "@/lib/repositories/resourcesRepository";
 import { writeAuditLog } from "@/lib/repositories/auditRepository";
+import {
+  columnsFromResourceRow,
+  composeResourceSaveData,
+  type ResourceColumnInput,
+} from "@/lib/resources/canonical";
 
 export function newStableId(prefix: string): string {
   return `${prefix}-${randomBytes(6).toString("hex")}`;
@@ -190,43 +195,48 @@ export async function applyResourceCmsFields(input: {
     input.mergePayload(currentPayload, safe),
   );
 
-  const data: Prisma.CmsResourceUncheckedUpdateInput = {
-    payload: nextPayload as Prisma.InputJsonValue,
+  const mergedColumns: ResourceColumnInput = {
+    ...columnsFromResourceRow(row),
   };
-
-  const columnKeys = [
+  for (const key of [
     "title",
     "description",
     "deck",
     "seoTitle",
     "seoDescription",
-    "ogTitle",
-    "ogDescription",
     "shortDefinition",
     "acronym",
+    "readingTime",
+    "author",
+  ] as const) {
+    if (typeof safe[key] === "string") {
+      mergedColumns[key] = safe[key] as string;
+    }
+  }
+  for (const key of [
     "relatedServiceHrefs",
     "relatedSolutionSlugs",
     "relatedPlatformSlugs",
     "relatedInsightSlugs",
     "relatedResourceIds",
     "aliases",
-    "readingTime",
-    "author",
-  ] as const;
-
-  for (const key of columnKeys) {
-    if (key in safe && safe[key] !== undefined) {
-      (data as Record<string, unknown>)[key] = safe[key];
+  ] as const) {
+    if (safe[key] !== undefined) {
+      mergedColumns[key] = safe[key];
     }
   }
 
-  // Keep glossary mirrors in sync when definition updated
-  if (input.expectedKind === "glossary") {
-    if (typeof safe.shortDefinition === "string") {
-      data.shortDefinition = safe.shortDefinition;
-      if (!safe.description) data.description = safe.shortDefinition;
-    }
+  if (input.expectedKind === "glossary" && typeof safe.shortDefinition === "string") {
+    mergedColumns.shortDefinition = safe.shortDefinition;
+    if (!safe.description) mergedColumns.description = safe.shortDefinition;
   }
+
+  const data = composeResourceSaveData({
+    type: row.type,
+    columns: mergedColumns,
+    structuralPayload: nextPayload,
+    existing: row,
+  });
 
   await saveResourceDraft({
     id: input.entityId,

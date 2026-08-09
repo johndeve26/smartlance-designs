@@ -9,6 +9,9 @@ import {
   unpublishInsightAction,
 } from "@/lib/admin/phase3-actions";
 import { StatusBadge } from "@/components/admin/StatusBadge";
+import { SeoFields } from "@/components/admin/SeoFields";
+import { MediaPicker } from "@/components/admin/media/MediaPicker";
+import { isMediaStorageConfigured } from "@/lib/media/storage";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +24,7 @@ export default async function AdminInsightEditorPage({ params }: PageProps) {
   if (!item) notFound();
   const canPublish = userCan(user, "publish");
   const canSlug = userCan(user, "slug_redirect");
+  const storageConfigured = isMediaStorageConfigured();
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -43,13 +47,37 @@ export default async function AdminInsightEditorPage({ params }: PageProps) {
         <label className="block text-sm">Category<input name="categoryLabel" defaultValue={item.categoryLabel} className="mt-1 w-full rounded border px-3 py-2" required /></label>
         <label className="block text-sm">Author<input name="author" defaultValue={item.author ?? ""} className="mt-1 w-full rounded border px-3 py-2" /></label>
         <label className="block text-sm">Original published at<input type="datetime-local" name="originalPublishedAt" defaultValue={item.originalPublishedAt.toISOString().slice(0, 16)} className="mt-1 w-full rounded border px-3 py-2" required /></label>
-        <label className="block text-sm">Hero image path<input name="heroImagePath" defaultValue={item.heroImagePath ?? ""} className="mt-1 w-full rounded border px-3 py-2 font-mono text-xs" /></label>
-        <label className="block text-sm">Hero alt<input name="heroImageAlt" defaultValue={item.heroImageAlt ?? ""} className="mt-1 w-full rounded border px-3 py-2" /></label>
+
+        <fieldset className="space-y-4 rounded border border-neutral-200 bg-neutral-50 p-4">
+          <legend className="px-1 text-sm font-semibold text-neutral-900">Hero image</legend>
+          <MediaPicker
+            name="heroImagePath"
+            label="Hero image"
+            defaultValue={item.heroImagePath}
+            storageConfigured={storageConfigured}
+          />
+          <label className="block text-sm">
+            Hero alt
+            <input name="heroImageAlt" defaultValue={item.heroImageAlt ?? ""} className="mt-1 w-full rounded border px-3 py-2" />
+          </label>
+        </fieldset>
+
         <label className="block text-sm">Body (Markdown)<textarea name="bodyMarkdown" defaultValue={item.bodyMarkdown} rows={24} className="mt-1 w-full rounded border px-3 py-2 font-mono text-xs" required /></label>
-        <label className="block text-sm">SEO title<input name="seoTitle" defaultValue={item.seoTitle ?? ""} className="mt-1 w-full rounded border px-3 py-2" /></label>
-        <label className="block text-sm">SEO description<textarea name="seoDescription" defaultValue={item.seoDescription ?? ""} rows={2} className="mt-1 w-full rounded border px-3 py-2" /></label>
         <label className="block text-sm">Related service hrefs JSON<textarea name="relatedServiceHrefs" defaultValue={JSON.stringify(item.relatedServiceHrefs ?? [], null, 2)} rows={3} className="mt-1 w-full rounded border px-3 py-2 font-mono text-xs" /></label>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="featured" defaultChecked={item.featured} /> Featured</label>
+
+        <SeoFields
+          defaults={{
+            seoTitle: item.seoTitle,
+            seoDescription: item.seoDescription,
+            ogTitle: item.ogTitle,
+            ogDescription: item.ogDescription,
+            ogImagePath: item.ogImagePath,
+            noIndex: item.noIndex,
+            canonicalOverride: item.canonicalOverride,
+          }}
+        />
+
         <button type="submit" className="rounded bg-neutral-900 px-4 py-2 text-sm text-white">Save draft</button>
       </form>
 

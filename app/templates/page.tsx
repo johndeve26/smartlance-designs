@@ -8,11 +8,11 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { CTASection } from "@/components/ui/cta-section";
 import { StructuredData } from "@/components/ui/structured-data";
 import {
-  getPublishedTemplates,
-  getTemplateSectionCount,
-} from "@/data/templates";
-import { getPublishedGuides } from "@/data/guides";
-import { getPublishedChecklists } from "@/data/checklists";
+  loadChecklistBySlug,
+  loadGuideBySlug,
+  loadPublishedTemplates,
+} from "@/lib/content/phase3-public";
+import type { TemplateListingContent } from "@/lib/resources/discovery";
 import { buildMetadata } from "@/lib/seo";
 import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data";
 
@@ -23,15 +23,17 @@ export const metadata: Metadata = buildMetadata({
   path: "/templates",
 });
 
-export default function TemplatesArchivePage() {
-  const templates = getPublishedTemplates();
-  const featured = templates.find((item) => item.featured) ?? templates[0];
-  const redesignGuide = getPublishedGuides().find(
-    (guide) => guide.slug === "website-redesign-guide",
-  );
-  const redesignChecklist = getPublishedChecklists().find(
-    (checklist) => checklist.slug === "website-redesign-checklist",
-  );
+function templateSectionCount(template: TemplateListingContent) {
+  return template.listingSectionCount ?? template.sections.length;
+}
+
+export default async function TemplatesArchivePage() {
+  const templates = await loadPublishedTemplates();
+  const featured =
+    (templates.find((item) => item.featured) as TemplateListingContent | undefined) ??
+    (templates[0] as TemplateListingContent | undefined);
+  const redesignGuide = await loadGuideBySlug("website-redesign-guide");
+  const redesignChecklist = await loadChecklistBySlug("website-redesign-checklist");
 
   return (
     <>
@@ -99,7 +101,7 @@ export default function TemplatesArchivePage() {
                 {featured.description}
               </p>
               <p className="mt-4 text-sm text-subtle">
-                {getTemplateSectionCount(featured)} sections
+                {templateSectionCount(featured)} sections
               </p>
               <Link
                 href={`/templates/${featured.slug}`}

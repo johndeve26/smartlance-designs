@@ -26,6 +26,12 @@ import {
 } from "@/lib/ai/prompts";
 import { getBrandVoice } from "@/lib/ai/editorial-service";
 import { saveWorkDraft } from "@/lib/repositories/workRepository";
+import type { WorkEditableFields } from "@/lib/repositories/workDraftFields";
+import {
+  parseCaseStudyContent,
+  validateCaseStudyContentInput,
+  type CaseStudyContentV1,
+} from "@/lib/work/case-study-content";
 import { prisma } from "@/lib/db";
 import { writeAuditLog } from "@/lib/repositories/auditRepository";
 import {
@@ -102,6 +108,38 @@ export const WORK_ACTIONS = [
     loadingLabel: "Reviewing Case Study…",
   },
 ] as const;
+
+const CASE_STUDY_CONTENT_FIELD_MAP: Record<string, keyof CaseStudyContentV1> = {
+  introHeading: "introHeading",
+  solutionIntro: "solutionIntro",
+  engineeringIntro: "engineeringIntro",
+  csGallery: "gallery",
+  csSectionHeadings: "sectionHeadings",
+  csServiceLinks: "serviceLinks",
+  csEngineeringStacks: "engineeringStacks",
+  csProductPrinciples: "productPrinciples",
+  csProductFeatures: "productFeatures",
+  csSaasInfrastructure: "saasInfrastructure",
+  csCaseStudyCta: "caseStudyCta",
+};
+
+function mergeCaseStudyContentFields(
+  existing: CaseStudyContentV1 | null,
+  fields: Record<string, unknown>,
+): CaseStudyContentV1 | null {
+  const patches: Partial<CaseStudyContentV1> = {};
+  for (const [field, value] of Object.entries(fields)) {
+    const key = CASE_STUDY_CONTENT_FIELD_MAP[field];
+    if (!key) continue;
+    (patches as Record<string, unknown>)[key] = value;
+  }
+  if (Object.keys(patches).length === 0) return existing;
+  return validateCaseStudyContentInput({
+    version: 1,
+    ...(existing ?? {}),
+    ...patches,
+  });
+}
 
 async function verifyWorkFields(fields: Record<string, unknown>) {
   const out = { ...fields };
@@ -212,23 +250,48 @@ export const workAssistant: ContentAssistantModule = {
     const mappedAction = input.action.startsWith("IMPROVE_FIELD:")
       ? (() => {
           const field = input.action.slice("IMPROVE_FIELD:".length);
-          if (field === "challenge") return "IMPROVE_CHALLENGE";
-          if (field === "solution" || field === "approach") return "IMPROVE_SOLUTION";
-          if (field === "shortDescription" || field === "overview")
+          if (field === "challenge" || field === "challenges") return "IMPROVE_CHALLENGE";
+          if (
+            field === "solution" ||
+            field === "approach" ||
+            field === "approachSteps" ||
+            field === "solutionPoints" ||
+            field === "solutionIntro"
+          ) {
+            return "IMPROVE_SOLUTION";
+          }
+          if (
+            field === "shortDescription" ||
+            field === "overview" ||
+            field === "introHeading" ||
+            field === "heroStatement" ||
+            field === "heroEyebrow" ||
+            field === "heroSupportingCopy"
+          ) {
             return "IMPROVE_SUMMARY";
+          }
           if (
             field === "resultSummary" ||
             field === "results" ||
             field === "measurableResults"
-          )
+          ) {
             return "FORMAT_RESULTS";
+          }
           if (
             field === "seoTitle" ||
             field === "seoDescription" ||
             field === "ogTitle" ||
             field === "ogDescription"
-          )
+          ) {
             return "GENERATE_SEO";
+          }
+          if (
+            field === "gallery" ||
+            field === "csGallery" ||
+            field.startsWith("cs")
+          ) {
+            return "IMPROVE_CASE_STUDY";
+          }
           return "IMPROVE_CASE_STUDY";
         })()
       : input.action;
@@ -326,6 +389,26 @@ export const workAssistant: ContentAssistantModule = {
       }
     }
 
+    if (input.action.startsWith("IMPROVE_FIELD:")) {
+      const targetField = input.action.slice("IMPROVE_FIELD:".length);
+      const targeted = fields.filter((f) => f.field === targetField);
+      if (targeted.length) {
+        return {
+          payload: {
+            fields: targeted,
+            claims: base.claims,
+            reviewFindings: base.reviewFindings,
+            suggestedRelations: base.suggestedRelations,
+          },
+          promptVersion: actionMeta.promptVersion,
+          provider: result.provider,
+          model: result.model,
+          tokenUsageInput: result.tokenUsageInput,
+          tokenUsageOutput: result.tokenUsageOutput,
+        };
+      }
+    }
+
     return {
       payload: {
         fields,
@@ -343,16 +426,29 @@ export const workAssistant: ContentAssistantModule = {
 
   async applyFields(input) {
     const verified = await verifyWorkFields(input.fields);
+    const row = await prisma.workProject.findUnique({
+      where: { id: input.entityId },
+      select: { caseStudyContent: true },
+    });
+    const existingContent = parseCaseStudyContent(row?.caseStudyContent);
+    const mergedContent = mergeCaseStudyContentFields(existingContent, verified);
+    for (const field of Object.keys(CASE_STUDY_CONTENT_FIELD_MAP)) {
+      delete verified[field];
+    }
+    if (mergedContent) {
+      verified.caseStudyContent = mergedContent;
+    }
+
     const data: Prisma.WorkProjectUncheckedUpdateInput = {};
     for (const [k, v] of Object.entries(verified)) {
-      if (!WORK_FIELD_ALLOWLIST.has(k)) continue;
+      if (!WORK_FIELD_ALLOWLIST.has(k) && k !== "caseStudyContent") continue;
       if (WORK_PROTECTED_FIELDS.has(k)) continue;
       (data as Record<string, unknown>)[k] = v;
     }
 
     await saveWorkDraft({
       id: input.entityId,
-      data,
+      data: data as Partial<WorkEditableFields>,
       actorId: input.actorId,
     });
 

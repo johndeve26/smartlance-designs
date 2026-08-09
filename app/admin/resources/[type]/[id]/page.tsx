@@ -12,6 +12,9 @@ import { StatusBadge } from "@/components/admin/StatusBadge";
 import type { ResourceKind } from "@prisma/client";
 import { ResourceAiPanel } from "@/components/admin/content-assistants/AiPanels";
 import { resourceKindToEntityType } from "@/lib/ai/content-assistants/resource-kinds";
+import { SeoFields } from "@/components/admin/SeoFields";
+import { MediaPicker } from "@/components/admin/media/MediaPicker";
+import { isMediaStorageConfigured } from "@/lib/media/storage";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +43,7 @@ export default async function AdminResourceEditorPage({
   if (!item || KIND_TO_SEGMENT[item.type] !== type) notFound();
   const canPublish = userCan(user, "publish");
   const canSlug = userCan(user, "slug_redirect");
+  const storageConfigured = isMediaStorageConfigured();
   const protectedEngine = item.type === "template" || item.type === "tool";
   const assistantType = resourceKindToEntityType(item.type);
 
@@ -83,12 +87,7 @@ export default async function AdminResourceEditorPage({
             <label className="block text-sm">Short definition<textarea name="shortDefinition" defaultValue={item.shortDefinition ?? ""} rows={2} className="mt-1 w-full rounded border px-3 py-2" /></label>
             <label className="block text-sm">Aliases JSON<textarea name="aliases" defaultValue={JSON.stringify(item.aliases ?? [], null, 2)} rows={3} className="mt-1 w-full rounded border px-3 py-2 font-mono text-xs" /></label>
           </>
-        ) : (
-          <>
-            <input type="hidden" name="shortDefinition" value="" />
-            <input type="hidden" name="aliases" value="" />
-          </>
-        )}
+        ) : null}
         <label className="block text-sm">
           Structured payload JSON
           <textarea
@@ -99,8 +98,74 @@ export default async function AdminResourceEditorPage({
             required
           />
         </label>
-        <label className="block text-sm">SEO title<input name="seoTitle" defaultValue={item.seoTitle ?? ""} className="mt-1 w-full rounded border px-3 py-2" /></label>
-        <label className="block text-sm">SEO description<textarea name="seoDescription" defaultValue={item.seoDescription ?? ""} rows={2} className="mt-1 w-full rounded border px-3 py-2" /></label>
+        <p className="text-xs text-neutral-500">
+          Structured content JSON holds subtype-specific sections and protected
+          IDs. CMS columns above are authoritative — Save generates a validated
+          compatibility payload automatically.
+        </p>
+
+        <fieldset className="space-y-4 rounded border border-neutral-200 bg-neutral-50 p-4">
+          <legend className="px-1 text-sm font-semibold text-neutral-900">Hero & metadata</legend>
+          <MediaPicker
+            name="heroImagePath"
+            label="Hero image"
+            defaultValue={item.heroImagePath}
+            storageConfigured={storageConfigured}
+          />
+          <label className="block text-sm">
+            Hero alt
+            <input name="heroImageAlt" defaultValue={item.heroImageAlt ?? ""} className="mt-1 w-full rounded border px-3 py-2" />
+          </label>
+          <label className="block text-sm">
+            Author
+            <input name="author" defaultValue={item.author ?? ""} className="mt-1 w-full rounded border px-3 py-2" />
+          </label>
+          <label className="block text-sm">
+            Reading time
+            <input name="readingTime" defaultValue={item.readingTime ?? ""} placeholder="8 min read" className="mt-1 w-full rounded border px-3 py-2" />
+          </label>
+        </fieldset>
+
+        <fieldset className="space-y-4 rounded border border-neutral-200 bg-neutral-50 p-4">
+          <legend className="px-1 text-sm font-semibold text-neutral-900">Relationships</legend>
+          <label className="block text-sm">
+            Related service hrefs JSON
+            <textarea name="relatedServiceHrefs" defaultValue={JSON.stringify(item.relatedServiceHrefs ?? [], null, 2)} rows={3} className="mt-1 w-full rounded border px-3 py-2 font-mono text-xs" />
+          </label>
+          <label className="block text-sm">
+            Related solution slugs JSON
+            <textarea name="relatedSolutionSlugs" defaultValue={JSON.stringify(item.relatedSolutionSlugs ?? [], null, 2)} rows={3} className="mt-1 w-full rounded border px-3 py-2 font-mono text-xs" />
+          </label>
+          <label className="block text-sm">
+            Related platform slugs JSON
+            <textarea name="relatedPlatformSlugs" defaultValue={JSON.stringify(item.relatedPlatformSlugs ?? [], null, 2)} rows={3} className="mt-1 w-full rounded border px-3 py-2 font-mono text-xs" />
+          </label>
+          <label className="block text-sm">
+            Related insight slugs JSON
+            <textarea name="relatedInsightSlugs" defaultValue={JSON.stringify(item.relatedInsightSlugs ?? [], null, 2)} rows={3} className="mt-1 w-full rounded border px-3 py-2 font-mono text-xs" />
+          </label>
+          <label className="block text-sm">
+            Related resource IDs JSON
+            <textarea name="relatedResourceIds" defaultValue={JSON.stringify(item.relatedResourceIds ?? [], null, 2)} rows={3} className="mt-1 w-full rounded border px-3 py-2 font-mono text-xs" />
+          </label>
+        </fieldset>
+
+        <SeoFields
+          defaults={{
+            seoTitle: item.seoTitle,
+            seoDescription: item.seoDescription,
+            ogTitle: item.ogTitle,
+            ogDescription: item.ogDescription,
+            ogImagePath: item.ogImagePath,
+            noIndex: item.noIndex,
+            canonicalOverride: item.canonicalOverride,
+          }}
+        />
+
+        <label className="block text-sm">
+          Featured order
+          <input name="featuredOrder" type="number" defaultValue={item.featuredOrder} className="mt-1 w-full rounded border px-3 py-2" />
+        </label>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="featured" defaultChecked={item.featured} /> Featured</label>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="featuredOnResources" defaultChecked={item.featuredOnResources} /> Featured on Resources hub</label>
         <button type="submit" className="rounded bg-neutral-900 px-4 py-2 text-sm text-white">Save draft</button>

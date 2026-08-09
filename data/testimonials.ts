@@ -1,8 +1,8 @@
 import type { Testimonial, FaqItem, TeamMember } from "@/types";
 
 /**
- * Testimonials migrated from live Smartlance Designs project pages.
- * Only published entries render.
+ * STATIC / PRE-IMPORT FALLBACK ONLY for Homepage and legacy surfaces.
+ * Production Homepage Testimonials use DB via `loadHomepageTestimonials()`.
  */
 export const testimonials: Testimonial[] = [
   {

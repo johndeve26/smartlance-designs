@@ -82,7 +82,7 @@ function seoFromForm(fd: FormData) {
   };
 }
 
-async function setPreviewCookie(entityType: string, entityId: string) {
+export async function setPreviewCookie(entityType: string, entityId: string) {
   const token = createPreviewToken(entityType, entityId);
   const jar = await cookies();
   jar.set(ADMIN_PREVIEW_COOKIE, token, {

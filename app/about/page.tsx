@@ -20,7 +20,13 @@ import {
 } from "@/data/about";
 import { getProjectBySlug, getVisibleProjects } from "@/data/portfolio";
 import { getTestimonialById } from "@/data/testimonials";
+import {
+  MANAGED_PAGE_HERO_DEFAULTS,
+  resolveManagedPageHero,
+} from "@/lib/managed-pages/hero";
+import { getPublishedManagedPageByKey } from "@/lib/managed-pages/public";
 import { buildManagedPageMetadata } from "@/lib/seo";
+import { siteConfig } from "@/lib/site";
 import { breadcrumbJsonLd } from "@/lib/structured-data";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -32,7 +38,14 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const managedPage = await getPublishedManagedPageByKey("about");
+  const staticHeroDefaults = {
+    ...MANAGED_PAGE_HERO_DEFAULTS.about,
+    supporting: `${siteConfig.name} is a website, SEO and digital-growth agency helping businesses build clearer, faster and more discoverable online experiences — with ${siteConfig.experienceClaim.toLowerCase()}.`,
+  };
+  const hero = resolveManagedPageHero(staticHeroDefaults, managedPage);
+
   const featuredProjects = aboutFeaturedProjectSlugs
     .map((slug) => getProjectBySlug(slug))
     .filter((project): project is NonNullable<typeof project> => Boolean(project));
@@ -53,7 +66,7 @@ export default function AboutPage() {
         ])}
       />
 
-      <AboutHero projects={collageProjects} />
+      <AboutHero projects={collageProjects} hero={hero} />
 
       <AboutWho />
 

@@ -133,8 +133,10 @@ export const growthSystemSteps = [
 ];
 
 /**
- * Homepage hero showcase.
- * Curated separately from Selected Work so the two never share an image.
+ * Homepage hero showcase slug — STATIC / PRE-IMPORT FALLBACK ONLY.
+ *
+ * When Work is DB-authoritative, Admin → Work `featuredHomepage` controls the
+ * homepage hero. This slug is not used in normal DB-backed production rendering.
  */
 export const homepageHeroProjectSlug = "freelance-os";
 

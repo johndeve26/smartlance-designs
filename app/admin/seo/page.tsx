@@ -75,9 +75,14 @@ export default async function AdminSeoPage({
             route: selected.route,
             seoTitle: selected.seoTitle,
             seoDescription: selected.seoDescription,
+            ogTitle: selected.ogTitle,
+            ogDescription: selected.ogDescription,
             ogImagePath: selected.ogImagePath,
             noIndex: selected.noIndex,
             canonicalOverride: selected.canonicalOverride,
+            heroEyebrow: selected.heroEyebrow,
+            heroHeadline: selected.heroHeadline,
+            heroSupporting: selected.heroSupporting,
           }}
         />
       ) : null}

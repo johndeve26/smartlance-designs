@@ -1,13 +1,25 @@
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
-import { industries } from "@/data/industries";
+import type { Industry } from "@/types";
+import { industries as typedIndustries } from "@/data/industries";
+
+type HomeIndustriesTeaserProps = {
+  industries?: Industry[];
+};
 
 /**
  * Compact homepage industries signal — curated subset with context,
  * not a directory dump. Links to the hub for the full catalog.
  */
-export function HomeIndustriesTeaser() {
-  const featured = industries.slice(0, 6);
+export function HomeIndustriesTeaser({
+  industries = typedIndustries,
+}: HomeIndustriesTeaserProps) {
+  const featured = [...industries]
+    .sort((a, b) => {
+      if (a.featured !== b.featured) return a.featured ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    })
+    .slice(0, 6);
   if (featured.length === 0) return null;
 
   return (

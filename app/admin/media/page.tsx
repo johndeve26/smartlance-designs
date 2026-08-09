@@ -3,6 +3,8 @@ import { requireAdminUser } from "@/lib/admin/session";
 import { listMediaAssets, countMediaByStatus } from "@/lib/repositories/mediaRepository";
 import { isMediaStorageConfigured, getConfiguredStorageProviderName } from "@/lib/media/storage";
 import { MediaUploadForm } from "@/components/admin/media/MediaUploadForm";
+import { StaticMediaSyncPanel } from "@/components/admin/media/StaticMediaSyncPanel";
+import { getLatestStaticMediaSyncRun } from "@/lib/media/sync-static";
 import {
   getAdminSiteSettingsExtras,
   getSiteSettingsAdmin,
@@ -25,7 +27,8 @@ export default async function AdminMediaPage({
   const status =
     sp.status === "ARCHIVED" || sp.status === "ACTIVE" ? sp.status : "ACTIVE";
 
-  const [{ items, total, pageSize }, counts, settingsRow] = await Promise.all([
+  const [{ items, total, pageSize }, counts, settingsRow, latestSync] =
+    await Promise.all([
     listMediaAssets({
       q: sp.q,
       sourceType,
@@ -35,6 +38,7 @@ export default async function AdminMediaPage({
     }),
     countMediaByStatus(),
     getSiteSettingsAdmin(),
+    getLatestStaticMediaSyncRun(),
   ]);
 
   const storageOk = isMediaStorageConfigured();
@@ -65,6 +69,10 @@ export default async function AdminMediaPage({
           development-only and rejected in production.
         </div>
       )}
+
+      <StaticMediaSyncPanel
+        lastRunAt={latestSync?.createdAt?.toISOString() ?? null}
+      />
 
       <form className="flex flex-wrap gap-2" method="get">
         <input

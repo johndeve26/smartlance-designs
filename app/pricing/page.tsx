@@ -18,6 +18,7 @@ import {
   PricingScopeMatrix,
 } from "@/components/pricing/pricing-sections";
 import { faqs as pricingFaqs } from "@/data/pricing";
+import type { ManagedPageHeroCopy } from "@/lib/managed-pages/hero";
 import { buildManagedPageMetadata } from "@/lib/seo";
 import {
   breadcrumbJsonLd,
@@ -25,6 +26,11 @@ import {
   webPageJsonLd,
 } from "@/lib/structured-data";
 import { getPublicSettings } from "@/lib/repositories/siteSettingsRepository";
+import { getPublishedManagedPageByKey } from "@/lib/managed-pages/public";
+import {
+  MANAGED_PAGE_HERO_DEFAULTS,
+  resolveManagedPageHero,
+} from "@/lib/managed-pages/hero";
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildManagedPageMetadata("pricing", {
@@ -37,6 +43,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function PricingPage() {
   const settings = await getPublicSettings();
+  const managedPage = await getPublishedManagedPageByKey("pricing");
+  const hero = resolveManagedPageHero(
+    MANAGED_PAGE_HERO_DEFAULTS.pricing,
+    managedPage,
+  );
   return (
     <>
       <StructuredData
@@ -55,7 +66,7 @@ export default async function PricingPage() {
         ]}
       />
 
-      <PricingHero />
+      <PricingHero hero={hero} />
       <PricingPrinciple showPublicPricing={settings.showPublicPricing} />
       <PricingScopeFactors />
       <PricingEngagementPaths />

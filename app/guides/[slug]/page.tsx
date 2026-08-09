@@ -15,12 +15,12 @@ import { GuideBody } from "@/components/guides/guide-body";
 import { GuideHero } from "@/components/guides/guide-hero";
 import {
   getGuideToc,
-  getRelatedPublishedGuides,
 } from "@/data/guides";
 import {
   loadGuideBySlug,
   loadPublishedGuides,
 } from "@/lib/content/phase3-public";
+import { resolveRelatedPublishedGuides } from "@/lib/resources/discovery";
 import { getSolutionBySlug, getSolutionHref } from "@/data/solutions";
 import { getServiceBySlug } from "@/data/services";
 import { getPostBySlug } from "@/lib/blog";
@@ -66,7 +66,8 @@ export default async function GuideDetailPage({ params }: PageProps) {
   }));
   const showToc = toc.length >= 3;
 
-  const relatedGuides = getRelatedPublishedGuides(guide.slug, 3);
+  const publishedGuides = await loadPublishedGuides();
+  const relatedGuides = resolveRelatedPublishedGuides(guide.slug, publishedGuides, 3);
   const relatedSolutions = (guide.relatedSolutionSlugs ?? [])
     .map((solutionSlug) => getSolutionBySlug(solutionSlug))
     .filter((solution) => solution?.published)

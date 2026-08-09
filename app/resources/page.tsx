@@ -11,13 +11,14 @@ import {
   ResourcesReviewCta,
   ResourcesTypeExplainer,
 } from "@/components/resources/resources-sections";
-import { getPublishedGuides } from "@/data/guides";
-import { getPublishedComparisons } from "@/data/comparisons";
 import {
-  getFeaturedResources,
-  getLatestInsightResources,
-} from "@/data/resources";
-import { getPostBySlug } from "@/lib/blog";
+  loadPublishedComparisons,
+  loadPublishedGuides,
+  loadPublishedInsights,
+  loadPublishedTools,
+  loadResourceDiscoveryCounts,
+} from "@/lib/content/phase3-public";
+import { getPublicResourceHref } from "@/lib/resources/discovery";
 import { buildManagedPageMetadata } from "@/lib/seo";
 import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data";
 import type { BlogPostMeta } from "@/types";
@@ -31,37 +32,48 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-function toPosts(slugs: string[]): BlogPostMeta[] {
-  return slugs
-    .map((slug) => getPostBySlug(slug))
-    .filter((post): post is NonNullable<typeof post> => post != null);
-}
+export default async function ResourcesPage() {
+  const [guides, comparisons, insights, tools, counts] = await Promise.all([
+    loadPublishedGuides(),
+    loadPublishedComparisons(),
+    loadPublishedInsights(),
+    loadPublishedTools(),
+    loadResourceDiscoveryCounts(),
+  ]);
 
-export default function ResourcesPage() {
-  const featuredResources = getFeaturedResources(3);
-  const guideSlug = featuredResources.find((r) => r.type === "guide")?.slug;
-  const leadGuide = guideSlug
-    ? getPublishedGuides().find((guide) => guide.slug === guideSlug)
-    : null;
-
-  const supportingComparison =
-    getPublishedComparisons().find((item) => item.featured) ??
-    getPublishedComparisons()[0] ??
+  const leadGuide =
+    guides.find((guide) => guide.featured) ??
+    guides.find((guide) => guide.slug === "website-redesign-guide") ??
+    guides[0] ??
     null;
 
-  const insightFeatured = featuredResources.filter((r) => r.type === "insight");
-  const supportingInsights = toPosts(insightFeatured.map((r) => r.slug)).slice(
-    0,
-    2,
-  );
-  const featuredInsightSlugs = new Set(supportingInsights.map((p) => p.slug));
+  const supportingComparison =
+    comparisons.find((item) => item.featured) ?? comparisons[0] ?? null;
 
-  const latestResources = getLatestInsightResources(8);
-  const latestPosts = toPosts(
-    latestResources
-      .map((r) => r.slug)
-      .filter((slug) => !featuredInsightSlugs.has(slug)),
-  ).slice(0, 6);
+  const platformSelector = tools.find(
+    (tool) => tool.slug === "website-platform-selector",
+  );
+  const toolHref = platformSelector
+    ? getPublicResourceHref("tool", platformSelector.slug)
+    : null;
+
+  const insightPosts = insights as BlogPostMeta[];
+  const featuredInsightSlugs = new Set(
+    [
+      "what-makes-a-website-convert",
+      "website-redesign-checklist",
+      "technical-seo-foundations",
+      "tools-to-test-wordpress-website",
+    ].filter((slug) => insightPosts.some((post) => post.slug === slug)),
+  );
+
+  const supportingInsights = insightPosts
+    .filter((post) => featuredInsightSlugs.has(post.slug))
+    .slice(0, 2);
+
+  const latestPosts = insightPosts
+    .filter((post) => !featuredInsightSlugs.has(post.slug))
+    .slice(0, 6);
 
   return (
     <>
@@ -80,15 +92,15 @@ export default function ResourcesPage() {
         ]}
       />
 
-      <ResourcesHero />
+      <ResourcesHero counts={counts} insightCount={insightPosts.length} />
 
       <ResourcesFeatured
-        leadGuide={leadGuide || null}
+        leadGuide={leadGuide}
         supportingComparison={supportingComparison}
         supportingInsights={supportingInsights}
       />
 
-      <ResourcesPlatformSelectorCallout />
+      <ResourcesPlatformSelectorCallout toolHref={toolHref} />
 
       <ResourcesBrowseByGoal />
       <ResourcesBrowseByTopic />

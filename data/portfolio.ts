@@ -828,6 +828,7 @@ function isVisible(project: Project) {
   return project.published || showDraftContent;
 }
 
+/** STATIC / PRE-IMPORT FALLBACK ONLY — typed portfolio catalog. */
 export function getVisibleProjects() {
   return projects
     .filter(isVisible)
@@ -840,6 +841,7 @@ export function getVisibleProjects() {
     .map(resolveProjectMedia);
 }
 
+/** STATIC / PRE-IMPORT FALLBACK ONLY. */
 export function getProjectBySlug(slug: string) {
   const project = projects.find((item) => item.slug === slug);
   if (!project || !isVisible(project)) return undefined;
@@ -858,6 +860,7 @@ export function getProjectsByCategory(category: string) {
   );
 }
 
+/** STATIC / PRE-IMPORT FALLBACK ONLY — resolves related projects from typed catalog. */
 export function getRelatedProjects(slugs: string[] = []) {
   const bySlug = new Map(getVisibleProjects().map((project) => [project.slug, project]));
   return slugs

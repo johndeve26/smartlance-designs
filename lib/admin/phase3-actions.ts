@@ -1,7 +1,10 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { assertSameOrigin, requireAdminUser } from "@/lib/admin/session";
+import { setPreviewCookie } from "@/lib/admin/content-actions";
+import { workFieldsFromForm } from "@/lib/admin/work-form";
 import {
   publishIndustry,
   saveIndustry,
@@ -9,6 +12,9 @@ import {
 } from "@/lib/repositories/industriesRepository";
 import {
   changeWorkSlug,
+  discardWorkDraft,
+  effectiveWorkFields,
+  getWorkByIdAdmin,
   publishWork,
   saveWorkDraft,
   unpublishWork,
@@ -27,10 +33,15 @@ import {
 } from "@/lib/repositories/insightsRepository";
 import {
   changeResourceSlug,
+  getResourceByIdAdmin,
   publishResource,
   saveResourceDraft,
   unpublishResource,
 } from "@/lib/repositories/resourcesRepository";
+import {
+  composeResourceSaveData,
+  type ResourceColumnInput,
+} from "@/lib/resources/canonical";
 
 function str(fd: FormData, key: string) {
   return String(fd.get(key) ?? "").trim();
@@ -39,6 +50,38 @@ function str(fd: FormData, key: string) {
 function bool(fd: FormData, key: string) {
   const v = fd.get(key);
   return v === "on" || v === "true" || v === "1";
+}
+
+function optStr(fd: FormData, key: string) {
+  const value = str(fd, key);
+  return value || null;
+}
+
+function parseJsonArrayField(fd: FormData, key: string): unknown[] | undefined {
+  const raw = str(fd, key);
+  if (!raw) return undefined;
+  try {
+    const value = JSON.parse(raw);
+    if (!Array.isArray(value)) {
+      throw new Error(`${key} must be a JSON array.`);
+    }
+    return value;
+  } catch (err) {
+    if (err instanceof Error && err.message.includes("must be a JSON array")) throw err;
+    throw new Error(`${key} must be valid JSON.`);
+  }
+}
+
+function seoFromForm(fd: FormData) {
+  return {
+    seoTitle: optStr(fd, "seoTitle"),
+    seoDescription: optStr(fd, "seoDescription"),
+    ogTitle: optStr(fd, "ogTitle"),
+    ogDescription: optStr(fd, "ogDescription"),
+    ogImagePath: optStr(fd, "ogImagePath"),
+    noIndex: bool(fd, "noIndex"),
+    canonicalOverride: optStr(fd, "canonicalOverride"),
+  };
 }
 
 export async function saveIndustryAction(formData: FormData) {
@@ -64,13 +107,7 @@ export async function saveIndustryAction(formData: FormData) {
       relatedServiceLinks: JSON.parse(str(formData, "relatedServiceLinks") || "[]"),
       relatedSolutionSlugs: JSON.parse(str(formData, "relatedSolutionSlugs") || "[]"),
       displayOrder: Number(formData.get("displayOrder") || 0),
-      seoTitle: str(formData, "seoTitle") || null,
-      seoDescription: str(formData, "seoDescription") || null,
-      ogTitle: str(formData, "ogTitle") || null,
-      ogDescription: str(formData, "ogDescription") || null,
-      ogImagePath: str(formData, "ogImagePath") || null,
-      noIndex: bool(formData, "noIndex"),
-      canonicalOverride: str(formData, "canonicalOverride") || null,
+      ...seoFromForm(formData),
     },
   });
   revalidatePath("/admin/industries");
@@ -92,59 +129,74 @@ export async function saveWorkAction(formData: FormData) {
   await assertSameOrigin();
   const actor = await requireAdminUser("edit_draft");
   const id = str(formData, "id");
-  let approvedProjectFacts: unknown = undefined;
-  const factsRaw = str(formData, "approvedProjectFacts");
-  if (factsRaw) {
-    try {
-      approvedProjectFacts = JSON.parse(factsRaw);
-    } catch {
-      throw new Error("Approved project facts must be valid JSON.");
-    }
+  const existing = id ? await getWorkByIdAdmin(id) : null;
+  const industryIds = existing?.industryLinks.map((link) => link.industryId) ?? [];
+  const effective = existing
+    ? effectiveWorkFields(existing, industryIds)
+    : null;
+
+  try {
+    await saveWorkDraft({
+      id: id || undefined,
+      actorId: actor.id,
+      industryIds: str(formData, "industryIds")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
+      data: workFieldsFromForm(formData, effective?.caseStudyContent ?? null),
+    });
+  } catch (err) {
+    throw new Error(err instanceof Error ? err.message : "Failed to save work draft");
   }
-  await saveWorkDraft({
-    id: id || undefined,
-    actorId: actor.id,
-    industryIds: str(formData, "industryIds")
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean),
-    data: {
-      name: str(formData, "name"),
-      slug: str(formData, "slug"),
-      industryLabel: str(formData, "industryLabel"),
-      challenge: str(formData, "challenge"),
-      solution: str(formData, "solution"),
-      shortDescription: str(formData, "shortDescription") || null,
-      resultSummary: str(formData, "resultSummary") || null,
-      results: str(formData, "results")
-        ? JSON.parse(str(formData, "results"))
-        : undefined,
-      servicesLabels: JSON.parse(str(formData, "servicesLabels") || "[]"),
-      coverImagePath: str(formData, "coverImagePath") || null,
-      heroImagePath: str(formData, "heroImagePath") || null,
-      featured: bool(formData, "featured"),
-      featuredHomepage: bool(formData, "featuredHomepage"),
-      featuredWorkArchive: bool(formData, "featuredWorkArchive"),
-      seoTitle: str(formData, "seoTitle"),
-      seoDescription: str(formData, "seoDescription"),
-      relatedServiceHrefs: str(formData, "relatedServiceHrefs")
-        ? JSON.parse(str(formData, "relatedServiceHrefs"))
-        : undefined,
-      approvedForAI: bool(formData, "approvedForAI"),
-      approvedProjectFacts:
-        approvedProjectFacts === undefined
-          ? undefined
-          : (approvedProjectFacts as object),
-    },
-  });
-  revalidatePath("/admin/work");
-  if (id) revalidatePath(`/admin/work/${id}`);
+
+  redirect(id ? `/admin/work/${id}?saved=1` : "/admin/work?saved=1");
 }
 
 export async function publishWorkAction(formData: FormData) {
   await assertSameOrigin();
   const actor = await requireAdminUser("publish");
-  await publishWork({ id: str(formData, "id"), actorId: actor.id });
+  const id = str(formData, "id");
+
+  if (str(formData, "name")) {
+    const existing = await getWorkByIdAdmin(id);
+    const industryIds = existing?.industryLinks.map((link) => link.industryId) ?? [];
+    const effective = existing
+      ? effectiveWorkFields(existing, industryIds)
+      : null;
+    await saveWorkDraft({
+      id,
+      actorId: actor.id,
+      industryIds: str(formData, "industryIds")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
+      data: workFieldsFromForm(formData, effective?.caseStudyContent ?? null),
+    });
+  }
+
+  try {
+    await publishWork({ id, actorId: actor.id });
+  } catch (err) {
+    throw new Error(err instanceof Error ? err.message : "Failed to publish work");
+  }
+
+  redirect(`/admin/work/${id}?published=1`);
+}
+
+export async function discardWorkDraftAction(formData: FormData) {
+  await assertSameOrigin();
+  const actor = await requireAdminUser("edit_draft");
+  const id = str(formData, "id");
+  await discardWorkDraft({ id, actorId: actor.id });
+  redirect(`/admin/work/${id}?discarded=1`);
+}
+
+export async function previewWorkAction(formData: FormData) {
+  await assertSameOrigin();
+  await requireAdminUser("preview");
+  const id = str(formData, "id");
+  const token = await setPreviewCookie("WorkProject", id);
+  redirect(`/admin/preview/work/${id}?preview=${encodeURIComponent(token)}`);
 }
 
 export async function unpublishWorkAction(formData: FormData) {
@@ -196,6 +248,7 @@ export async function saveTestimonialAction(formData: FormData) {
       internalSource: str(formData, "internalSource") || null,
       internalVerificationNote:
         str(formData, "internalVerificationNote") || null,
+      avatarPath: optStr(formData, "avatarPath"),
       ...(themesJson !== undefined
         ? { themesJson: themesJson as object }
         : {}),
@@ -245,12 +298,11 @@ export async function saveInsightAction(formData: FormData) {
       heroImagePath: str(formData, "heroImagePath") || null,
       heroImageAlt: str(formData, "heroImageAlt") || null,
       featured: bool(formData, "featured"),
-      seoTitle: str(formData, "seoTitle") || null,
-      seoDescription: str(formData, "seoDescription") || null,
       relatedServiceHrefs: str(formData, "relatedServiceHrefs")
         ? JSON.parse(str(formData, "relatedServiceHrefs"))
         : undefined,
       originalPublishedAt: new Date(str(formData, "originalPublishedAt")),
+      ...seoFromForm(formData),
     },
   });
   revalidatePath("/admin/insights");
@@ -282,25 +334,53 @@ export async function saveResourceAction(formData: FormData) {
   await assertSameOrigin();
   const actor = await requireAdminUser("edit_draft");
   const id = str(formData, "id");
-  const payload = JSON.parse(str(formData, "payload"));
-  await saveResourceDraft({
-    id: id || undefined,
-    actorId: actor.id,
-    data: {
-      title: str(formData, "title"),
-      slug: str(formData, "slug"),
-      description: str(formData, "description"),
-      deck: str(formData, "deck") || null,
-      payload,
-      featured: bool(formData, "featured"),
-      featuredOnResources: bool(formData, "featuredOnResources"),
-      seoTitle: str(formData, "seoTitle") || null,
-      seoDescription: str(formData, "seoDescription") || null,
-      shortDefinition: str(formData, "shortDefinition") || null,
-      aliases: str(formData, "aliases")
+  const existing = id ? await getResourceByIdAdmin(id) : null;
+  if (!existing) {
+    throw new Error("Resource not found.");
+  }
+
+  let structuralPayload: unknown;
+  try {
+    structuralPayload = JSON.parse(str(formData, "payload"));
+  } catch {
+    throw new Error("Structured content must be valid JSON.");
+  }
+
+  const columns: ResourceColumnInput = {
+    slug: str(formData, "slug"),
+    title: str(formData, "title"),
+    description: str(formData, "description"),
+    deck: optStr(formData, "deck"),
+    author: optStr(formData, "author"),
+    readingTime: optStr(formData, "readingTime"),
+    heroImagePath: optStr(formData, "heroImagePath"),
+    heroImageAlt: optStr(formData, "heroImageAlt"),
+    relatedServiceHrefs: parseJsonArrayField(formData, "relatedServiceHrefs"),
+    relatedSolutionSlugs: parseJsonArrayField(formData, "relatedSolutionSlugs"),
+    relatedPlatformSlugs: parseJsonArrayField(formData, "relatedPlatformSlugs"),
+    relatedInsightSlugs: parseJsonArrayField(formData, "relatedInsightSlugs"),
+    relatedResourceIds: parseJsonArrayField(formData, "relatedResourceIds"),
+    shortDefinition:
+      existing.type === "glossary" ? optStr(formData, "shortDefinition") : undefined,
+    aliases:
+      existing.type === "glossary" && str(formData, "aliases")
         ? JSON.parse(str(formData, "aliases"))
         : undefined,
-    },
+    featured: bool(formData, "featured"),
+    featuredOnResources: bool(formData, "featuredOnResources"),
+    featuredOrder: Number(formData.get("featuredOrder") || 0),
+    ...seoFromForm(formData),
+  };
+
+  await saveResourceDraft({
+    id,
+    actorId: actor.id,
+    data: composeResourceSaveData({
+      type: existing.type,
+      columns,
+      structuralPayload,
+      existing,
+    }),
   });
   revalidatePath("/admin/resources");
 }
