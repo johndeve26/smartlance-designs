@@ -60,9 +60,35 @@ curl -sI https://YOUR-PREVIEW.vercel.app/portal | rg -i 'cache-control|cf-cache-
 curl -sI https://YOUR-PREVIEW.vercel.app/_next/static/chunks/webpack.js | rg -i 'cache-control'
 ```
 
+### 4. R2 public media — versioned brand & project assets (V1.1)
+
+| Asset class | Example path | Recommended R2 `Cache-Control` | Status |
+|-------------|--------------|--------------------------------|--------|
+| Versioned brand logos | `/images/brand/smartlance-logo-v2.webp` | `public, max-age=31536000, immutable` | **RECOMMENDED** — apply in R2 bucket rule or object metadata after upload |
+| Versioned mark | `/images/brand/smartlance-mark-v2.webp` | `public, max-age=31536000, immutable` | **RECOMMENDED** |
+| Project screenshots | `/images/projects/*/hero.webp`, `hero-768.webp` | `public, max-age=2592000, stale-while-revalidate=86400` | **RECOMMENDED** |
+| Legacy unversioned logo | `/images/brand/smartlance-logo.png` | `public, max-age=86400` only | **CURRENT** — do not mark immutable (same URL may be overwritten) |
+
+**Manual upload required after V1.1 deploy:**
+
+```bash
+# Sync new versioned assets to R2 (when credentials configured)
+npm run media:migrate:r2 -- --prefix images/brand/smartlance-logo-v2.webp
+npm run media:migrate:r2 -- --prefix images/brand/smartlance-logo-dark-v2.webp
+npm run media:migrate:r2 -- --prefix images/brand/smartlance-mark-v2.webp
+npm run media:migrate:r2 -- --prefix images/projects/freelance-os/hero-768.webp
+```
+
+**Verify:**
+
+```bash
+curl -sI "https://YOUR-R2-HOST/images/brand/smartlance-logo-v2.webp" | rg -i 'cache-control|cf-cache-status|age'
+# Request twice — second response should show Age > 0 when cached
+```
+
 ## APPLIED
 
-_None from this repo — document dashboard changes here when applied manually._
+_None from this repo — document dashboard/R2 changes here when applied manually._
 
 ## Interaction with Vercel
 

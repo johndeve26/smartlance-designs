@@ -8,12 +8,14 @@ const syne = Syne({
   subsets: ["latin"],
   variable: "--font-syne",
   display: "swap",
+  weight: ["600", "700"],
 });
 
 const figtree = Figtree({
   subsets: ["latin"],
   variable: "--font-figtree",
   display: "swap",
+  weight: ["400", "500", "600", "700"],
 });
 
 export async function generateMetadata(): Promise<Metadata> {

@@ -93,7 +93,7 @@ export function fallbackPublicSiteSettings(): PublicSiteSettings {
     gtmContainerId: process.env.NEXT_PUBLIC_GTM_ID || null,
     clarityProjectId: process.env.NEXT_PUBLIC_CLARITY_ID || null,
     analyticsEnabled: true,
-    primaryLogoPath: resolveMediaUrl("/images/brand/smartlance-logo.png"),
+    primaryLogoPath: resolveMediaUrl("/images/brand/smartlance-logo-v2.webp"),
     logoOnDarkPath: resolveMediaUrl("/images/brand/smartlance-logo-on-dark.png"),
     faviconPath: resolveMediaUrl("/images/brand/favicon-32.png"),
     footerDescription: null,

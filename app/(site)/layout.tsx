@@ -18,7 +18,7 @@ export default async function SiteLayout({
     email: settings.email,
     phone: settings.phone,
     sameAs: settings.socialLinks.map((s) => s.url),
-    logoPath: settings.primaryLogoPath || "/images/brand/smartlance-logo.png",
+    logoPath: settings.primaryLogoPath || "/images/brand/smartlance-logo-v2.webp",
     address: settings.presentation.address,
   });
   const website = websiteJsonLd({

@@ -42,7 +42,8 @@ export function BlogCard({
     >
       <Link
         href={`/blog/${post.slug}`}
-        aria-label={`Read article: ${post.title}`}
+        tabIndex={-1}
+        aria-hidden
         className={cn(
           "relative block overflow-hidden bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
           isLead
@@ -134,6 +135,7 @@ export function BlogCard({
 
         <Link
           href={`/blog/${post.slug}`}
+          aria-label={`Read article: ${post.title}`}
           className={cn(
             "group/link inline-flex items-center gap-1.5 pt-5 text-base font-semibold text-accent-text hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
             !isLead && "mt-auto",

@@ -55,7 +55,7 @@ export function HomeHero({
       />
 
       <Container className="relative grid items-center gap-12 pb-16 pt-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-14 lg:pb-24 lg:pt-20 xl:gap-20">
-        <div className="min-w-0">
+        <div className="order-2 min-w-0 lg:order-1">
           <p className="eyebrow">{eyebrow}</p>
           <h1 className="heading-hero mt-4 max-w-[16ch] font-display font-semibold tracking-tight sm:max-w-[18ch]">
             {renderHeadline(headline, headlineAccent)}
@@ -79,7 +79,7 @@ export function HomeHero({
         </div>
 
         {imageSrc && showcase ? (
-          <figure className="relative min-w-0">
+          <figure className="relative order-1 min-w-0 lg:order-2">
             {/* Thin accent rule anchors the image to the editorial grid */}
             <span
               className="absolute -left-4 top-0 hidden h-16 w-px bg-accent lg:block"
@@ -92,8 +92,8 @@ export function HomeHero({
                 showcase.imageAlt ||
                 `${showcase.name} website designed and built by Smartlance Designs`
               }
-              priority
-              sizes="(max-width: 1023px) 100vw, 1280px"
+              lcp
+              sizes="(max-width: 640px) calc(100vw - 2.5rem), (max-width: 1024px) calc(100vw - 3rem), 648px"
               maxWidthClassName="max-w-[1280px]"
               frameClassName="border border-border shadow-md"
             />

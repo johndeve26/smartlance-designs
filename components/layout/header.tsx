@@ -181,7 +181,7 @@ function HeaderInteractive({
       <Container
         className="flex h-[4.25rem] items-center justify-between gap-4 lg:h-[4.75rem]"
       >
-        <Logo priority />
+        <Logo />
 
         <nav
           className="hidden items-center gap-1 xl:flex"

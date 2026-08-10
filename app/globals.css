@@ -51,8 +51,8 @@
   --color-accent-foreground: var(--neutral-900);
   --color-accent-soft: var(--orange-100);
   --color-accent-hover: var(--orange-600);
-  /* Readable accent text on light backgrounds */
-  --color-accent-text: var(--orange-700);
+  /* Readable accent text on light backgrounds — AA on white and warm muted surfaces */
+  --color-accent-text: var(--orange-800);
 
   --color-primary: var(--neutral-800);
   --color-primary-foreground: #ffffff;
@@ -71,8 +71,8 @@
    */
   --color-muted: var(--neutral-600);
   --color-muted-foreground: var(--neutral-600);
-  /* Metadata and quiet labels — never below AA on white */
-  --color-subtle: var(--neutral-500);
+  /* Metadata and quiet labels — AA on white and --color-surface-muted */
+  --color-subtle: var(--neutral-600);
 
   --color-border: var(--neutral-200);
   --color-border-strong: var(--neutral-300);

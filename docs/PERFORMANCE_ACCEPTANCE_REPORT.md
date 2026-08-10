@@ -76,3 +76,21 @@ Implemented measure-first performance & caching for public marketing routes: cen
 ## Final verdict
 
 Application-side performance & caching architecture is **complete and tested**. Live CDN behavior and Core Web Vitals on Vercel preview/production require post-deploy verification to reach **VERIFIED** status.
+
+---
+
+## V1.1 Frontend delivery pass (2026-08-10)
+
+**Verdict:** `SMARTLANCE FRONTEND PERFORMANCE V1.1 COMPLETE — LIVE PERFORMANCE VERIFICATION PENDING`
+
+| Metric | Before (lab median) | After (lab median) |
+|--------|---------------------|---------------------|
+| Mobile LCP | 4.8s | **3.1s** |
+| Mobile Performance | 82 | **94** |
+| Accessibility | 96 | **100** |
+| TBT | 69ms | 16ms |
+| CLS | 0 | 0 |
+
+Primary LCP fix: Next.js 16 `fetchPriority="high"` + mobile hero reorder + responsive hero/logo assets. Full report: [`docs/FRONTEND_PERFORMANCE_V1_1.md`](FRONTEND_PERFORMANCE_V1_1.md).
+
+**P0 manual:** Upload `*-v2.webp` brand assets and `hero-768.webp` to R2 before production Lighthouse rerun.

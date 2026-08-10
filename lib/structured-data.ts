@@ -35,7 +35,7 @@ export function organizationJsonLd(overrides?: {
     name,
     legalName: overrides?.legalName || siteConfig.legalName,
     url,
-    logo: absoluteUrl(overrides?.logoPath || "/images/brand/smartlance-logo.png"),
+    logo: absoluteUrl(overrides?.logoPath || "/images/brand/smartlance-logo-v2.webp"),
     description: overrides?.description || siteConfig.description,
     email: overrides?.email || siteConfig.email,
   };
@@ -200,7 +200,7 @@ export function articleJsonLd(input: {
       name: siteConfig.name,
       logo: {
         "@type": "ImageObject",
-        url: absoluteUrl("/images/brand/smartlance-logo.png"),
+        url: absoluteUrl("/images/brand/smartlance-logo-v2.webp"),
       },
     },
     ...(input.image
