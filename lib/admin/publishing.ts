@@ -30,6 +30,8 @@ export const CACHE_TAGS = {
   redirects: "redirects",
   media: (id: string) => `media:${id}`,
   seo: (page: string) => `seo:${page}`,
+  managedPage: (key: string) => `managed-page:${key}`,
+  cmsRuntime: "cms-runtime",
 } as const;
 
 export async function createContentRevision(input: {
@@ -174,4 +176,24 @@ export function revalidateSiteSettings() {
 
 export function revalidateRedirects() {
   revalidateTag(CACHE_TAGS.redirects, "max");
+}
+
+const MANAGED_PAGE_ROUTES: Record<string, string> = {
+  about: "/about",
+  contact: "/contact",
+  pricing: "/pricing",
+  "project-planner": "/project-planner",
+  "free-website-review": "/free-website-review",
+  resources: "/resources",
+  "legal-terms": "/legal/terms-and-condition",
+  "legal-privacy": "/legal/privacy-statement",
+  "legal-accessibility": "/legal/accessibility-statement",
+};
+
+export function revalidateManagedPage(key: string) {
+  revalidateTag(CACHE_TAGS.managedPage(key), "max");
+  revalidateTag(CACHE_TAGS.sitemap, "max");
+  const route = MANAGED_PAGE_ROUTES[key];
+  if (route) revalidatePath(route);
+  revalidatePath("/sitemap.xml");
 }

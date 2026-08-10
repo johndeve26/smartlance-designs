@@ -4,7 +4,7 @@ import { ServicePageTemplate } from "@/components/services/service-page-template
 import {
   getPublishedServiceBySlug,
   listPublishedServices,
-} from "@/lib/repositories/servicesRepository";
+} from "@/lib/public/cache";
 import { findActiveRedirect } from "@/lib/repositories/redirectsRepository";
 import { buildPageMetadata } from "@/lib/seo";
 

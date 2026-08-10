@@ -27,7 +27,7 @@ import { HomeAiAutomationSection, HomeCoreCapabilitiesSection } from "@/componen
 import { HomeCapabilityStrip } from "@/components/home/capability-strip";
 import { HomeFinalCtaSection } from "@/components/home/final-cta-section";
 import { homepageProcessSteps } from "@/lib/public/how-we-work-content";
-import { getHomepageContent } from "@/lib/repositories/homepageRepository";
+import { getHomepageContent } from "@/lib/public/cache";
 import {
   loadHomepageWorkShowcase,
 } from "@/lib/home/showcase";

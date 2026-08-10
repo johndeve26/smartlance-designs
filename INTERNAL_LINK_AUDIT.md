@@ -1,6 +1,6 @@
 # Internal Link Audit
 
-Generated: 2026-08-07
+Generated: 2026-08-10
 
 Contextual inbound only (registry + entity related fields + hub seeds).
 Header / footer / sitemap are **not** counted.
@@ -10,9 +10,9 @@ Header / footer / sitemap are **not** counted.
 | Bucket | Count |
 | --- | ---: |
 | 0 contextual inbound | 1 |
-| 1 contextual inbound | 35 |
+| 1 contextual inbound | 37 |
 | 2+ contextual inbound | 42 |
-| Routes tracked | 78 |
+| Routes tracked | 80 |
 
 ## Zero contextual inbound
 
@@ -48,11 +48,13 @@ Header / footer / sitemap are **not** counted.
 - `/solutions` ← `/`
 - `/work` ← `/`
 - `/work/banyan-vacations` ← `/work`
+- `/work/freelance-os` ← `/work`
 - `/work/gemini-corporate-relocations` ← `/work`
 - `/work/kaerek-homes` ← `/work`
 - `/work/katerinas-place` ← `/work`
 - `/work/nashville-home-viewer` ← `/work`
 - `/work/overlook-cabin-rentals` ← `/work`
+- `/work/padeya` ← `/work`
 - `/work/the-coast` ← `/work`
 - `/work/zen-stays-rental` ← `/work`
 

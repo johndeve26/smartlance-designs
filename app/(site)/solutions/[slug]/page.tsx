@@ -12,9 +12,9 @@ import { LocalVisibilitySolutionPage } from "@/components/solutions/solution-loc
 import { OperationsSolutionPage } from "@/components/solutions/operations-solution-page";
 import {
   getPublishedSolutionBySlug,
-  getSolutionPageContentBySlug,
   listPublishedSolutions,
-} from "@/lib/repositories/solutionsRepository";
+} from "@/lib/public/cache";
+import { getSolutionPageContentBySlug } from "@/lib/repositories/solutionsRepository";
 import { findActiveRedirect } from "@/lib/repositories/redirectsRepository";
 import {
   isConversionsSolutionContent,

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/site";
 import { getPublicSettings } from "@/lib/repositories/siteSettingsRepository";
-import { getManagedPageByKey } from "@/lib/repositories/managedPagesRepository";
+import { getPublishedManagedPageByKey } from "@/lib/public/cache";
 import {
   getSiteOrigin,
   resolveAbsoluteAssetUrl,
@@ -89,8 +89,8 @@ export async function buildManagedPageMetadata(
   key: string,
   fallback: { title: string; description: string; path: string },
 ): Promise<Metadata> {
-  const managed = await getManagedPageByKey(key);
-  if (!managed || managed.status !== "PUBLISHED") {
+  const managed = await getPublishedManagedPageByKey(key);
+  if (!managed) {
     return buildPageMetadata({
       title: fallback.title,
       description: fallback.description,

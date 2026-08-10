@@ -4,7 +4,7 @@ import { PlatformPageTemplate } from "@/components/platforms/platform-page-templ
 import {
   getPublishedPlatformBySlug,
   listPublishedPlatforms,
-} from "@/lib/repositories/platformsRepository";
+} from "@/lib/public/cache";
 import { findActiveRedirect } from "@/lib/repositories/redirectsRepository";
 import { getVisibleProjects } from "@/data/portfolio";
 import { buildPageMetadata } from "@/lib/seo";

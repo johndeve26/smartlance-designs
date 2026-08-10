@@ -11,6 +11,7 @@ const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
   pgPool?: Pool;
   prismaSchemaFingerprint?: string;
+  perfQueryCount?: number;
 };
 
 /**

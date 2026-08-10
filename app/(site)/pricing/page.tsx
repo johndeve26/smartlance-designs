@@ -26,7 +26,7 @@ import {
   webPageJsonLd,
 } from "@/lib/structured-data";
 import { getPublicSettings } from "@/lib/repositories/siteSettingsRepository";
-import { getPublishedManagedPageByKey } from "@/lib/managed-pages/public";
+import { getPublishedManagedPageByKey } from "@/lib/public/cache";
 import {
   MANAGED_PAGE_HERO_DEFAULTS,
   resolveManagedPageHero,

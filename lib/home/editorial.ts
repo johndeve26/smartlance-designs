@@ -2,14 +2,11 @@ import { getLatestPosts } from "@/lib/blog";
 import { homepageTestimonialIds as typedTestimonialIds } from "@/data/home";
 import { getTestimonialById } from "@/data/testimonials";
 import {
-  CmsDatabaseUnavailableError,
-  resolveCmsContentRuntime,
-} from "@/lib/content/content-source";
-import {
   listHomepageInsights,
-  type HomepageInsightCard,
-} from "@/lib/repositories/insightsRepository";
-import { listCuratedHomepageTestimonials } from "@/lib/repositories/testimonialsRepository";
+  listCuratedHomepageTestimonials,
+} from "@/lib/public/cache";
+import { resolveCmsContentRuntime, CmsDatabaseUnavailableError } from "@/lib/content/content-source";
+import type { HomepageInsightCard } from "@/lib/repositories/insightsRepository";
 import type { Testimonial } from "@/types";
 
 export const HOMEPAGE_INSIGHTS_LIMIT = 3;

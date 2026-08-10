@@ -1,13 +1,10 @@
 import { homepageHeroProjectSlug } from "@/data/home";
 import { getFeaturedProjects } from "@/data/portfolio";
 import {
-  resolveWorkContentRuntime,
-  WorkDatabaseUnavailableError,
-} from "@/lib/content/work-source";
-import {
   getPublishedHomepageHero,
-  listPublishedFeaturedWork,
-} from "@/lib/repositories/workRepository";
+  getPublishedFeaturedWork,
+} from "@/lib/public/cache";
+import { resolveWorkContentRuntime, WorkDatabaseUnavailableError } from "@/lib/content/work-source";
 import type { Project } from "@/types";
 
 /** Selected Work section: 1 featured row + 2 supporting cards. */
@@ -73,7 +70,7 @@ async function loadDatabaseShowcase(): Promise<{
   try {
     const hero = await getPublishedHomepageHero();
     const selectedProjects = (
-      await listPublishedFeaturedWork(hero?.slug)
+      await getPublishedFeaturedWork(hero?.slug)
     ).slice(0, SELECTED_WORK_LIMIT);
 
     return {
@@ -144,7 +141,7 @@ export async function loadSelectedWorkProjects(options?: {
     const excludeSlug =
       options?.excludeHeroSlug ??
       (await getPublishedHomepageHero())?.slug;
-    return (await listPublishedFeaturedWork(excludeSlug)).slice(
+    return (await getPublishedFeaturedWork(excludeSlug)).slice(
       0,
       SELECTED_WORK_LIMIT,
     );

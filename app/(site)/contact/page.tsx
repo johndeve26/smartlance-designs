@@ -12,7 +12,7 @@ import { companyDetails } from "@/data/navigation";
 import { buildManagedPageMetadata } from "@/lib/seo";
 import { breadcrumbJsonLd, faqJsonLd } from "@/lib/structured-data";
 import { getPublicSettings } from "@/lib/repositories/siteSettingsRepository";
-import { getPublishedManagedPageByKey } from "@/lib/managed-pages/public";
+import { getPublishedManagedPageByKey } from "@/lib/public/cache";
 import {
   MANAGED_PAGE_HERO_DEFAULTS,
   resolveManagedPageHero,

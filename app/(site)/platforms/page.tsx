@@ -10,7 +10,7 @@ import { StructuredData } from "@/components/ui/structured-data";
 import { PlatformCard } from "@/components/platforms/platform-card";
 import { ProjectCard } from "@/components/ui/project-card";
 import { platformGroupMeta, platforms as typedPlatforms } from "@/data/platforms";
-import { listPublishedPlatforms } from "@/lib/repositories/platformsRepository";
+import { listPublishedPlatforms } from "@/lib/public/cache";
 import { getProjectBySlug } from "@/data/portfolio";
 import { buildMetadata } from "@/lib/seo";
 import { breadcrumbJsonLd, faqJsonLd } from "@/lib/structured-data";

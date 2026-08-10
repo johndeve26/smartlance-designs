@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { revalidateManagedPage } from "@/lib/admin/publishing";
 import { assertSameOrigin, requireAdminUser } from "@/lib/admin/session";
 import { assertCan, can } from "@/lib/admin/rbac";
 import {
@@ -291,6 +292,7 @@ export async function saveManagedPageAction(formData: FormData) {
         heroSupporting: String(formData.get("heroSupporting") || "") || null,
       },
     });
+    revalidateManagedPage(key);
     revalidatePath("/admin/seo");
     return { ok: true as const };
   } catch (err) {

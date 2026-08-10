@@ -1,10 +1,5 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { Figtree, Syne } from "next/font/google";
-import { SiteFooter, SiteHeader, SitePreFooter } from "@/components/layout/site-chrome";
-import { AnalyticsScripts } from "@/components/layout/analytics-scripts";
-import { StructuredData } from "@/components/ui/structured-data";
-import { organizationJsonLd, websiteJsonLd } from "@/lib/structured-data";
 import { siteConfig } from "@/lib/site";
 import { getPublicSettings } from "@/lib/repositories/siteSettingsRepository";
 import "./globals.css";
@@ -81,50 +76,14 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const settings = await getPublicSettings();
-  const headerList = await headers();
-  const isAdminRoute = headerList.get("x-smartlance-admin") === "1";
-  const isPortalRoute = headerList.get("x-smartlance-portal") === "1";
-  const isWorkspaceRoute = headerList.get("x-smartlance-workspace") === "1";
-  const hidePublicChrome = isAdminRoute || isPortalRoute || isWorkspaceRoute;
-  const org = organizationJsonLd({
-    name: settings.siteName,
-    legalName: settings.businessName,
-    url: settings.url,
-    description: settings.description,
-    email: settings.email,
-    phone: settings.phone,
-    sameAs: settings.socialLinks.map((s) => s.url),
-    logoPath: settings.primaryLogoPath || "/images/brand/smartlance-logo.png",
-    address: settings.presentation.address,
-  });
-  const website = websiteJsonLd({
-    name: settings.siteName,
-    url: settings.url,
-    description: settings.description,
-  });
-
   return (
     <html lang="en" className={`${syne.variable} ${figtree.variable} h-full`} suppressHydrationWarning>
-      <body className="min-h-full flex flex-col antialiased">
-        {!hidePublicChrome ? <StructuredData data={[org, website]} /> : null}
-        {!hidePublicChrome && settings.analyticsEnabled ? (
-          <AnalyticsScripts
-            gaId={settings.gaMeasurementId || ""}
-            gtmId={settings.gtmContainerId || ""}
-            clarityId={settings.clarityProjectId || ""}
-          />
-        ) : null}
-        {!hidePublicChrome ? <SiteHeader /> : null}
-        <main className="flex-1">{children}</main>
-        {!hidePublicChrome ? <SitePreFooter /> : null}
-        {!hidePublicChrome ? <SiteFooter /> : null}
-      </body>
+      <body className="min-h-full flex flex-col antialiased">{children}</body>
     </html>
   );
 }

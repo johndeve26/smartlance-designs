@@ -27,5 +27,6 @@ describe("CACHE_TAGS", () => {
     expect(CACHE_TAGS.service("website-design")).toBe("service:website-design");
     expect(CACHE_TAGS.solution("slow-website")).toBe("solution:slow-website");
     expect(CACHE_TAGS.platform("wordpress")).toBe("platform:wordpress");
+    expect(CACHE_TAGS.managedPage("about")).toBe("managed-page:about");
   });
 });

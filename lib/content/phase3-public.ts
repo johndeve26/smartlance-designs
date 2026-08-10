@@ -4,10 +4,12 @@
  */
 import { hasDatabaseUrl } from "@/lib/db";
 import {
-  listPublishedInsights,
-  getPublishedInsightBySlug,
   countPublishedInsights,
   type InsightPublic,
+} from "@/lib/repositories/insightsRepository";
+import {
+  listPublishedInsights,
+  getPublishedInsightBySlug,
 } from "@/lib/repositories/insightsRepository";
 import {
   resolveCmsContentRuntime,

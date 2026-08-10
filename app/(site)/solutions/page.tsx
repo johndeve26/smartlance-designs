@@ -17,7 +17,7 @@ import {
   solutionsSelectedWorkSlugs,
   getPublishedSolutions as getTypedPublishedSolutions,
 } from "@/data/solutions";
-import { listPublishedSolutions } from "@/lib/repositories/solutionsRepository";
+import { listPublishedSolutions } from "@/lib/public/cache";
 import { getProjectBySlug } from "@/data/portfolio";
 import { buildMetadata } from "@/lib/seo";
 import { breadcrumbJsonLd, faqJsonLd } from "@/lib/structured-data";

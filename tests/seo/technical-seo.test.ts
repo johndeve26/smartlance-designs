@@ -12,6 +12,11 @@ import {
 } from "@/lib/structured-data";
 import { buildPublicSitemapEntries } from "@/lib/seo/sitemap-entries";
 import { isIndexNowEnabled } from "@/lib/seo/indexnow";
+import { aiAutomationSlugs } from "@/lib/public/ai-automation-routes";
+import {
+  getOperationsSolution,
+  operationsSolutionSlugs,
+} from "@/lib/public/operations-solutions-content";
 
 describe("canonical resolution", () => {
   const origin = "https://smartlancedesigns.com";
@@ -127,6 +132,46 @@ describe("sitemap builder", () => {
     expect(urls.some((u) => u.endsWith("/blog"))).toBe(true);
     expect(urls.some((u) => u.endsWith("/how-we-work"))).toBe(true);
     expect(urls.some((u) => u.endsWith("/free-tools"))).toBe(true);
+  });
+
+  it("includes all AI hub and child routes in sitemap", async () => {
+    const entries = await buildPublicSitemapEntries();
+    const urls = entries.map((e) => e.url);
+    const origin = siteOriginFromConfig();
+
+    expect(urls).toContain(`${origin}/ai-automation`);
+    for (const slug of aiAutomationSlugs) {
+      expect(urls).toContain(`${origin}/ai-automation/${slug}`);
+    }
+  });
+
+  it("includes all six operations solution routes in sitemap", async () => {
+    const entries = await buildPublicSitemapEntries();
+    const urls = entries.map((e) => e.url);
+    const origin = siteOriginFromConfig();
+
+    for (const slug of operationsSolutionSlugs) {
+      expect(urls).toContain(`${origin}/solutions/${slug}`);
+    }
+  });
+
+  it("excludes admin, portal, workspace, and legacy AI service paths", async () => {
+    const entries = await buildPublicSitemapEntries();
+    const urls = entries.map((e) => e.url);
+
+    for (const url of urls) {
+      expect(url).not.toMatch(/\/admin(\/|$)/);
+      expect(url).not.toMatch(/\/portal(\/|$)/);
+      expect(url).not.toMatch(/\/workspace(\/|$)/);
+      expect(url).not.toMatch(/\/services\/ai-/);
+    }
+  });
+
+  it("gives each operations solution a distinct metaTitle", () => {
+    const titles = operationsSolutionSlugs.map(
+      (slug) => getOperationsSolution(slug)!.metaTitle,
+    );
+    expect(new Set(titles).size).toBe(operationsSolutionSlugs.length);
   });
 });
 

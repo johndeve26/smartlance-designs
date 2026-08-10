@@ -24,7 +24,7 @@ import {
   MANAGED_PAGE_HERO_DEFAULTS,
   resolveManagedPageHero,
 } from "@/lib/managed-pages/hero";
-import { getPublishedManagedPageByKey } from "@/lib/managed-pages/public";
+import { getPublishedManagedPageByKey } from "@/lib/public/cache";
 import { buildManagedPageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 import { breadcrumbJsonLd } from "@/lib/structured-data";

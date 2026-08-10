@@ -10,8 +10,10 @@ import { StructuredData } from "@/components/ui/structured-data";
 import { WebsiteSeoBridge } from "@/components/services/website-seo-bridge";
 import { ServicesWorkCard } from "@/components/services/services-work-card";
 import { PlatformCard } from "@/components/platforms/platform-card";
-import { getPublishedPlatformBySlug } from "@/lib/repositories/platformsRepository";
-import { listPublishedServices } from "@/lib/repositories/servicesRepository";
+import {
+  getPublishedPlatformBySlug,
+  listPublishedServices,
+} from "@/lib/public/cache";
 import { serviceGroupMeta, services as typedServices } from "@/data/services";
 import { getPlatformBySlug } from "@/data/platforms";
 import { seoServices } from "@/data/seo";
