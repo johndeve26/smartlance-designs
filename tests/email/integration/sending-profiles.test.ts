@@ -150,6 +150,7 @@ describeIntegration("email sending profiles integration", () => {
         fromNameSnapshot: "Before",
         fromEmailSnapshot: `${PREFIX}-before@test.local`,
         transportTypeSnapshot: "SYSTEM_SMTP",
+        createdById: adminId,
       },
     });
 
