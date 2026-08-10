@@ -48,8 +48,23 @@ Task completion percentage: `done tasks / total tasks × 100` (see `lib/agency/p
 
 Project model supports future: Proposals → Project, Invoices, Contracts, Change Requests — not implemented in V1.
 
-## Admin navigation
+## Starter templates
 
-**Agency** group: Projects (`/admin/agency`), Project Templates (`/admin/agency/templates`).
+Seven editable starter templates are available via explicit **Install starter templates** action (requires `manage_project_templates`). They are identified by stable `systemKey` values and install idempotently — edited starters are never overwritten.
 
-RBAC: `view_projects`, `manage_projects`, `manage_project_templates`.
+**Page loads do not mutate the database.** Visiting `/admin/agency/templates` is read-only from a persistence perspective.
+
+## Project numbers
+
+Format: `SL-YYYY-####` (minimum 4 digits; expands naturally beyond 9999).
+
+Allocation uses PostgreSQL `INSERT … ON CONFLICT DO UPDATE` on `AgencyProjectCounter` for atomic yearly increments inside the project creation transaction. Bounded retry handles rare unique collisions on `projectNumber`.
+
+## Private file storage
+
+| Environment | Driver |
+|-------------|--------|
+| Development | `local` (filesystem under `storage/agency/private/`) |
+| Production | `s3` required (`AGENCY_PRIVATE_STORAGE_DRIVER=s3`) |
+
+Production startup validation fails if S3 is not configured. Downloads are authorized per-request; S3 objects use short-lived signed URLs (10 minutes). No public ACLs or permanent URLs.

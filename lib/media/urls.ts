@@ -1,7 +1,9 @@
 import type { ProductFeatureSection, Project } from "@/types";
 
 export function getMediaPublicBaseUrl(): string | null {
-  const raw = process.env.MEDIA_PUBLIC_BASE_URL?.trim();
+  const raw =
+    process.env.NEXT_PUBLIC_MEDIA_PUBLIC_BASE_URL?.trim() ||
+    process.env.MEDIA_PUBLIC_BASE_URL?.trim();
   if (!raw) return null;
   return raw.replace(/\/$/, "");
 }

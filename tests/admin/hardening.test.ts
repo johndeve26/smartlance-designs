@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { validateServerEnv, ENV_CATALOG } from "@/lib/env";
 import { can } from "@/lib/admin/rbac";
 
@@ -19,6 +19,27 @@ describe("validateServerEnv", () => {
     const result = validateServerEnv({ throwOnError: false });
     expect(result).toHaveProperty("ok");
     expect(Array.isArray(result.issues)).toBe(true);
+  });
+
+  it("flags malformed NEXT_PUBLIC_SITE_URL that embeds DATABASE_URL", () => {
+    const prior = process.env.NEXT_PUBLIC_SITE_URL;
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("VERCEL_ENV", "production");
+    process.env.NEXT_PUBLIC_SITE_URL =
+      "http://localhost:3000DATABASE_URL=postgresql://user:pass@host/db";
+    process.env.ADMIN_SESSION_SECRET = "x".repeat(32);
+    process.env.MEDIA_STORAGE_PROVIDER = "s3";
+
+    const result = validateServerEnv({ throwOnError: false });
+    expect(
+      result.issues.some(
+        (i) => i.key === "NEXT_PUBLIC_SITE_URL" && i.severity === "error",
+      ),
+    ).toBe(true);
+
+    if (prior === undefined) delete process.env.NEXT_PUBLIC_SITE_URL;
+    else process.env.NEXT_PUBLIC_SITE_URL = prior;
+    vi.unstubAllEnvs();
   });
 });
 

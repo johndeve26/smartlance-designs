@@ -8,6 +8,8 @@ import {
 } from "@/lib/admin/ai-writer-actions";
 import { getAIProviderStatus } from "@/lib/ai/providers";
 import { AIWriterSubnav } from "@/components/admin/ai-writer/AIWriterSubnav";
+import { PageHeader } from "@/components/ui/page-header";
+import { AdminPanel } from "@/components/admin/patterns/AdminPanel";
 import {
   listTopicCalibrationFixtures,
   listTopicCalibrationHoldout,
@@ -34,20 +36,24 @@ export default async function AIEvaluationsPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <div>
-        <Link href="/admin/ai-writer" className="text-sm text-neutral-500">
-          ← AI Writer
-        </Link>
-        <h1 className="mt-2 text-2xl font-semibold">AI Writer evaluations</h1>
-        <p className="mt-1 text-sm text-neutral-600">
-          Golden fixtures for production-quality validation. CI uses mocks. Live provider evals are
-          intentional only - not run on every deploy. No master quality score.
-        </p>
-      </div>
+      <PageHeader
+        title="AI Writer evaluations"
+        description={
+          <>
+            <Link href="/admin/ai-writer" className="text-accent-text hover:underline">
+              ← AI Writer
+            </Link>
+            <span className="mt-2 block">
+              Golden fixtures for production-quality validation. CI uses mocks. Live provider evals are
+              intentional only - not run on every deploy. No master quality score.
+            </span>
+          </>
+        }
+      />
 
       <AIWriterSubnav current="/admin/ai-writer/evaluations" />
 
-      <div className="rounded-lg border bg-white p-4 text-sm">
+      <AdminPanel className="text-sm">
         <p>
           AI Provider: <strong>{provider.label}</strong>
         </p>
@@ -61,9 +67,9 @@ export default async function AIEvaluationsPage() {
             </button>
           </form>
         ) : null}
-      </div>
+      </AdminPanel>
 
-      <section className="rounded-lg border bg-white p-4">
+      <AdminPanel>
         <h2 className="text-lg font-medium">Topic Intelligence calibration</h2>
         <p className="mt-1 text-sm text-neutral-600">
           Offline gold set ({topicFixtures.length} fixtures + {holdout.length} holdout). Human
@@ -169,9 +175,9 @@ export default async function AIEvaluationsPage() {
             </ul>
           </div>
         ) : null}
-      </section>
+      </AdminPanel>
 
-      <section className="rounded-lg border bg-white p-4">
+      <AdminPanel>
         <h2 className="text-lg font-medium">Golden fixtures (article pipeline)</h2>
         <ul className="mt-3 space-y-2 text-sm">
           {fixtures.map((f) => (
@@ -188,9 +194,9 @@ export default async function AIEvaluationsPage() {
             </li>
           ))}
         </ul>
-      </section>
+      </AdminPanel>
 
-      <section className="rounded-lg border bg-white p-4">
+      <AdminPanel>
         <h2 className="text-lg font-medium">Recent snapshots</h2>
         {snapshots.length === 0 ? (
           <p className="mt-2 text-sm text-neutral-500">No evaluation snapshots yet.</p>
@@ -209,7 +215,7 @@ export default async function AIEvaluationsPage() {
             ))}
           </ul>
         )}
-      </section>
+      </AdminPanel>
     </div>
   );
 }

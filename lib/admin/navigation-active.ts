@@ -62,10 +62,7 @@ export function isAdminNavItemActive(pathname: string, itemId: string): boolean 
   }
 
   if (itemId === "ai-writer") {
-    return (
-      pathname.startsWith("/admin/ai-writer") &&
-      !pathname.startsWith("/admin/ai-writer/discover")
-    );
+    return pathname.startsWith("/admin/ai-writer");
   }
 
   if (itemId === "enquiries") {
@@ -73,11 +70,89 @@ export function isAdminNavItemActive(pathname: string, itemId: string): boolean 
   }
 
   if (itemId === "crm") {
-    return pathname === "/admin/crm" || pathname.startsWith("/admin/crm/");
+    return pathname === "/admin/crm";
   }
 
-  if (itemId === "agency-projects" || itemId === "agency-templates") {
-    return pathname === "/admin/agency" || pathname.startsWith("/admin/agency/");
+  if (itemId === "crm-inbox") {
+    return pathname.startsWith("/admin/crm/inbox");
+  }
+
+  if (itemId === "crm-contacts") {
+    return pathname.startsWith("/admin/crm/contacts");
+  }
+
+  if (itemId === "crm-companies") {
+    return pathname.startsWith("/admin/crm/companies");
+  }
+
+  if (itemId === "crm-leads") {
+    return pathname.startsWith("/admin/crm/leads");
+  }
+
+  if (itemId === "crm-deals") {
+    return pathname.startsWith("/admin/crm/deals");
+  }
+
+  if (itemId === "agency-projects") {
+    return (
+      pathname === "/admin/agency" ||
+      pathname.startsWith("/admin/agency/projects") ||
+      pathname.startsWith("/admin/agency/templates")
+    );
+  }
+
+  if (itemId === "agency-onboarding") {
+    return (
+      pathname.startsWith("/admin/agency/onboarding") &&
+      !pathname.startsWith("/admin/agency/onboarding-templates")
+    );
+  }
+
+  if (itemId === "agency-change-requests") {
+    return pathname.startsWith("/admin/agency/change-requests");
+  }
+
+  if (itemId === "agency-proposals") {
+    return pathname.startsWith("/admin/agency/proposals");
+  }
+
+  if (itemId === "agency-contracts") {
+    return (
+      pathname.startsWith("/admin/agency/contracts") &&
+      !pathname.startsWith("/admin/agency/contract-templates")
+    );
+  }
+
+  if (itemId === "agency-billing") {
+    return (
+      pathname.startsWith("/admin/agency/billing") ||
+      pathname.startsWith("/admin/agency/invoices") ||
+      pathname.startsWith("/admin/agency/payments")
+    );
+  }
+
+  if (itemId === "agency-retainers") {
+    return pathname.startsWith("/admin/agency/retainers");
+  }
+
+  if (itemId === "agency-websites") {
+    return pathname.startsWith("/admin/agency/websites");
+  }
+
+  if (itemId === "agency-support") {
+    return pathname.startsWith("/admin/agency/support");
+  }
+
+  if (itemId === "settings") {
+    return (
+      pathname === "/admin/settings" ||
+      (pathname.startsWith("/admin/settings/") &&
+        !pathname.startsWith("/admin/crm/settings"))
+    );
+  }
+
+  if (itemId === "email") {
+    return pathname === "/admin/email" || pathname.startsWith("/admin/email/");
   }
 
   const item = adminNavigation
@@ -103,9 +178,9 @@ const SEGMENT_LABELS: Record<string, string> = {
   industries: "Industries",
   work: "Work",
   testimonials: "Testimonials",
-  insights: "Insights",
+  insights: "Blog",
   resources: "Resources",
-  "ai-writer": "AI Writer",
+  "ai-writer": "AI",
   discover: "Topic Intelligence",
   "content-audit": "Content Audit",
   media: "Media",
@@ -127,10 +202,21 @@ const SEGMENT_LABELS: Record<string, string> = {
   sequences: "Sequences",
   outreach: "Outreach",
   "email-templates": "Email Templates",
+  onboarding: "Onboarding",
+  "change-requests": "Change Requests",
+  proposals: "Proposals",
+  contracts: "Contracts",
+  billing: "Billing",
+  retainers: "Retainers",
+  websites: "Websites",
+  support: "Support",
+  invoices: "Invoices",
+  payments: "Payments",
   contact: "Contact",
   reviews: "Website Reviews",
   users: "Users",
-  "audit-log": "Audit Log",
+  "audit-log": "Audit",
+  email: "Email",
   settings: "Settings",
   system: "System",
   new: "New",

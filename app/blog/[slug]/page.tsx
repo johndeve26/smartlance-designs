@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
+import { AudienceSubscribeSection } from "@/components/audience/subscribe-section-server";
 import { CTASection } from "@/components/ui/cta-section";
 import { StructuredData } from "@/components/ui/structured-data";
 import { ArticleHero } from "@/components/blog/article-hero";
@@ -188,6 +189,16 @@ export default async function BlogPostPage({ params }: PageProps) {
       <ArticleRelated posts={related} />
 
       <ArticleNav previous={previous} next={next} />
+
+      <Section className="!pt-0 !pb-12">
+        <Container>
+          <AudienceSubscribeSection
+            source="INSIGHT"
+            sourceUrl={`/blog/${post.slug}`}
+            variant="insight"
+          />
+        </Container>
+      </Section>
 
       <CTASection
         className="!py-14 sm:!py-16 lg:!py-[4.5rem]"

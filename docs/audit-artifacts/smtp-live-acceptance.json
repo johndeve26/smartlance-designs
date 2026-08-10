@@ -1,0 +1,150 @@
+{
+  "generatedAt": "2026-08-10T09:44:41.263Z",
+  "checks": [
+    {
+      "name": "inventory.transport",
+      "status": "PASS",
+      "detail": "active=smtp"
+    },
+    {
+      "name": "inventory.config_source",
+      "status": "PASS",
+      "detail": "admin_smtp host=premium302.web-hosting.com port=587 security=STARTTLS from=contact@smartlancedesigns.com replyTo=contact@smartlancedesigns.com"
+    },
+    {
+      "name": "inventory.env_smtp",
+      "status": "SKIP",
+      "detail": "unset"
+    },
+    {
+      "name": "inventory.resend",
+      "status": "SKIP",
+      "detail": "unset"
+    },
+    {
+      "name": "cta_url_audit.site_url",
+      "status": "PENDING",
+      "detail": "NEXT_PUBLIC_SITE_URL=http://localhost:3000DATABASE_URL=postgresql://neondb_owner:npg_uFsGENiB0CD7@ep-plain-cherry-ayi0kx0a-pooler.c-5.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require — production/staging URL required for email CTAs"
+    },
+    {
+      "name": "cta_url_audit.localhost_fallbacks",
+      "status": "PENDING",
+      "detail": "proposals/send.ts: hardcoded localhost fallback in source; contracts/send.ts: hardcoded localhost fallback in source; billing/invoices.ts: hardcoded localhost fallback in source; billing/payment-email.ts: hardcoded localhost fallback in source; onboarding/email.ts: hardcoded localhost fallback in source; client-success/support-email.ts: hardcoded localhost fallback in source"
+    },
+    {
+      "name": "prospect_magic_link",
+      "status": "PENDING",
+      "detail": "invite URL built but email NOT sent — SMTP acceptance blocked for magic-link delivery"
+    },
+    {
+      "name": "change_request_email",
+      "status": "SKIP",
+      "detail": "no outbound change-request email sender found in codebase"
+    },
+    {
+      "name": "connection",
+      "status": "PASS",
+      "detail": "premium302.web-hosting.com:587 STARTTLS"
+    },
+    {
+      "name": "delivery",
+      "status": "PASS",
+      "detail": "sent to domain=smartlancedesigns.com messageId=<ed332f47-bdca-4b69-3303-fe5d7533cc8a@sm"
+    },
+    {
+      "name": "delivery.from_reply_to",
+      "status": "PASS",
+      "detail": "from=contact@smartlancedesigns.com replyTo=contact@smartlancedesigns.com"
+    },
+    {
+      "name": "credential_failure",
+      "status": "PASS",
+      "detail": "AUTH_FAILED: Authentication was rejected."
+    },
+    {
+      "name": "log_sanitization.credentials",
+      "status": "PASS",
+      "detail": "AUTH_FAILED: Authentication was rejected."
+    },
+    {
+      "name": "invalid_recipient",
+      "status": "PASS",
+      "detail": "DELIVERY_FAILED: Email delivery failed."
+    },
+    {
+      "name": "timeout_unreachable",
+      "status": "PASS",
+      "detail": "CONNECTION_FAILED in 2ms"
+    },
+    {
+      "name": "spf",
+      "status": "PASS",
+      "detail": "SPF record found"
+    },
+    {
+      "name": "dkim",
+      "status": "PENDING",
+      "detail": "requires provider-specific selector lookup — not inferred from SMTP"
+    },
+    {
+      "name": "dmarc",
+      "status": "PENDING",
+      "detail": "requires _dmarc TXT lookup — inspect separately"
+    },
+    {
+      "name": "admin_test_email",
+      "status": "PENDING",
+      "detail": "UI workflow mirrors sendViaSmtp test above"
+    },
+    {
+      "name": "prospect_request",
+      "status": "PENDING",
+      "detail": "requires workspace submit on staging"
+    },
+    {
+      "name": "clarification",
+      "status": "PENDING",
+      "detail": "requires admin clarification action"
+    },
+    {
+      "name": "proposal",
+      "status": "PENDING",
+      "detail": "requires admin send on staging fixture"
+    },
+    {
+      "name": "contract",
+      "status": "PENDING",
+      "detail": "requires admin send on staging fixture"
+    },
+    {
+      "name": "invoice",
+      "status": "PENDING",
+      "detail": "requires issue invoice on staging"
+    },
+    {
+      "name": "payment_confirmation",
+      "status": "PENDING",
+      "detail": "requires Paystack test payment path"
+    },
+    {
+      "name": "onboarding",
+      "status": "PENDING",
+      "detail": "requires start onboarding on staging"
+    },
+    {
+      "name": "support",
+      "status": "PENDING",
+      "detail": "requires support reply on staging"
+    },
+    {
+      "name": "failure_boundary",
+      "status": "PENDING",
+      "detail": "run integration tests for state-before-send"
+    },
+    {
+      "name": "duplicate_send",
+      "status": "PENDING",
+      "detail": "payment claim tested in unit/integration"
+    }
+  ]
+}

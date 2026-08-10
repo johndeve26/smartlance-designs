@@ -18,6 +18,42 @@ export const AGENCY_PAGE_SIZE_DEFAULT = 25;
 export const AGENCY_PAGE_SIZE_MAX = 100;
 export const AGENCY_ACTIVITY_DEFAULT = 20;
 export const AGENCY_PRIVATE_STORAGE_PREFIX = "agency/private";
+export const AGENCY_FILE_MAX_BYTES = 50 * 1024 * 1024;
+
+const BLOCKED_UPLOAD_EXTENSIONS = new Set([
+  ".html",
+  ".htm",
+  ".js",
+  ".mjs",
+  ".cjs",
+  ".exe",
+  ".sh",
+  ".bat",
+  ".cmd",
+  ".php",
+  ".py",
+  ".rb",
+  ".pl",
+]);
+
+const ALLOWED_UPLOAD_MIME_PREFIXES = [
+  "image/",
+  "application/pdf",
+  "text/plain",
+  "application/zip",
+  "application/x-zip-compressed",
+  "application/vnd.",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument",
+];
+
+export function isAllowedAgencyUpload(filename: string, mimeType: string) {
+  const ext = filename.includes(".") ? `.${filename.split(".").pop()?.toLowerCase()}` : "";
+  if (BLOCKED_UPLOAD_EXTENSIONS.has(ext)) return false;
+  if (mimeType.toLowerCase().includes("html")) return false;
+  if (mimeType.toLowerCase().includes("javascript")) return false;
+  return ALLOWED_UPLOAD_MIME_PREFIXES.some((prefix) => mimeType.toLowerCase().startsWith(prefix));
+}
 
 export const ACTIVE_PROJECT_STATUSES: AgencyProjectStatus[] = [
   "PLANNING",
@@ -97,6 +133,9 @@ export const AGENCY_REQUIREMENT_TYPE_LABELS: Record<AgencyRequirementType, strin
 export const AGENCY_REQUIREMENT_STATUS_LABELS: Record<AgencyRequirementStatus, string> = {
   REQUESTED: "Requested",
   RECEIVED: "Received",
+  SUBMITTED: "Submitted",
+  UNDER_REVIEW: "Under review",
+  NEEDS_CLARIFICATION: "Needs clarification",
   ACCEPTED: "Accepted",
   NOT_NEEDED: "Not needed",
 };
@@ -141,6 +180,9 @@ export const AGENCY_ACTIVITY_TYPE_LABELS: Record<AgencyProjectActivityType, stri
   DELIVERABLE_APPROVED: "Deliverable approved",
   DELIVERABLE_CHANGES_REQUESTED: "Changes requested",
   REQUIREMENT_RECEIVED: "Requirement received",
+  ONBOARDING_STARTED: "Onboarding started",
+  ONBOARDING_SUBMITTED: "Onboarding submitted",
+  ONBOARDING_COMPLETED: "Onboarding completed",
   UPDATE_POSTED: "Update posted",
   MEMBER_ADDED: "Member added",
   CLIENT_ACCESS_GRANTED: "Client access granted",

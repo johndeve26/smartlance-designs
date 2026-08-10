@@ -119,6 +119,41 @@
 
   --shadow-sm: 0 1px 2px rgb(26 26 26 / 0.04);
   --shadow-md: 0 8px 24px rgb(26 26 26 / 0.06);
+
+  /* Product surfaces */
+  --surface-page: var(--neutral-50);
+  --surface-elevated: #ffffff;
+  --surface-sidebar: #ffffff;
+  --surface-sidebar-admin: var(--neutral-900);
+
+  /* Product spacing */
+  --space-page-x: 1.25rem;
+  --space-section: 1.5rem;
+  --space-stack: 0.75rem;
+
+  /* Navigation dimensions */
+  --nav-sidebar-width: 15rem;
+  --nav-sidebar-collapsed: 4rem;
+  --nav-topbar-height: 3.5rem;
+  --nav-mobile-bottom: 4rem;
+
+  /* Product typography scale */
+  --text-display: clamp(1.75rem, 2.5vw, 2.25rem);
+  --text-page-title: 1.5rem;
+  --text-section-heading: 1.125rem;
+  --text-card-title: 1rem;
+  --text-body: 0.9375rem;
+  --text-small: 0.8125rem;
+  --text-label: 0.75rem;
+  --text-meta-size: 0.8125rem;
+
+  /* Focus */
+  --ring-offset: 2px;
+  --focus-ring: var(--color-ring);
+
+  /* Info semantic */
+  --color-info: #175cd3;
+  --color-info-soft: #eff8ff;
 }
 
 @theme inline {
@@ -158,6 +193,8 @@
   --color-error-soft: var(--color-error-soft);
   --color-warning: var(--color-warning);
   --color-warning-soft: var(--color-warning-soft);
+  --color-info: var(--color-info);
+  --color-info-soft: var(--color-info-soft);
 
   --color-orange-50: var(--orange-50);
   --color-orange-100: var(--orange-100);
@@ -191,6 +228,11 @@
 
   --shadow-sm: var(--shadow-sm);
   --shadow-md: var(--shadow-md);
+
+  --color-info: var(--color-info);
+  --color-info-soft: var(--color-info-soft);
+  --color-surface-page: var(--surface-page);
+  --color-surface-elevated: var(--surface-elevated);
 }
 
 @layer base {
@@ -377,6 +419,52 @@
 
   .article-image-breakout {
     @apply relative left-1/2 my-12 w-[min(100vw-2.5rem,65rem)] max-w-none -translate-x-1/2 sm:w-[min(100vw-3rem,62rem)] lg:w-[min(100%,52rem)] xl:w-[min(100%,58rem)];
+  }
+
+  /* Product typography utilities */
+  .text-display {
+    font-size: var(--text-display);
+    line-height: 1.15;
+    @apply font-display font-semibold tracking-tight text-foreground;
+  }
+
+  .text-page-title {
+    font-size: var(--text-page-title);
+    line-height: 1.25;
+    @apply font-display font-semibold tracking-tight text-foreground;
+  }
+
+  .text-section-heading {
+    font-size: var(--text-section-heading);
+    line-height: 1.35;
+    @apply font-semibold text-foreground;
+  }
+
+  .text-card-title {
+    font-size: var(--text-card-title);
+    line-height: 1.4;
+    @apply font-semibold text-foreground;
+  }
+
+  .text-body-sm {
+    font-size: var(--text-body);
+    line-height: 1.55;
+    @apply text-muted;
+  }
+
+  .text-label {
+    font-size: var(--text-label);
+    line-height: 1.4;
+    @apply font-medium text-foreground;
+  }
+
+  /* Product surface utilities */
+  .surface-page {
+    background: var(--surface-page);
+  }
+
+  .surface-elevated {
+    background: var(--surface-elevated);
   }
 }
 

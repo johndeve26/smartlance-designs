@@ -41,12 +41,13 @@ export async function POST(request: Request) {
     return jsonError("Too many requests. Please try again later.", 429);
   }
 
-  const { _gotcha, ...payload } = parsed.data;
+  const { _gotcha, subscribeToUpdates, ...payload } = parsed.data;
   void _gotcha;
 
   const result = await submitWebsiteReviewEnquiry({
     data: payload,
     sourcePath: "/free-website-review",
+    subscribeToUpdates: Boolean(subscribeToUpdates),
   });
 
   if (!result.ok) {

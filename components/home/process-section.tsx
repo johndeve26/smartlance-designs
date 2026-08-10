@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import type { ProcessStep } from "@/types";
+import { PUBLIC_CTAS } from "@/lib/public/cta-map";
 
 export function ProcessSection({ steps }: { steps: ProcessStep[] }) {
   if (!steps.length) return null;
@@ -10,8 +12,12 @@ export function ProcessSection({ steps }: { steps: ProcessStep[] }) {
         <div className="max-w-2xl">
           <p className="eyebrow">Process</p>
           <h2 className="heading-section mt-3 font-display font-semibold">
-            How a Project Moves From Idea to Launch
+            How Smartlance Works
           </h2>
+          <p className="section-deck mt-4">
+            A structured path from understanding your business to launch — and
+            improvement beyond it.
+          </p>
         </div>
 
         {/* Desktop: 3×2 editorial grid — ordinals stay secondary to titles */}
@@ -49,6 +55,12 @@ export function ProcessSection({ steps }: { steps: ProcessStep[] }) {
             </li>
           ))}
         </ol>
+
+        <p className="mt-10">
+          <Link href={PUBLIC_CTAS.howWeWork.href} className="link-action">
+            {PUBLIC_CTAS.howWeWork.label} →
+          </Link>
+        </p>
       </Container>
     </section>
   );

@@ -7,6 +7,7 @@ import {
   updateAgencyTemplateAction,
 } from "@/lib/admin/agency-actions";
 import { AGENCY_SERVICE_TYPE_LABELS } from "@/lib/agency/constants";
+import { AdminPanel } from "@/components/admin/patterns/AdminPanel";
 
 type TemplateData = {
   id?: string;
@@ -26,9 +27,10 @@ export function TemplateEditor({ template }: { template?: TemplateData }) {
 
   if (!template?.id) {
     return (
-      <form
-        className="admin-card max-w-xl space-y-4 p-4"
-        onSubmit={(e) => {
+      <AdminPanel className="max-w-xl space-y-4">
+        <form
+          className="space-y-4"
+          onSubmit={(e) => {
           e.preventDefault();
           const fd = new FormData(e.currentTarget);
           start(async () => {
@@ -54,15 +56,17 @@ export function TemplateEditor({ template }: { template?: TemplateData }) {
         <button type="submit" disabled={pending} className="admin-btn admin-btn-primary">
           {pending ? "Creating…" : "Create template"}
         </button>
-      </form>
+        </form>
+      </AdminPanel>
     );
   }
 
   return (
     <div className="space-y-6">
-      <form
-        className="admin-card space-y-4 p-4"
-        onSubmit={(e) => {
+      <AdminPanel className="space-y-4">
+        <form
+          className="space-y-4"
+          onSubmit={(e) => {
           e.preventDefault();
           const fd = new FormData(e.currentTarget);
           start(async () => {
@@ -97,9 +101,10 @@ export function TemplateEditor({ template }: { template?: TemplateData }) {
         <button type="submit" disabled={pending} className="admin-btn admin-btn-primary">
           {pending ? "Saving…" : "Save template"}
         </button>
-      </form>
+        </form>
+      </AdminPanel>
 
-      <section className="admin-card space-y-3 p-4">
+      <AdminPanel className="space-y-3">
         <h2 className="font-semibold">Milestones & tasks</h2>
         {(template.milestones ?? []).map((ms, i) => (
           <div key={i} className="rounded border p-3 text-sm">
@@ -114,9 +119,9 @@ export function TemplateEditor({ template }: { template?: TemplateData }) {
         {!template.milestones?.length ? (
           <p className="text-sm text-neutral-500">No milestones defined yet.</p>
         ) : null}
-      </section>
+      </AdminPanel>
 
-      <section className="admin-card space-y-3 p-4">
+      <AdminPanel className="space-y-3">
         <h2 className="font-semibold">Requirements</h2>
         <ul className="list-disc pl-5 text-sm text-neutral-700">
           {(template.requirements ?? []).map((r, i) => (
@@ -126,7 +131,7 @@ export function TemplateEditor({ template }: { template?: TemplateData }) {
         {!template.requirements?.length ? (
           <p className="text-sm text-neutral-500">No requirements defined yet.</p>
         ) : null}
-      </section>
+      </AdminPanel>
     </div>
   );
 }

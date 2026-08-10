@@ -5,6 +5,8 @@ import {
   portalInviteExpiresAt,
 } from "@/lib/portal/crypto";
 import { createPortalSession } from "@/lib/portal/session";
+import { sendSmartlanceEmail } from "@/lib/email/send-smartlance";
+import { emailSiteUrl } from "@/lib/email/site-url";
 
 export async function requestPortalMagicLink(email: string) {
   const normalized = email.trim().toLowerCase();
@@ -58,8 +60,26 @@ export async function requestPortalMagicLink(email: string) {
     },
   });
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "";
+  const baseUrl = emailSiteUrl();
   const loginUrl = `${baseUrl}/portal/auth/${token}`;
+
+  void sendSmartlanceEmail({
+    category: "AUTH_MAGIC_LINK",
+    to: contact.email,
+    subject: "Your Smartlance client portal login link",
+    text: [
+      "Use this link to sign in to your Smartlance client portal:",
+      "",
+      loginUrl,
+      "",
+      "This link expires and can only be used once.",
+      "",
+      "If you did not request this, you can ignore this email.",
+    ].join("\n"),
+    html: `<p>Use this link to sign in to your Smartlance client portal:</p><p><a href="${loginUrl}">Sign in to portal</a></p><p>This link expires and can only be used once.</p>`,
+  }).catch((err) => {
+    console.error("[portal:magic-link-email]", err instanceof Error ? err.message : err);
+  });
 
   return { ok: true as const, loginUrl, email: contact.email };
 }

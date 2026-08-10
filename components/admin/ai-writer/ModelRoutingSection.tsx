@@ -4,6 +4,8 @@ import { getCatalogDefaultModel } from "@/lib/ai/providers";
 import { listProviderPresentations, ROUTING_TASKS } from "@/lib/ai/providers/presentation";
 import type { ProviderAccountView } from "@/components/admin/ai-writer/ProviderConnections";
 
+import { AI_ADMIN_LABELS } from "@/lib/admin/ai-settings-labels";
+
 export function ModelRoutingSection({
   settings,
   accounts,
@@ -25,7 +27,8 @@ export function ModelRoutingSection({
       <div>
         <h2 className="text-lg font-semibold text-neutral-900">Model routing</h2>
         <p className="mt-1 text-sm text-neutral-600">
-          Choose which provider and model handles each Editorial Studio task.
+          Assign providers and models by task — editorial studio, content assistants,{" "}
+          {AI_ADMIN_LABELS.websiteToolsRouting.toLowerCase()}, and research.
         </p>
       </div>
 

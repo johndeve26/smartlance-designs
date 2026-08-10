@@ -16,11 +16,20 @@ Portal auth is completely separate from admin capabilities. Portal users cannot 
 
 ## Private files
 
-Project files use `AgencyProjectFile` with private storage keys under `agency/private/` (local) or private S3 keys.
+Project files use `AgencyProjectFile` with private storage keys under `agency/private/` prefix.
 
-- **No public CMS media URLs** for deliverables
-- Access via `/api/agency/files/[id]` with admin RBAC or portal project access check
-- Files streamed server-side (not unsigned public URLs)
+- **Development:** local filesystem (`AGENCY_PRIVATE_STORAGE_DRIVER=local`)
+- **Production:** S3-compatible private bucket required; startup validation fails without it
+
+Access via `/api/agency/files/[id]`:
+
+1. Authenticate admin (`view_projects`) or portal session
+2. Verify explicit `AgencyProjectClientAccess`
+3. Stream (local) or redirect to short-lived signed S3 URL (10 min TTL)
+
+Upload restrictions: max 50 MB, blocked HTML/JS/executables, safe Content-Disposition headers, `X-Content-Type-Options: nosniff`.
+
+Never expose storage keys or permanent public URLs to clients.
 
 ## Credential safety
 

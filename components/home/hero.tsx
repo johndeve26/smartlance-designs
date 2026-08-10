@@ -71,6 +71,11 @@ export function HomeHero({
               <Link href={secondaryCtaHref}>{secondaryCtaLabel}</Link>
             </Button>
           </div>
+          <p className="mt-5">
+            <Link href="/work" className="link-action text-[0.9375rem]">
+              See our work →
+            </Link>
+          </p>
         </div>
 
         {imageSrc && showcase ? (

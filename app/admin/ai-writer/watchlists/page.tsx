@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireAdminUser } from "@/lib/admin/session";
 import { prisma } from "@/lib/db";
 import { AIWriterSubnav } from "@/components/admin/ai-writer/AIWriterSubnav";
+import { PageHeader } from "@/components/ui/page-header";
 import {
   saveWatchlistAction,
   scanWatchlistAction,
@@ -26,21 +27,20 @@ export default async function WatchlistsPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 pb-10">
-      <header className="space-y-3">
-        <nav className="text-sm text-neutral-500">
-          <Link href="/admin/ai-writer/discover" className="hover:text-neutral-800">
-            Topic Discovery
-          </Link>
-          <span className="mx-1.5">/</span>
-          <span className="text-neutral-800">Watchlists</span>
-        </nav>
-        <h1 className="text-2xl font-semibold">Watchlists</h1>
-        <p className="text-sm text-neutral-600">
-          Monitored themes. Use Scan now for manual discovery. Scheduled scans stay disabled until
-          durable cron is configured.
-        </p>
-        <AIWriterSubnav current="/admin/ai-writer/discover" />
-      </header>
+      <PageHeader
+        title="Watchlists"
+        description="Monitored themes. Use Scan now for manual discovery. Scheduled scans stay disabled until durable cron is configured."
+        breadcrumbs={
+          <nav className="text-sm text-muted">
+            <Link href="/admin/ai-writer/discover" className="hover:text-foreground">
+              Topic Discovery
+            </Link>
+            <span className="mx-1.5">/</span>
+            <span className="text-foreground">Watchlists</span>
+          </nav>
+        }
+      />
+      <AIWriterSubnav current="/admin/ai-writer/discover" />
 
       <div className="space-y-4">
         {watchlists.map((wl) => {

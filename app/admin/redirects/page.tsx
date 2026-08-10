@@ -2,6 +2,7 @@ import { requireAdminUser } from "@/lib/admin/session";
 import { can } from "@/lib/admin/rbac";
 import { listRedirects, countRedirectsByOrigin } from "@/lib/repositories/redirectsRepository";
 import { RedirectsManager } from "@/components/admin/RedirectsManager";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const dynamic = "force-dynamic";
 
@@ -37,13 +38,10 @@ export default async function AdminRedirectsPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Redirects</h1>
-        <p className="mt-1 text-sm text-neutral-600">
-          {total} matching · Legacy: {byOrigin.LEGACY_MIGRATION ?? 0} · Slug
-          change: {byOrigin.SLUG_CHANGE ?? 0} · Manual: {byOrigin.MANUAL ?? 0}
-        </p>
-      </div>
+      <PageHeader
+        title="Redirects"
+        description={`${total} matching · Legacy: ${byOrigin.LEGACY_MIGRATION ?? 0} · Slug change: ${byOrigin.SLUG_CHANGE ?? 0} · Manual: ${byOrigin.MANUAL ?? 0}`}
+      />
       <RedirectsManager
         items={items.map((r) => ({
           id: r.id,

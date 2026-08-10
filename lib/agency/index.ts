@@ -14,3 +14,4 @@ export * from "@/lib/agency/requirements";
 export * from "@/lib/agency/deliverables";
 export * from "@/lib/agency/dashboard";
 export * from "@/lib/agency/files";
+export * from "@/lib/agency/private-storage";

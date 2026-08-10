@@ -2,6 +2,7 @@ import type { AgencyServiceType, Prisma, PrismaClient } from "@prisma/client";
 import { prisma } from "@/lib/db";
 
 type TemplateSeed = {
+  systemKey: string;
   name: string;
   description: string;
   serviceType: AgencyServiceType;
@@ -28,6 +29,7 @@ type TemplateSeed = {
 
 const SYSTEM_TEMPLATE_SEEDS: TemplateSeed[] = [
   {
+    systemKey: "website-design",
     name: "Website Design",
     description: "Standard new website design engagement from discovery through launch.",
     serviceType: "WEBSITE_DESIGN",
@@ -89,6 +91,7 @@ const SYSTEM_TEMPLATE_SEEDS: TemplateSeed[] = [
     ],
   },
   {
+    systemKey: "website-redesign",
     name: "Website Redesign",
     description: "Redesign an existing website while preserving SEO and content continuity.",
     serviceType: "WEBSITE_REDESIGN",
@@ -140,6 +143,7 @@ const SYSTEM_TEMPLATE_SEEDS: TemplateSeed[] = [
     ],
   },
   {
+    systemKey: "landing-page",
     name: "Landing Page",
     description: "Single high-converting landing page campaign build.",
     serviceType: "LANDING_PAGE",
@@ -179,6 +183,7 @@ const SYSTEM_TEMPLATE_SEEDS: TemplateSeed[] = [
     ],
   },
   {
+    systemKey: "ecommerce",
     name: "E-commerce Website",
     description: "Online store setup with catalog, checkout, and launch.",
     serviceType: "ECOMMERCE",
@@ -229,6 +234,7 @@ const SYSTEM_TEMPLATE_SEEDS: TemplateSeed[] = [
     ],
   },
   {
+    systemKey: "seo",
     name: "SEO Project",
     description: "Technical and on-page SEO improvement engagement.",
     serviceType: "SEO",
@@ -270,6 +276,7 @@ const SYSTEM_TEMPLATE_SEEDS: TemplateSeed[] = [
     ],
   },
   {
+    systemKey: "branding",
     name: "Branding",
     description: "Brand identity development from discovery to guidelines.",
     serviceType: "BRANDING",
@@ -310,6 +317,7 @@ const SYSTEM_TEMPLATE_SEEDS: TemplateSeed[] = [
     ],
   },
   {
+    systemKey: "website-maintenance",
     name: "Website Maintenance",
     description: "Ongoing website care, updates, and support retainer.",
     serviceType: "WEBSITE_MAINTENANCE",
@@ -366,6 +374,7 @@ async function createTemplateFromSeed(
       name: seed.name,
       description: seed.description,
       serviceType: seed.serviceType,
+      systemKey: seed.systemKey,
       isSystem: true,
       createdById,
     },
@@ -589,19 +598,34 @@ export async function instantiateTemplateIntoProject(
   };
 }
 
-export async function seedSystemTemplatesIfEmpty(createdById: string) {
-  const existing = await prisma.agencyProjectTemplate.count({
-    where: { isSystem: true },
-  });
-  if (existing > 0) {
-    return { seeded: false, count: existing };
-  }
+export const STARTER_TEMPLATE_SYSTEM_KEYS = SYSTEM_TEMPLATE_SEEDS.map((s) => s.systemKey);
+
+/**
+ * Explicitly install missing starter templates. Idempotent by stable systemKey.
+ * Does not overwrite existing templates (including edited starters).
+ */
+export async function installStarterTemplates(createdById: string) {
+  let created = 0;
+  let skipped = 0;
 
   await prisma.$transaction(async (tx) => {
     for (const seed of SYSTEM_TEMPLATE_SEEDS) {
+      const existing = await tx.agencyProjectTemplate.findUnique({
+        where: { systemKey: seed.systemKey },
+      });
+      if (existing) {
+        skipped++;
+        continue;
+      }
       await createTemplateFromSeed(seed, createdById, tx);
+      created++;
     }
   });
 
-  return { seeded: true, count: SYSTEM_TEMPLATE_SEEDS.length };
+  return { created, skipped, total: SYSTEM_TEMPLATE_SEEDS.length };
+}
+
+/** @deprecated Use installStarterTemplates via explicit admin action. */
+export async function seedSystemTemplatesIfEmpty(createdById: string) {
+  return installStarterTemplates(createdById);
 }

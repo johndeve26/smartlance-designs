@@ -14,6 +14,8 @@ import { JsonField } from "@/components/admin/JsonField";
 import { SeoFields } from "@/components/admin/SeoFields";
 import { PlatformAiPanel } from "@/components/admin/content-assistants/AiPanels";
 import { ImproveFieldButton } from "@/components/admin/content-assistants/ImproveFieldButton";
+import { AdminDetailHeader } from "@/components/admin/patterns/AdminDetailHeader";
+import { StatusBadge } from "@/components/admin/StatusBadge";
 
 export const metadata: Metadata = {
   title: "Edit platform",
@@ -59,13 +61,12 @@ export default async function AdminPlatformEditPage({
   if (sp.slug) message = "Slug updated.";
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <div className="mb-4">
-        <h1 className="admin-page-title">{platform.name}</h1>
-        <p className="mt-1 font-mono text-xs text-neutral-500">
-          {platform.slug} · {platform.id}
-        </p>
-      </div>
+    <div className="mx-auto max-w-3xl space-y-6">
+      <AdminDetailHeader
+        title={platform.name}
+        subtitle={`${platform.slug} · ${platform.id}`}
+        secondaryActions={<StatusBadge status={platform.status} />}
+      />
 
       <form className="space-y-4">
         <input type="hidden" name="id" value={platform.id} />

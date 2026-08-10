@@ -7,6 +7,9 @@ import {
 } from "@/lib/enquiries/service";
 import { EnquiryFilters } from "@/components/admin/enquiries/EnquiryFilters";
 import { EnquiryTable } from "@/components/admin/enquiries/EnquiryTable";
+import { AdminListPage } from "@/components/admin/patterns/AdminListPage";
+import { Button } from "@/components/ui/button";
+import { Pagination } from "@/components/ui/pagination";
 import type { EnquiryStatus, EnquiryType } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -56,69 +59,55 @@ export default async function AdminEnquiriesPage({
   ]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold text-neutral-900">Enquiries</h1>
-          <p className="mt-1 text-sm text-neutral-600">
-            {counts.total} new · {failures} delivery failure
-            {failures === 1 ? "" : "s"} (24h)
-          </p>
+    <AdminListPage
+      title="Enquiries"
+      description={`${counts.total} new · ${failures} delivery failure${failures === 1 ? "" : "s"} (24h)`}
+      action={
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="secondary" size="sm">
+            <Link href="/admin/enquiries/contact">
+              Contact ({counts.contact} new)
+            </Link>
+          </Button>
+          <Button asChild variant="secondary" size="sm">
+            <Link href="/admin/enquiries/reviews">
+              Reviews ({counts.review} new)
+            </Link>
+          </Button>
         </div>
-        <div className="flex flex-wrap gap-2 text-sm">
-          <Link
-            href="/admin/enquiries/contact"
-            className="rounded border px-3 py-1.5 hover:bg-white"
-          >
-            Contact ({counts.contact} new)
-          </Link>
-          <Link
-            href="/admin/enquiries/reviews"
-            className="rounded border px-3 py-1.5 hover:bg-white"
-          >
-            Reviews ({counts.review} new)
-          </Link>
-        </div>
-      </div>
-
-      <EnquiryFilters
-        basePath="/admin/enquiries"
-        defaults={{
-          q: sp.q || "",
-          type: sp.type || "",
-          status: sp.status || "",
-          delivery: sp.delivery || "",
-          range: sp.range || "",
-        }}
-        showType
-      />
-
+      }
+      filters={
+        <EnquiryFilters
+          basePath="/admin/enquiries"
+          defaults={{
+            q: sp.q || "",
+            type: sp.type || "",
+            status: sp.status || "",
+            delivery: sp.delivery || "",
+            range: sp.range || "",
+          }}
+          showType
+        />
+      }
+      isEmpty={items.length === 0}
+      empty={{
+        title: "No enquiries match these filters",
+      }}
+      pagination={
+        total > pageSize ? (
+          <Pagination
+            page={page}
+            pageSize={pageSize}
+            total={total}
+            hrefForPage={(p) =>
+              `/admin/enquiries?q=${encodeURIComponent(sp.q || "")}&type=${sp.type || ""}&status=${sp.status || ""}&delivery=${sp.delivery || ""}&range=${sp.range || ""}&page=${p}`
+            }
+          />
+        ) : undefined
+      }
+    >
       <EnquiryTable items={items} empty="No enquiries match these filters." />
-
-      {total > pageSize ? (
-        <div className="flex gap-2 text-sm">
-          {page > 1 ? (
-            <Link
-              href={`/admin/enquiries?q=${encodeURIComponent(sp.q || "")}&type=${sp.type || ""}&status=${sp.status || ""}&delivery=${sp.delivery || ""}&range=${sp.range || ""}&page=${page - 1}`}
-              className="rounded border px-3 py-1"
-            >
-              Previous
-            </Link>
-          ) : null}
-          <span className="px-2 py-1 text-neutral-500">
-            Page {page} of {Math.ceil(total / pageSize)}
-          </span>
-          {page * pageSize < total ? (
-            <Link
-              href={`/admin/enquiries?q=${encodeURIComponent(sp.q || "")}&type=${sp.type || ""}&status=${sp.status || ""}&delivery=${sp.delivery || ""}&range=${sp.range || ""}&page=${page + 1}`}
-              className="rounded border px-3 py-1"
-            >
-              Next
-            </Link>
-          ) : null}
-        </div>
-      ) : null}
-    </div>
+    </AdminListPage>
   );
 }
 

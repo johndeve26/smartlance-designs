@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireAdminUser } from "@/lib/admin/session";
-import { AgencySubNavBar } from "@/components/admin/agency/AgencySubNavBar";
 import { TemplateEditor } from "@/components/admin/agency/TemplateEditor";
+import { AdminDetailHeader } from "@/components/admin/patterns/AdminDetailHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -10,13 +10,12 @@ export default async function NewAgencyTemplatePage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <Link href="/admin/agency/templates" className="text-sm text-neutral-600 hover:underline">
-          ← Templates
-        </Link>
-        <h1 className="mt-2 text-2xl font-semibold">New Template</h1>
-      </div>
-      <AgencySubNavBar />
+      <Link href="/admin/agency/templates" className="text-sm text-muted hover:underline">
+        ← Templates
+      </Link>
+
+      <AdminDetailHeader title="New Template" />
+
       <TemplateEditor />
     </div>
   );

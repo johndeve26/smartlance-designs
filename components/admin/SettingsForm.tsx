@@ -31,6 +31,8 @@ type Settings = {
   analyticsEnabled: boolean;
   contactFormEnabled: boolean;
   freeReviewFormEnabled: boolean;
+  audienceEnabled: boolean;
+  audienceRequireConfirmation: boolean;
   formSuccessMessage: string | null;
   formFallbackMessage: string | null;
   showPublicPricing: boolean;
@@ -131,6 +133,9 @@ export function SettingsForm({
           analyticsEnabled: fd.get("analyticsEnabled") === "on",
           contactFormEnabled: fd.get("contactFormEnabled") === "on",
           freeReviewFormEnabled: fd.get("freeReviewFormEnabled") === "on",
+          audienceEnabled: fd.get("audienceEnabled") === "on",
+          audienceRequireConfirmation:
+            fd.get("audienceRequireConfirmation") === "on",
           formSuccessMessage: String(fd.get("formSuccessMessage") || "") || null,
           formFallbackMessage:
             String(fd.get("formFallbackMessage") || "") || null,
@@ -312,7 +317,7 @@ export function SettingsForm({
         />
         <Field
           name="contactFromEmail"
-          label="Notification sender (Resend From)"
+          label="Notification sender (legacy Resend From override)"
           defaultValue={presentation.contactFromEmail || ""}
         />
         <Field
@@ -321,8 +326,32 @@ export function SettingsForm({
           defaultValue={presentation.formToEmail || ""}
         />
         <p className="text-xs text-neutral-500">
-          Email delivery secrets: {envStatus.email}. Media storage: {envStatus.media}.
-          Resend API key and webhooks remain environment-only.
+          Email delivery status: {envStatus.email}. Media storage: {envStatus.media}.
+          Admin SMTP overrides Resend when enabled. Resend API key and webhooks
+          remain environment fallbacks.
+        </p>
+      </section>
+
+      <section className="rounded-lg border bg-white p-4 space-y-3">
+        <h2 className="font-semibold">Audience</h2>
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            name="audienceEnabled"
+            defaultChecked={settings.audienceEnabled}
+          />
+          Audience signup enabled
+        </label>
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            name="audienceRequireConfirmation"
+            defaultChecked={settings.audienceRequireConfirmation}
+          />
+          Require email confirmation (double opt-in)
+        </label>
+        <p className="text-xs text-neutral-500">
+          Controls public subscribe forms. Existing subscribers remain stored when disabled.
         </p>
       </section>
 

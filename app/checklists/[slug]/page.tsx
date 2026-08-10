@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { AudienceSubscribeSection } from "@/components/audience/subscribe-section-server";
 import { CTASection } from "@/components/ui/cta-section";
 import { StructuredData } from "@/components/ui/structured-data";
 import { BlogCard } from "@/components/ui/blog-card";
@@ -296,6 +297,16 @@ export default async function ChecklistDetailPage({ params }: PageProps) {
               </div>
             ) : null}
           </div>
+        </Container>
+      </Section>
+
+      <Section className="!pt-0 !pb-12 print:hidden">
+        <Container>
+          <AudienceSubscribeSection
+            source="CHECKLIST"
+            sourceUrl={`/checklists/${slug}`}
+            variant="resource"
+          />
         </Container>
       </Section>
 

@@ -3,6 +3,8 @@ import Link from "next/link";
 import { requireAdminUser, userCan } from "@/lib/admin/session";
 import { listAllServicesAdmin } from "@/lib/repositories/servicesRepository";
 import { ContentBulkTable } from "@/components/admin/ContentBulkTable";
+import { AdminListPage } from "@/components/admin/patterns/AdminListPage";
+import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: "Services",
@@ -15,21 +17,27 @@ export default async function AdminServicesPage() {
   const services = await listAllServicesAdmin();
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="admin-page-title">Services</h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            {services.length} service{services.length === 1 ? "" : "s"}
-          </p>
-        </div>
-        {canEdit ? (
-          <Link href="/admin/services/new" className="admin-btn-primary">
-            New service
-          </Link>
-        ) : null}
-      </div>
-
+    <AdminListPage
+      title="Services"
+      description="Create, review and publish Smartlance service pages."
+      action={
+        canEdit ? (
+          <Button asChild size="sm">
+            <Link href="/admin/services/new">New service</Link>
+          </Button>
+        ) : undefined
+      }
+      isEmpty={services.length === 0}
+      empty={{
+        title: "No services yet",
+        description: "Create your first service page.",
+        action: canEdit ? (
+          <Button asChild>
+            <Link href="/admin/services/new">Create first service</Link>
+          </Button>
+        ) : undefined,
+      }}
+    >
       <ContentBulkTable
         family="service"
         canPublish={canPublish}
@@ -53,6 +61,6 @@ export default async function AdminServicesPage() {
           },
         }))}
       />
-    </div>
+    </AdminListPage>
   );
 }

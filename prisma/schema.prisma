@@ -164,6 +164,9 @@ model AdminUser {
   aiContentProposalsCreated AIContentProposal[]      @relation("AIContentProposalCreator")
   aiContentProposalsAccepted AIContentProposal[]     @relation("AIContentProposalAcceptor")
   emailSettingsUpdated      EmailSettings[]          @relation("EmailSettingsUpdater")
+  emailSendingProfilesCreated EmailSendingProfile[]  @relation("EmailSendingProfileCreator")
+  emailSendingProfilesUpdated EmailSendingProfile[]  @relation("EmailSendingProfileUpdater")
+  emailRoutingRulesUpdated  EmailRoutingRule[]       @relation("EmailRoutingRuleUpdater")
   inboundEmailSettingsUpdated InboundEmailSettings[] @relation("InboundEmailSettingsUpdater")
   inboundEmailSyncActor     InboundEmailSettings[]   @relation("InboundEmailSyncActor")
   subscribersUnsubscribed   Subscriber[]             @relation("SubscriberUnsubscriber")
@@ -203,6 +206,50 @@ model AdminUser {
   agencyFilesCreated            AgencyProjectFile[]       @relation("AgencyFileCreator")
   portalInvitesCreated          ClientPortalInvite[]      @relation("PortalInviteCreator")
   agencyClientAccessGranted     AgencyProjectClientAccess[] @relation("AgencyClientAccessGranter")
+  agencyProposalsOwned          AgencyProposal[]          @relation("AgencyProposalOwner")
+  agencyProposalsCreated        AgencyProposal[]          @relation("AgencyProposalCreator")
+  agencyProposalVersionsCreated AgencyProposalVersion[]   @relation("AgencyProposalVersionCreator")
+  agencyProposalAccessGranted   AgencyProposalClientAccess[] @relation("AgencyProposalAccessGranter")
+  agencyProposalActivities      AgencyProposalActivity[]  @relation("AgencyProposalActivityAdmin")
+  agencyContractsOwned          AgencyContract[]          @relation("AgencyContractOwner")
+  agencyContractsCreated        AgencyContract[]          @relation("AgencyContractCreator")
+  agencyContractVersionsCreated AgencyContractVersion[] @relation("AgencyContractVersionCreator")
+  agencyContractTemplatesCreated AgencyContractTemplate[] @relation("AgencyContractTemplateCreator")
+  agencyContractAccessGranted   AgencyContractClientAccess[] @relation("AgencyContractAccessGranter")
+  agencyContractActivities      AgencyContractActivity[]  @relation("AgencyContractActivityAdmin")
+  agencyContractSignatures      AgencyContractSignature[] @relation("AgencyContractSignatureAdmin")
+  agencyContractSigners         AgencyContractSigner[]    @relation("AgencyContractSignerAdmin")
+  agencyBillingSchedulesCreated AgencyBillingSchedule[]   @relation("AgencyBillingScheduleCreator")
+  agencyInvoicesCreated         AgencyInvoice[]           @relation("AgencyInvoiceCreator")
+  agencyPaymentsRecorded        AgencyPayment[]           @relation("AgencyPaymentRecorder")
+  agencyRetainersOwned          AgencyRetainer[]          @relation("AgencyRetainerOwner")
+  agencyRetainersCreated        AgencyRetainer[]          @relation("AgencyRetainerCreator")
+  agencyInvoiceAccessGranted    AgencyInvoiceClientAccess[] @relation("AgencyInvoiceAccessGranter")
+  agencyClientBillingAccessGranted AgencyClientBillingAccess[] @relation("AgencyClientBillingAccessGranter")
+  agencyBillingActivities       AgencyBillingActivity[]   @relation("AgencyBillingActivityAdmin")
+  agencyOnboardingTemplatesCreated AgencyOnboardingTemplate[] @relation("AgencyOnboardingTemplateCreator")
+  agencyOnboardingTemplateVersionsCreated AgencyOnboardingTemplateVersion[] @relation("AgencyOnboardingTemplateVersionCreator")
+  agencyOnboardingsOwned        AgencyProjectOnboarding[] @relation("AgencyOnboardingOwner")
+  agencyOnboardingsCreated      AgencyProjectOnboarding[] @relation("AgencyOnboardingCreator")
+  agencyOnboardingResponsesReviewed AgencyOnboardingResponse[] @relation("AgencyOnboardingResponseReviewer")
+  agencyOnboardingActivities    AgencyOnboardingActivity[] @relation("AgencyOnboardingActivityAdmin")
+  agencyChangeRequestsOwned     AgencyChangeRequest[]      @relation("AgencyChangeRequestOwner")
+  agencyChangeRequestsCreated   AgencyChangeRequest[]      @relation("AgencyChangeRequestCreator")
+  agencyChangeRequestsRequested AgencyChangeRequest[]      @relation("AgencyChangeRequestAdminRequester")
+  agencyChangeRequestRevisions  AgencyChangeRequestRevision[] @relation("AgencyChangeRequestRevisionAdmin")
+  agencyChangeRequestAssessments AgencyChangeRequestAssessment[] @relation("AgencyChangeRequestAssessor")
+  agencyChangeRequestAccessGranted AgencyChangeRequestClientAccess[] @relation("AgencyChangeRequestAccessGranter")
+  agencyChangeRequestMessages   AgencyChangeRequestMessage[] @relation("AgencyChangeRequestMessageAdmin")
+  agencyChangeRequestApplications AgencyChangeRequestApplication[] @relation("AgencyChangeRequestApplier")
+  agencyChangeRequestActivities AgencyChangeRequestActivity[] @relation("AgencyChangeRequestActivityAdmin")
+  agencyChangeRequestFiles      AgencyChangeRequestFile[]  @relation("AgencyChangeRequestFileAdmin")
+  managedWebsitesCreated        AgencyManagedWebsite[]     @relation("AgencyManagedWebsiteCreator")
+  managedWebsiteAccessGranted   AgencyManagedWebsiteClientAccess[] @relation("AgencyManagedWebsiteAccessGranter")
+  websiteCareEventsPerformed    AgencyWebsiteCareEvent[]   @relation("AgencyWebsiteCareEventPerformer")
+  supportRequestsAssigned       AgencySupportRequest[]     @relation("AgencySupportRequestAssignee")
+  supportMessages               AgencySupportMessage[]     @relation("AgencySupportMessageAdmin")
+  supportRequestFiles           AgencySupportRequestFile[] @relation("AgencySupportRequestFileAdmin")
+  prospectRequestMessages       AgencyProspectRequestMessage[] @relation("AgencyProspectRequestMessageAdmin")
 
   @@index([status])
   @@index([role])
@@ -342,6 +389,86 @@ model EmailSettings {
   updatedById            String?
 
   updatedBy AdminUser? @relation("EmailSettingsUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+}
+
+enum EmailTransportType {
+  SYSTEM_SMTP
+  CUSTOM_SMTP
+}
+
+enum EmailRouteCategory {
+  AUTH_MAGIC_LINK
+  PROSPECT_GENERAL
+  PROSPECT_REQUEST
+  PROSPECT_CLARIFICATION
+  CRM_MANUAL
+  CRM_SEQUENCE
+  CRM_INBOUND_REPLY
+  PROPOSAL
+  CONTRACT
+  PROJECT
+  ONBOARDING
+  CHANGE_REQUEST
+  INVOICE
+  PAYMENT_CONFIRMATION
+  SUPPORT
+  GENERAL_SYSTEM
+}
+
+enum EmailProfileTestStatus {
+  UNTESTED
+  PASSED
+  FAILED
+}
+
+model EmailSendingProfile {
+  id                 String                 @id @default(cuid())
+  name               String
+  slug               String                 @unique
+  description        String?                @db.Text
+  fromName           String
+  fromEmail          String
+  replyToName        String?
+  replyToEmail       String?
+  transportType      EmailTransportType     @default(SYSTEM_SMTP)
+  smtpHost           String?
+  smtpPort           Int?
+  smtpSecurityMode   String?                @default("STARTTLS")
+  smtpUsername       String?
+  smtpPasswordCiphertext String?            @db.Text
+  smtpPasswordIv     String?
+  smtpPasswordTag    String?
+  smtpPasswordLast4  String?
+  isActive           Boolean                @default(false)
+  isDefault          Boolean                @default(false)
+  sortOrder          Int                    @default(0)
+  lastTestedAt       DateTime?
+  lastTestStatus     EmailProfileTestStatus @default(UNTESTED)
+  lastTestErrorCode  String?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  createdById        String?
+  updatedById        String?
+
+  createdBy     AdminUser?          @relation("EmailSendingProfileCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy     AdminUser?          @relation("EmailSendingProfileUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  routingRules  EmailRoutingRule[]
+  crmEmails     CrmEmail[]
+
+  @@index([isActive, sortOrder])
+  @@index([isDefault])
+}
+
+model EmailRoutingRule {
+  id               String             @id @default(cuid())
+  category         EmailRouteCategory @unique
+  sendingProfileId String
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  updatedById      String?
+
+  sendingProfile EmailSendingProfile @relation(fields: [sendingProfileId], references: [id], onDelete: Restrict)
+  updatedBy      AdminUser?          @relation("EmailRoutingRuleUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
 }
 
 model InboundEmailSettings {
@@ -2064,6 +2191,7 @@ enum CrmContactSource {
   CONTACT_FORM
   WEBSITE_REVIEW
   PROJECT_PLANNER
+  PROSPECT_WORKSPACE
   REFERRAL
   INBOUND_EMAIL
   OUTBOUND
@@ -2257,6 +2385,14 @@ model CrmCompany {
   tasks    CrmTask[]
   activities CrmActivity[]
   agencyProjects AgencyProject[]
+  agencyProposals AgencyProposal[]
+  agencyContracts AgencyContract[]
+  billingProfiles AgencyBillingProfile[]
+  agencyInvoices  AgencyInvoice[]
+  agencyPayments  AgencyPayment[]
+  retainers       AgencyRetainer[]
+  clientBillingAccess AgencyClientBillingAccess[]
+  managedWebsites AgencyManagedWebsite[]
 
   @@index([name])
   @@index([domain])
@@ -2313,6 +2449,32 @@ model CrmContact {
   portalUser          ClientPortalUser?
   deliverableReviews  AgencyDeliverableReview[]
   clientProjectAccess AgencyProjectClientAccess[]
+  proposalAccess      AgencyProposalClientAccess[]
+  proposalResponses   AgencyProposalClientResponse[]
+  proposalAcceptances AgencyProposalAcceptance[]
+  agencyProposals     AgencyProposal[]             @relation("AgencyProposalPrimaryContact")
+  agencyContracts     AgencyContract[]
+  contractSigners     AgencyContractSigner[]
+  contractSignatures  AgencyContractSignature[]
+  contractResponses   AgencyContractResponse[]
+  contractClientAccess AgencyContractClientAccess[]
+  billingProfiles      AgencyBillingProfile[]
+  agencyInvoices       AgencyInvoice[]
+  agencyPayments       AgencyPayment[]
+  retainers            AgencyRetainer[]
+  invoiceClientAccess  AgencyInvoiceClientAccess[]
+  clientBillingAccess  AgencyClientBillingAccess[]
+  assignedRequirements AgencyClientRequirement[] @relation("RequirementAssignedContact")
+  onboardingPrimaryContacts AgencyProjectOnboarding[] @relation("AgencyOnboardingPrimaryContact")
+  onboardingResponses AgencyOnboardingResponse[] @relation("AgencyOnboardingResponseContact")
+  onboardingReminders AgencyOnboardingReminder[] @relation("AgencyOnboardingReminderContact")
+  changeRequestsRequested AgencyChangeRequest[] @relation("AgencyChangeRequestContactRequester")
+  changeRequestClientAccess AgencyChangeRequestClientAccess[] @relation("AgencyChangeRequestClientAccessContact")
+  changeRequestApprovals AgencyChangeRequestApproval[] @relation("AgencyChangeRequestApprovalContact")
+  changeRequestDecisions AgencyChangeRequestDecision[] @relation("AgencyChangeRequestDecisionContact")
+  managedWebsiteAccess AgencyManagedWebsiteClientAccess[]
+  supportRequestsSubmitted AgencySupportRequest[]
+  prospectRequests AgencyProspectRequest[] @relation("AgencyProspectRequestContact")
 
   @@index([companyId])
   @@index([lifecycleStage])
@@ -2394,6 +2556,7 @@ model CrmDeal {
   emails  CrmEmail[]
   emailThreads CrmEmailThread[]
   agencyProject AgencyProject?
+  agencyProposals AgencyProposal[]
 
   @@index([contactId])
   @@index([companyId])
@@ -2488,6 +2651,11 @@ model CrmEmail {
   inReplyToMessageId  String?
   referencesHeader    String?                   @db.Text
   fromAddress         String?
+  sendingProfileId    String?
+  fromNameSnapshot    String?
+  fromEmailSnapshot   String?
+  replyToSnapshot     String?
+  transportTypeSnapshot EmailTransportType?
   toAddresses         Json?
   ccAddresses         Json?
   mailboxKey          String?
@@ -2526,6 +2694,7 @@ model CrmEmail {
   trackedLinks      CrmTrackedLink[]
   engagementEvents  CrmEmailEngagementEvent[]
   createdBy         AdminUser              @relation("CrmEmailCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  sendingProfile    EmailSendingProfile?   @relation(fields: [sendingProfileId], references: [id], onDelete: SetNull)
 
   @@unique([mailboxKey, mailboxUidValidity, mailboxUid])
   @@index([contactId, createdAt])
@@ -3041,6 +3210,9 @@ enum AgencyRequirementType {
 enum AgencyRequirementStatus {
   REQUESTED
   RECEIVED
+  SUBMITTED
+  UNDER_REVIEW
+  NEEDS_CLARIFICATION
   ACCEPTED
   NOT_NEEDED
 }
@@ -3078,6 +3250,9 @@ enum AgencyProjectActivityType {
   DELIVERABLE_APPROVED
   DELIVERABLE_CHANGES_REQUESTED
   REQUIREMENT_RECEIVED
+  ONBOARDING_STARTED
+  ONBOARDING_SUBMITTED
+  ONBOARDING_COMPLETED
   UPDATE_POSTED
   MEMBER_ADDED
   CLIENT_ACCESS_GRANTED
@@ -3108,8 +3283,9 @@ enum AgencyProjectClientRole {
 }
 
 model AgencyProjectCounter {
-  year       Int @id
-  lastNumber Int @default(0)
+  year       Int      @id
+  lastNumber Int      @default(0)
+  updatedAt  DateTime @updatedAt
 }
 
 model AgencyProject {
@@ -3135,6 +3311,13 @@ model AgencyProject {
   internalNotes          String?             @db.Text
   clientVisibilityEnabled Boolean            @default(true)
   caseStudyCandidate     Boolean             @default(false)
+  requireOnboarding           Boolean             @default(false)
+  requireSignedContract       Boolean             @default(false)
+  requireDeposit              Boolean             @default(false)
+  requireInternalKickoff      Boolean             @default(false)
+  internalKickoffCompletedAt  DateTime?
+  sourceProposalId       String?             @unique
+  sourceProposalAcceptanceId String?         @unique
   createdById            String
   createdAt              DateTime            @default(now())
   updatedAt              DateTime            @updatedAt
@@ -3156,6 +3339,16 @@ model AgencyProject {
   clientAccess  AgencyProjectClientAccess[]
   files         AgencyProjectFile[]
   portalInvites ClientPortalInvite[]
+  sourceProposal AgencyProposal? @relation(fields: [sourceProposalId], references: [id], onDelete: SetNull)
+  sourceProposalAcceptance AgencyProposalAcceptance? @relation(fields: [sourceProposalAcceptanceId], references: [id], onDelete: SetNull)
+  contracts AgencyContract[]
+  billingSchedules AgencyBillingSchedule[]
+  invoices AgencyInvoice[]
+  retainers AgencyRetainer[]
+  onboardings AgencyProjectOnboarding[]
+  changeRequests AgencyChangeRequest[]
+  managedWebsites AgencyManagedWebsite[]
+  supportRequests AgencySupportRequest[]
 
   @@index([status, targetDueDate])
   @@index([ownerId, status])
@@ -3183,6 +3376,7 @@ model AgencyProjectTemplate {
   name        String
   description String?          @db.Text
   serviceType AgencyServiceType
+  systemKey   String?          @unique
   isArchived  Boolean          @default(false)
   isSystem    Boolean          @default(false)
   createdById String
@@ -3266,6 +3460,7 @@ model AgencyProjectMilestone {
   tasks        AgencyProjectTask[]
   requirements AgencyClientRequirement[]
   deliverables AgencyDeliverable[]
+  billingInstallments AgencyBillingInstallment[]
 
   @@index([projectId, position])
   @@index([projectId, status])
@@ -3287,6 +3482,7 @@ model AgencyProjectTask {
   clientVisible  Boolean                   @default(false)
   position       Int                       @default(0)
   blockedReason  String?                   @db.Text
+  changeRequestId String?
   createdAt      DateTime                  @default(now())
   updatedAt      DateTime                  @updatedAt
 
@@ -3294,30 +3490,51 @@ model AgencyProjectTask {
   milestone AgencyProjectMilestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
   assignee  AdminUser?             @relation("AgencyTaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
   createdBy AdminUser              @relation("AgencyTaskCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  changeRequest AgencyChangeRequest? @relation(fields: [changeRequestId], references: [id], onDelete: SetNull)
 
   @@index([projectId, status])
   @@index([assigneeId, status, dueDate])
   @@index([projectId, position])
+  @@index([changeRequestId])
 }
 
 model AgencyClientRequirement {
   id            String                  @id @default(cuid())
   projectId     String
   milestoneId   String?
+  onboardingId  String?
+  onboardingSectionId String?
+  sourceQuestionId String?
+  sourceTemplateKey String?
   title         String
   description   String?                 @db.Text
   type          AgencyRequirementType   @default(OTHER)
   status        AgencyRequirementStatus @default(REQUESTED)
+  required      Boolean                 @default(true)
   dueDate       DateTime?
   clientVisible Boolean                 @default(true)
+  assignedContactId String?
+  clientReviewNote String?              @db.Text
+  internalReviewNote String?            @db.Text
+  accessMetadataJson Json?
   fulfilledAt   DateTime?
+  changeRequestId String?
   createdAt     DateTime                @default(now())
   updatedAt     DateTime                @updatedAt
 
   project   AgencyProject           @relation(fields: [projectId], references: [id], onDelete: Cascade)
   milestone AgencyProjectMilestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+  onboarding AgencyProjectOnboarding? @relation(fields: [onboardingId], references: [id], onDelete: SetNull)
+  onboardingSection AgencyOnboardingSection? @relation(fields: [onboardingSectionId], references: [id], onDelete: SetNull)
+  assignedContact CrmContact? @relation("RequirementAssignedContact", fields: [assignedContactId], references: [id], onDelete: SetNull)
+  fileSubmissions AgencyOnboardingFileSubmission[]
+  reminders AgencyOnboardingReminder[]
+  changeRequest AgencyChangeRequest? @relation(fields: [changeRequestId], references: [id], onDelete: SetNull)
 
   @@index([projectId, status])
+  @@index([onboardingId, status])
+  @@index([changeRequestId])
+  @@unique([onboardingId, sourceTemplateKey])
 }
 
 model AgencyDeliverable {
@@ -3330,17 +3547,20 @@ model AgencyDeliverable {
   status        AgencyDeliverableStatus @default(DRAFT)
   clientVisible Boolean                 @default(true)
   createdById   String
+  changeRequestId String?
   createdAt     DateTime                @default(now())
   updatedAt     DateTime                @updatedAt
 
   project   AgencyProject           @relation(fields: [projectId], references: [id], onDelete: Cascade)
   milestone AgencyProjectMilestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
   createdBy AdminUser               @relation("AgencyDeliverableCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  changeRequest AgencyChangeRequest? @relation(fields: [changeRequestId], references: [id], onDelete: SetNull)
 
   versions AgencyDeliverableVersion[]
   reviews  AgencyDeliverableReview[]
 
   @@index([projectId, status])
+  @@index([changeRequestId])
 }
 
 model AgencyDeliverableVersion {
@@ -3444,6 +3664,9 @@ model AgencyProjectFile {
   project   AgencyProject             @relation(fields: [projectId], references: [id], onDelete: Cascade)
   version   AgencyDeliverableVersion? @relation(fields: [versionId], references: [id], onDelete: SetNull)
   createdBy AdminUser                 @relation("AgencyFileCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  onboardingSubmissions AgencyOnboardingFileSubmission[]
+  changeRequestFiles    AgencyChangeRequestFile[]
+  supportRequestFiles   AgencySupportRequestFile[]
 
   @@index([projectId])
 }
@@ -3463,6 +3686,39 @@ model ClientPortalUser {
   projectAccess AgencyProjectClientAccess[]
   reviews  AgencyDeliverableReview[]
   activities AgencyProjectActivity[]
+  proposalAccess AgencyProposalClientAccess[]
+  proposalResponses AgencyProposalClientResponse[]
+  proposalAcceptances AgencyProposalAcceptance[]
+  proposalActivities AgencyProposalActivity[]
+  contractAccess AgencyContractClientAccess[]
+  contractSignatures AgencyContractSignature[]
+  contractResponses AgencyContractResponse[]
+  contractActivities AgencyContractActivity[]
+  contractSigners AgencyContractSigner[]
+  invoiceClientAccess AgencyInvoiceClientAccess[]
+  clientBillingAccess AgencyClientBillingAccess[]
+  billingActivities AgencyBillingActivity[]
+  onboardingResponses AgencyOnboardingResponse[] @relation("AgencyOnboardingResponsePortalUser")
+  onboardingFileSubmissions AgencyOnboardingFileSubmission[] @relation("AgencyOnboardingFileSubmissionPortalUser")
+  onboardingActivities AgencyOnboardingActivity[] @relation("AgencyOnboardingActivityPortal")
+  onboardingReminders AgencyOnboardingReminder[] @relation("AgencyOnboardingReminderPortalUser")
+  changeRequestsRequested AgencyChangeRequest[] @relation("AgencyChangeRequestPortalRequester")
+  changeRequestRevisions AgencyChangeRequestRevision[] @relation("AgencyChangeRequestRevisionPortal")
+  changeRequestAccess AgencyChangeRequestClientAccess[] @relation("AgencyChangeRequestClientAccessPortal")
+  changeRequestApprovals AgencyChangeRequestApproval[] @relation("AgencyChangeRequestApprovalPortal")
+  changeRequestDecisions AgencyChangeRequestDecision[] @relation("AgencyChangeRequestDecisionPortal")
+  changeRequestMessages AgencyChangeRequestMessage[] @relation("AgencyChangeRequestMessagePortal")
+  changeRequestActivities AgencyChangeRequestActivity[] @relation("AgencyChangeRequestActivityPortal")
+  changeRequestFiles AgencyChangeRequestFile[] @relation("AgencyChangeRequestFilePortal")
+  managedWebsiteAccess AgencyManagedWebsiteClientAccess[]
+  supportRequestsSubmitted AgencySupportRequest[] @relation("AgencySupportRequestSubmitter")
+  supportMessages AgencySupportMessage[] @relation("AgencySupportMessagePortal")
+  supportRequestFiles AgencySupportRequestFile[] @relation("AgencySupportRequestFilePortal")
+  prospectProfile AgencyProspectProfile?
+  websiteReviews AgencyWebsiteReview[]
+  websiteBriefs AgencyWebsiteBrief[]
+  prospectRequests AgencyProspectRequest[]
+  prospectRequestMessages AgencyProspectRequestMessage[]
 
   @@index([email])
   @@index([status])
@@ -3520,4 +3776,2264 @@ model AgencyProjectClientAccess {
   @@unique([projectId, contactId])
   @@index([portalUserId, projectId])
   @@index([contactId])
+}
+
+// --- Agency Proposals V2 ---
+
+enum AgencyProposalStatus {
+  DRAFT
+  INTERNAL_REVIEW
+  SENT
+  CHANGES_REQUESTED
+  ACCEPTED
+  DECLINED
+  EXPIRED
+  ARCHIVED
+}
+
+enum AgencyProposalLineItemType {
+  SERVICE
+  ADD_ON
+  DISCOUNT
+  OTHER
+}
+
+enum AgencyProposalClientRole {
+  VIEWER
+  DECISION_MAKER
+}
+
+enum AgencyProposalClientResponseType {
+  CHANGES_REQUESTED
+  DECLINED
+}
+
+enum AgencyProposalActivityType {
+  PROPOSAL_CREATED
+  VERSION_CREATED
+  SENT
+  VIEWED
+  CHANGES_REQUESTED
+  DECLINED
+  ACCEPTED
+  PROJECT_CREATED
+}
+
+enum AgencyProposalSectionType {
+  OVERVIEW
+  GOALS
+  SCOPE
+  DELIVERABLES
+  TIMELINE
+  PRICING
+  ASSUMPTIONS
+  EXCLUSIONS
+  REVISION_POLICY
+  NEXT_STEPS
+  CLIENT_RESPONSIBILITIES
+}
+
+model AgencyProposalCounter {
+  year       Int      @id
+  lastNumber Int      @default(0)
+  updatedAt  DateTime @updatedAt
+}
+
+model AgencyProposal {
+  id                      String               @id @default(cuid())
+  proposalNumber          String               @unique
+  dealId                  String?
+  companyId               String?
+  primaryContactId        String
+  sourceProspectRequestId String?              @unique
+  title                   String
+  summary                 String?              @db.Text
+  status                  AgencyProposalStatus @default(DRAFT)
+  currency          String               @default("USD")
+  currentVersionId  String?
+  acceptedVersionId String?
+  ownerId           String
+  createdById       String
+  internalNotes     String?              @db.Text
+  sentAt            DateTime?
+  acceptedAt        DateTime?
+  declinedAt        DateTime?
+  expiresAt         DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  deal                  CrmDeal?               @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  company               CrmCompany?            @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  primaryContact        CrmContact             @relation("AgencyProposalPrimaryContact", fields: [primaryContactId], references: [id], onDelete: Restrict)
+  sourceProspectRequest AgencyProspectRequest? @relation(fields: [sourceProspectRequestId], references: [id], onDelete: SetNull)
+  owner                 AdminUser              @relation("AgencyProposalOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  createdBy             AdminUser              @relation("AgencyProposalCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  versions     AgencyProposalVersion[]
+  clientAccess AgencyProposalClientAccess[]
+  responses    AgencyProposalClientResponse[]
+  acceptance   AgencyProposalAcceptance?
+  activities   AgencyProposalActivity[]
+  project      AgencyProject?
+  contracts    AgencyContract[]
+  invoices     AgencyInvoice[]
+
+  @@index([status, updatedAt])
+  @@index([ownerId, status])
+  @@index([dealId])
+  @@index([companyId])
+  @@index([primaryContactId])
+}
+
+model AgencyProposalVersion {
+  id                String    @id @default(cuid())
+  proposalId        String
+  versionNumber     Int
+  title             String
+  intro             String?   @db.Text
+  scopeSummary      String?   @db.Text
+  timelineSummary   String?   @db.Text
+  estimatedStart    DateTime?
+  estimatedDuration String?
+  pricingSubtotal   Decimal   @db.Decimal(12, 2)
+  discountAmount    Decimal?  @db.Decimal(12, 2)
+  taxAmount         Decimal?  @db.Decimal(12, 2)
+  totalAmount       Decimal   @db.Decimal(12, 2)
+  currency          String    @default("USD")
+  assumptionsText   String?   @db.Text
+  exclusionsText    String?   @db.Text
+  termsSummary      String?   @db.Text
+  revisionPolicy    String?   @db.Text
+  validUntil        DateTime?
+  createdById       String
+  createdAt         DateTime  @default(now())
+  publishedAt       DateTime?
+
+  proposal     AgencyProposal                  @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  createdBy    AdminUser                       @relation("AgencyProposalVersionCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  sections     AgencyProposalSection[]
+  scopeItems   AgencyProposalScopeItem[]
+  deliverables AgencyProposalDeliverableItem[]
+  lineItems    AgencyProposalLineItem[]
+  responses    AgencyProposalClientResponse[]
+
+  @@unique([proposalId, versionNumber])
+  @@index([proposalId])
+}
+
+model AgencyProposalSection {
+  id                String                    @id @default(cuid())
+  proposalVersionId String
+  sectionType       AgencyProposalSectionType
+  title             String
+  body              String?                   @db.Text
+  position          Int
+
+  version AgencyProposalVersion @relation(fields: [proposalVersionId], references: [id], onDelete: Cascade)
+
+  @@index([proposalVersionId, position])
+}
+
+model AgencyProposalScopeItem {
+  id                String  @id @default(cuid())
+  proposalVersionId String
+  title             String
+  description       String? @db.Text
+  position          Int
+  included          Boolean @default(true)
+  clientVisible     Boolean @default(true)
+
+  version AgencyProposalVersion @relation(fields: [proposalVersionId], references: [id], onDelete: Cascade)
+
+  @@index([proposalVersionId, position])
+}
+
+model AgencyProposalDeliverableItem {
+  id                String  @id @default(cuid())
+  proposalVersionId String
+  title             String
+  description       String? @db.Text
+  quantity          Int     @default(1)
+  position          Int
+
+  version AgencyProposalVersion @relation(fields: [proposalVersionId], references: [id], onDelete: Cascade)
+
+  @@index([proposalVersionId, position])
+}
+
+model AgencyProposalLineItem {
+  id                  String                     @id @default(cuid())
+  proposalVersionId   String
+  name                String
+  description         String?                    @db.Text
+  quantity            Decimal                    @db.Decimal(10, 2)
+  unitPrice           Decimal                    @db.Decimal(12, 2)
+  amount              Decimal                    @db.Decimal(12, 2)
+  position            Int
+  type                AgencyProposalLineItemType @default(SERVICE)
+  isOptional          Boolean                    @default(false)
+  isSelectedByDefault Boolean                    @default(false)
+
+  version AgencyProposalVersion @relation(fields: [proposalVersionId], references: [id], onDelete: Cascade)
+
+  @@index([proposalVersionId, position])
+}
+
+model AgencyProposalClientAccess {
+  id            String                   @id @default(cuid())
+  proposalId    String
+  contactId     String
+  portalUserId  String?
+  role          AgencyProposalClientRole @default(VIEWER)
+  grantedAt     DateTime                 @default(now())
+  revokedAt     DateTime?
+  grantedById   String
+  firstViewedAt DateTime?
+  lastViewedAt  DateTime?
+
+  proposal   AgencyProposal    @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  contact    CrmContact        @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  portalUser ClientPortalUser? @relation(fields: [portalUserId], references: [id], onDelete: SetNull)
+  grantedBy  AdminUser         @relation("AgencyProposalAccessGranter", fields: [grantedById], references: [id], onDelete: Restrict)
+
+  @@unique([proposalId, contactId])
+  @@index([portalUserId, proposalId])
+  @@index([contactId])
+}
+
+model AgencyProposalClientResponse {
+  id           String                           @id @default(cuid())
+  proposalId   String
+  versionId    String
+  portalUserId String
+  contactId    String
+  responseType AgencyProposalClientResponseType
+  comment      String?                          @db.Text
+  createdAt    DateTime                         @default(now())
+
+  proposal   AgencyProposal        @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  version    AgencyProposalVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  portalUser ClientPortalUser      @relation(fields: [portalUserId], references: [id], onDelete: Restrict)
+  contact    CrmContact            @relation(fields: [contactId], references: [id], onDelete: Restrict)
+
+  @@index([proposalId, createdAt])
+}
+
+model AgencyProposalAcceptance {
+  id                      String   @id @default(cuid())
+  proposalId              String   @unique
+  acceptedVersionId       String
+  portalUserId            String
+  contactId               String
+  acceptedAt              DateTime @default(now())
+  acceptedTotal           Decimal  @db.Decimal(12, 2)
+  currency                String
+  selectedOptionalItemIds Json
+  scopeHash               String?
+  termsAcknowledged       Boolean  @default(true)
+
+  proposal   AgencyProposal     @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  portalUser ClientPortalUser   @relation(fields: [portalUserId], references: [id], onDelete: Restrict)
+  contact    CrmContact         @relation(fields: [contactId], references: [id], onDelete: Restrict)
+  project    AgencyProject?
+  contracts  AgencyContract[]
+  billingSchedules AgencyBillingSchedule[]
+  invoices   AgencyInvoice[]
+  changeRequests AgencyChangeRequest[]
+
+  @@index([acceptedVersionId])
+}
+
+model AgencyProposalActivity {
+  id                String                     @id @default(cuid())
+  proposalId        String
+  type              AgencyProposalActivityType
+  summary           String
+  actorUserId       String?
+  actorPortalUserId String?
+  entityType        String?
+  entityId          String?
+  metadata          Json?
+  clientVisible     Boolean                    @default(false)
+  createdAt         DateTime                   @default(now())
+
+  proposal        AgencyProposal    @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  actorUser       AdminUser?        @relation("AgencyProposalActivityAdmin", fields: [actorUserId], references: [id], onDelete: SetNull)
+  actorPortalUser ClientPortalUser? @relation(fields: [actorPortalUserId], references: [id], onDelete: SetNull)
+
+  @@index([proposalId, createdAt])
+}
+
+// --- Agency Contracts V2.1 ---
+
+enum AgencyContractStatus {
+  DRAFT
+  READY_FOR_REVIEW
+  SENT
+  PARTIALLY_SIGNED
+  SIGNED
+  CORRECTION_REQUESTED
+  DECLINED
+  EXPIRED
+  VOIDED
+  ARCHIVED
+}
+
+enum AgencyContractType {
+  SERVICE_AGREEMENT
+  NDA
+  MAINTENANCE
+  OTHER
+}
+
+enum AgencyContractSource {
+  MANUAL
+  PROPOSAL_ACCEPTANCE
+}
+
+enum AgencyContractSignerType {
+  CLIENT
+  AGENCY
+}
+
+enum AgencyContractSignerRole {
+  CLIENT_SIGNATORY
+  AGENCY_SIGNATORY
+  VIEWER
+}
+
+enum AgencyContractSignerStatus {
+  PENDING
+  VIEWED
+  SIGNED
+  DECLINED
+}
+
+enum AgencyContractResponseType {
+  CORRECTION_REQUESTED
+  DECLINED
+}
+
+enum AgencyContractActivityType {
+  CONTRACT_CREATED
+  VERSION_CREATED
+  CONTRACT_SENT
+  CONTRACT_VIEWED
+  SIGNATURE_COMPLETED
+  CORRECTION_REQUESTED
+  CONTRACT_DECLINED
+  CONTRACT_FULLY_SIGNED
+  CONTRACT_VOIDED
+  CONTRACT_ARCHIVED
+}
+
+enum AgencyContractTemplateStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+model AgencyContractCounter {
+  year       Int      @id
+  lastNumber Int      @default(0)
+  updatedAt  DateTime @updatedAt
+}
+
+model AgencyContractTemplate {
+  id               String                       @id @default(cuid())
+  name             String
+  description      String?                      @db.Text
+  status           AgencyContractTemplateStatus @default(DRAFT)
+  currentVersionId String?
+  createdById      String
+  createdAt        DateTime                     @default(now())
+  updatedAt        DateTime                     @updatedAt
+
+  createdBy AdminUser                       @relation("AgencyContractTemplateCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  versions  AgencyContractTemplateVersion[]
+
+  @@index([status, updatedAt])
+}
+
+model AgencyContractTemplateVersion {
+  id            String   @id @default(cuid())
+  templateId    String
+  versionNumber Int
+  name          String
+  content       String   @db.Text
+  createdById   String
+  createdAt     DateTime @default(now())
+
+  template AgencyContractTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@unique([templateId, versionNumber])
+  @@index([templateId])
+}
+
+model AgencyContract {
+  id                   String               @id @default(cuid())
+  contractNumber       String               @unique
+  proposalId           String?
+  proposalAcceptanceId String?
+  projectId            String?
+  companyId            String?
+  primaryContactId     String?
+  title                String
+  contractType         AgencyContractType   @default(SERVICE_AGREEMENT)
+  source               AgencyContractSource @default(MANUAL)
+  status               AgencyContractStatus @default(DRAFT)
+  currentVersionId     String?
+  signedVersionId      String?
+  ownerId              String
+  createdById          String
+  internalNotes        String?              @db.Text
+  sentAt               DateTime?
+  fullySignedAt        DateTime?
+  declinedAt           DateTime?
+  voidedAt             DateTime?
+  voidReason           String?              @db.Text
+  expiresAt            DateTime?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+
+  proposal           AgencyProposal?           @relation(fields: [proposalId], references: [id], onDelete: SetNull)
+  proposalAcceptance AgencyProposalAcceptance? @relation(fields: [proposalAcceptanceId], references: [id], onDelete: SetNull)
+  project            AgencyProject?            @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  company            CrmCompany?               @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  primaryContact     CrmContact?               @relation(fields: [primaryContactId], references: [id], onDelete: SetNull)
+  owner              AdminUser                 @relation("AgencyContractOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  createdBy          AdminUser                 @relation("AgencyContractCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  versions     AgencyContractVersion[]
+  signers      AgencyContractSigner[]
+  clientAccess AgencyContractClientAccess[]
+  signatures   AgencyContractSignature[]
+  responses    AgencyContractResponse[]
+  activities   AgencyContractActivity[]
+  billingSchedules AgencyBillingSchedule[]
+  invoices     AgencyInvoice[]
+  retainers    AgencyRetainer[]
+  changeRequests AgencyChangeRequest[]
+
+  @@index([status, updatedAt])
+  @@index([ownerId, status])
+  @@index([proposalId])
+  @@index([proposalAcceptanceId])
+  @@index([projectId])
+  @@index([companyId])
+}
+
+model AgencyContractVersion {
+  id                      String    @id @default(cuid())
+  contractId              String
+  versionNumber           Int
+  title                   String
+  content                 String    @db.Text
+  resolvedVariables       Json?
+  sourceTemplateId        String?
+  sourceTemplateVersionId String?
+  proposalAcceptanceId    String?
+  proposalScopeHash       String?
+  contentHash             String
+  publishedAt             DateTime?
+  createdById             String
+  createdAt               DateTime  @default(now())
+
+  contract   AgencyContract            @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  createdBy  AdminUser                 @relation("AgencyContractVersionCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  signers    AgencyContractSigner[]
+  signatures AgencyContractSignature[]
+  responses  AgencyContractResponse[]
+
+  @@unique([contractId, versionNumber])
+  @@index([contractId])
+}
+
+model AgencyContractSigner {
+  id                String                     @id @default(cuid())
+  contractId        String
+  contractVersionId String?
+  signerType        AgencyContractSignerType
+  portalUserId      String?
+  adminUserId       String?
+  contactId         String?
+  nameSnapshot      String
+  emailSnapshot     String
+  companySnapshot   String?
+  role              AgencyContractSignerRole
+  signingOrder      Int                        @default(1)
+  isRequired        Boolean                    @default(true)
+  status            AgencyContractSignerStatus @default(PENDING)
+  invitedAt         DateTime?
+  viewedAt          DateTime?
+  signedAt          DateTime?
+  declinedAt        DateTime?
+  createdAt         DateTime                   @default(now())
+  updatedAt         DateTime                   @updatedAt
+
+  contract   AgencyContract          @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  version    AgencyContractVersion?  @relation(fields: [contractVersionId], references: [id], onDelete: SetNull)
+  portalUser ClientPortalUser?       @relation(fields: [portalUserId], references: [id], onDelete: SetNull)
+  adminUser  AdminUser?              @relation("AgencyContractSignerAdmin", fields: [adminUserId], references: [id], onDelete: SetNull)
+  contact    CrmContact?             @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  signatures AgencyContractSignature[]
+
+  @@index([contractId, status])
+  @@index([portalUserId])
+  @@index([adminUserId])
+}
+
+model AgencyContractClientAccess {
+  id            String                   @id @default(cuid())
+  contractId    String
+  contactId     String
+  portalUserId  String?
+  role          AgencyContractSignerRole @default(VIEWER)
+  grantedAt     DateTime                 @default(now())
+  revokedAt     DateTime?
+  grantedById   String
+  firstViewedAt DateTime?
+  lastViewedAt  DateTime?
+
+  contract   AgencyContract    @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  contact    CrmContact        @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  portalUser ClientPortalUser? @relation(fields: [portalUserId], references: [id], onDelete: SetNull)
+  grantedBy  AdminUser         @relation("AgencyContractAccessGranter", fields: [grantedById], references: [id], onDelete: Restrict)
+
+  @@unique([contractId, contactId])
+  @@index([portalUserId, contractId])
+}
+
+model AgencyContractSignature {
+  id                  String   @id @default(cuid())
+  contractId          String
+  contractVersionId   String
+  signerId            String
+  signerPortalUserId  String?
+  signerAdminUserId   String?
+  contactId           String?
+  signerNameSnapshot  String
+  signerEmailSnapshot String
+  typedSignatureName  String
+  signerTitle         String?
+  consentTextSnapshot String   @db.Text
+  consentVersion      String
+  contractContentHash String
+  signedAt            DateTime @default(now())
+  ipHash              String?
+  userAgentHash       String?
+  createdAt           DateTime @default(now())
+
+  contract   AgencyContract        @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  version    AgencyContractVersion @relation(fields: [contractVersionId], references: [id], onDelete: Cascade)
+  signer     AgencyContractSigner  @relation(fields: [signerId], references: [id], onDelete: Cascade)
+  portalUser ClientPortalUser?     @relation(fields: [signerPortalUserId], references: [id], onDelete: SetNull)
+  adminUser  AdminUser?            @relation("AgencyContractSignatureAdmin", fields: [signerAdminUserId], references: [id], onDelete: SetNull)
+  contact    CrmContact?           @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  @@unique([contractVersionId, signerId])
+  @@index([contractId])
+}
+
+model AgencyContractResponse {
+  id           String                     @id @default(cuid())
+  contractId   String
+  versionId    String
+  portalUserId String?
+  adminUserId  String?
+  contactId    String?
+  responseType AgencyContractResponseType
+  comment      String?                    @db.Text
+  createdAt    DateTime                   @default(now())
+
+  contract   AgencyContract        @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  version    AgencyContractVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  portalUser ClientPortalUser?     @relation(fields: [portalUserId], references: [id], onDelete: SetNull)
+  contact    CrmContact?           @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  @@index([contractId, createdAt])
+}
+
+model AgencyContractActivity {
+  id                String                     @id @default(cuid())
+  contractId        String
+  type              AgencyContractActivityType
+  summary           String
+  actorUserId       String?
+  actorPortalUserId String?
+  entityType        String?
+  entityId          String?
+  metadata          Json?
+  clientVisible     Boolean                    @default(false)
+  createdAt         DateTime                   @default(now())
+
+  contract        AgencyContract    @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  actorUser       AdminUser?        @relation("AgencyContractActivityAdmin", fields: [actorUserId], references: [id], onDelete: SetNull)
+  actorPortalUser ClientPortalUser? @relation(fields: [actorPortalUserId], references: [id], onDelete: SetNull)
+
+  @@index([contractId, createdAt])
+}
+
+// --- Agency Billing V2.2 ---
+
+enum AgencyInvoiceStatus {
+  DRAFT
+  ISSUED
+  PARTIALLY_PAID
+  PAID
+  VOID
+  WRITTEN_OFF
+}
+
+enum AgencyInvoiceSource {
+  MANUAL
+  PROPOSAL_ACCEPTANCE
+  CONTRACT
+  PROJECT
+  RETAINER
+  SCHEDULE
+  CHANGE_REQUEST
+}
+
+enum AgencyPaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+  NEEDS_REVIEW
+}
+
+enum AgencyPaymentMethod {
+  CARD
+  BANK_TRANSFER
+  ONLINE_TRANSFER
+  CASH
+  OTHER
+}
+
+enum AgencyPaymentProvider {
+  MANUAL
+  PAYSTACK
+}
+
+enum AgencyPaymentSource {
+  PORTAL
+  ADMIN_MANUAL
+  WEBHOOK
+  VERIFY
+}
+
+enum AgencyBillingScheduleStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum AgencyBillingInstallmentType {
+  DEPOSIT
+  MILESTONE
+  FINAL
+  OTHER
+}
+
+enum AgencyBillingInstallmentStatus {
+  PENDING
+  INVOICED
+  PAID
+}
+
+enum AgencyRetainerStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ENDED
+  CANCELLED
+}
+
+enum AgencyRetainerInterval {
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum AgencyRetainerIssueMode {
+  CREATE_DRAFT
+  AUTO_ISSUE
+}
+
+enum AgencyBillingClientAccessRole {
+  BILLING_ADMIN
+  VIEWER
+}
+
+enum AgencyBillingActivityType {
+  INVOICE_CREATED
+  INVOICE_ISSUED
+  INVOICE_VIEWED
+  INVOICE_VOIDED
+  INVOICE_WRITTEN_OFF
+  PAYMENT_INITIATED
+  PAYMENT_RECEIVED
+  PAYMENT_PARTIAL
+  INVOICE_PAID
+  MANUAL_PAYMENT_RECORDED
+  PAYMENT_ANOMALY
+  RETAINER_INVOICE_GENERATED
+  REMINDER_SENT
+}
+
+enum AgencyPaymentWebhookStatus {
+  RECEIVED
+  PROCESSED
+  FAILED
+  IGNORED
+}
+
+model AgencyBillingSettings {
+  id                       String                  @id @default("agency-billing")
+  defaultCurrency          String                  @default("USD")
+  defaultPaymentTermsDays  Int                     @default(14)
+  businessLegalName        String?
+  billingEmail             String?
+  billingAddressJson       Json?
+  taxLabel                 String?
+  taxRateBasisPoints       Int?
+  paymentInstructions      String?                 @db.Text
+  retainerDefaultIssueMode AgencyRetainerIssueMode @default(CREATE_DRAFT)
+  paystackEnabled          Boolean                 @default(false)
+  updatedAt                DateTime                @updatedAt
+}
+
+model AgencyBillingProfile {
+  id              String   @id @default(cuid())
+  companyId       String?
+  contactId       String?
+  legalName       String
+  billingEmail    String
+  billingPhone    String?
+  addressLine1    String?
+  addressLine2    String?
+  city            String?
+  stateRegion     String?
+  postalCode      String?
+  countryCode     String?
+  taxIdentifier   String?
+  taxLabel        String?
+  defaultCurrency String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  company  CrmCompany?   @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  contact  CrmContact?   @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  invoices AgencyInvoice[]
+
+  @@index([companyId])
+  @@index([contactId])
+}
+
+model AgencyInvoiceCounter {
+  year       Int      @id
+  lastNumber Int      @default(0)
+  updatedAt  DateTime @updatedAt
+}
+
+model AgencyPaymentCounter {
+  year       Int      @id
+  lastNumber Int      @default(0)
+  updatedAt  DateTime @updatedAt
+}
+
+model AgencyBillingSchedule {
+  id                   String                      @id @default(cuid())
+  proposalAcceptanceId String?
+  contractId           String?
+  projectId            String?
+  currency             String
+  totalScheduledMinor  Int
+  status               AgencyBillingScheduleStatus @default(DRAFT)
+  createdById          String
+  createdAt            DateTime                    @default(now())
+  updatedAt            DateTime                    @updatedAt
+
+  proposalAcceptance AgencyProposalAcceptance? @relation(fields: [proposalAcceptanceId], references: [id], onDelete: SetNull)
+  contract           AgencyContract?           @relation(fields: [contractId], references: [id], onDelete: SetNull)
+  project            AgencyProject?            @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  createdBy          AdminUser                 @relation("AgencyBillingScheduleCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  installments       AgencyBillingInstallment[]
+  invoices           AgencyInvoice[]
+}
+
+model AgencyBillingInstallment {
+  id                    String                         @id @default(cuid())
+  billingScheduleId     String
+  sequence              Int
+  label                 String
+  type                  AgencyBillingInstallmentType   @default(OTHER)
+  amountMinor           Int
+  percentageBasisPoints Int?
+  milestoneId           String?
+  dueDate               DateTime?
+  dueDaysOffset         Int?
+  invoiceId             String?
+  status                AgencyBillingInstallmentStatus @default(PENDING)
+  createdAt             DateTime                       @default(now())
+
+  schedule       AgencyBillingSchedule   @relation(fields: [billingScheduleId], references: [id], onDelete: Cascade)
+  milestone      AgencyProjectMilestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+  invoice        AgencyInvoice?          @relation("InstallmentInvoice", fields: [invoiceId], references: [id], onDelete: SetNull)
+  linkedInvoices AgencyInvoice[]         @relation("InvoiceInstallment")
+
+  @@unique([billingScheduleId, sequence])
+}
+
+model AgencyInvoice {
+  id                       String              @id @default(cuid())
+  invoiceNumber            String              @unique
+  source                   AgencyInvoiceSource @default(MANUAL)
+  companyId                String?
+  primaryContactId         String?
+  billingProfileId         String?
+  proposalId               String?
+  proposalAcceptanceId     String?
+  contractId               String?
+  projectId                String?
+  retainerId               String?
+  billingScheduleId        String?
+  billingInstallmentId     String?
+  billingPeriodStart       DateTime?
+  billingPeriodEnd         DateTime?
+  status                   AgencyInvoiceStatus @default(DRAFT)
+  currency                 String
+  subtotalMinor            Int                 @default(0)
+  discountMinor            Int                 @default(0)
+  taxMinor                 Int                 @default(0)
+  totalMinor               Int                 @default(0)
+  amountPaidMinor          Int                 @default(0)
+  amountDueMinor           Int                 @default(0)
+  issueDate                DateTime?
+  dueDate                  DateTime?
+  sentAt                   DateTime?
+  paidAt                   DateTime?
+  voidedAt                 DateTime?
+  voidReason               String?             @db.Text
+  writtenOffAt             DateTime?
+  writeOffReason           String?             @db.Text
+  billingNameSnapshot      String?
+  billingEmailSnapshot     String?
+  billingAddressSnapshotJson Json?
+  issuerNameSnapshot       String?
+  issuerEmailSnapshot      String?
+  memo                     String?             @db.Text
+  clientNotes              String?             @db.Text
+  internalNotes            String?             @db.Text
+  snapshotHash             String?
+  allowPartialPayment      Boolean             @default(false)
+  changeRequestId          String?             @unique
+  createdById              String
+  createdAt                DateTime            @default(now())
+  updatedAt                DateTime            @updatedAt
+
+  company            CrmCompany?               @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  primaryContact     CrmContact?               @relation(fields: [primaryContactId], references: [id], onDelete: SetNull)
+  billingProfile     AgencyBillingProfile?     @relation(fields: [billingProfileId], references: [id], onDelete: SetNull)
+  proposal           AgencyProposal?           @relation(fields: [proposalId], references: [id], onDelete: SetNull)
+  proposalAcceptance AgencyProposalAcceptance? @relation(fields: [proposalAcceptanceId], references: [id], onDelete: SetNull)
+  contract           AgencyContract?           @relation(fields: [contractId], references: [id], onDelete: SetNull)
+  project            AgencyProject?            @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  retainer           AgencyRetainer?           @relation(fields: [retainerId], references: [id], onDelete: SetNull)
+  billingSchedule    AgencyBillingSchedule?    @relation(fields: [billingScheduleId], references: [id], onDelete: SetNull)
+  billingInstallment AgencyBillingInstallment? @relation("InvoiceInstallment", fields: [billingInstallmentId], references: [id], onDelete: SetNull)
+  createdBy          AdminUser                 @relation("AgencyInvoiceCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  changeRequest      AgencyChangeRequest?      @relation(fields: [changeRequestId], references: [id], onDelete: SetNull)
+
+  lineItems        AgencyInvoiceLineItem[]
+  allocations      AgencyPaymentAllocation[]
+  clientAccess     AgencyInvoiceClientAccess[]
+  activities       AgencyBillingActivity[]
+  retainerPeriods  AgencyRetainerBillingPeriod[]
+  installmentLinks AgencyBillingInstallment[]  @relation("InstallmentInvoice")
+
+  @@index([status, dueDate])
+  @@index([companyId])
+  @@index([projectId])
+  @@index([proposalAcceptanceId])
+  @@index([contractId])
+  @@index([retainerId])
+}
+
+model AgencyInvoiceLineItem {
+  id              String  @id @default(cuid())
+  invoiceId       String
+  description     String
+  quantity        Int     @default(1)
+  unitAmountMinor Int
+  amountMinor     Int
+  position        Int     @default(0)
+  sourceType      String?
+  sourceId        String?
+
+  invoice AgencyInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+model AgencyPayment {
+  id                    String                @id @default(cuid())
+  paymentReference      String?               @unique
+  companyId             String?
+  contactId             String?
+  provider              AgencyPaymentProvider
+  providerTransactionId String?
+  providerReference     String?
+  status                AgencyPaymentStatus   @default(PENDING)
+  currency              String
+  amountMinor           Int
+  method                AgencyPaymentMethod   @default(OTHER)
+  source                AgencyPaymentSource   @default(PORTAL)
+  metadataJson          Json?
+  receivedAt            DateTime?
+  confirmedAt           DateTime?
+  failedAt              DateTime?
+  confirmationEmailSentAt    DateTime?
+  confirmationEmailClaimedAt DateTime?
+  recordedById          String?
+  manualNote            String?               @db.Text
+  clientRequestId       String?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  company       CrmCompany?                 @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  contact       CrmContact?                 @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  recordedBy    AdminUser?                  @relation("AgencyPaymentRecorder", fields: [recordedById], references: [id], onDelete: SetNull)
+  allocations   AgencyPaymentAllocation[]
+  webhookEvents AgencyPaymentWebhookEvent[]
+  activities    AgencyBillingActivity[]
+
+  @@unique([provider, providerTransactionId])
+  @@index([status, createdAt])
+}
+
+model AgencyPaymentAllocation {
+  id          String   @id @default(cuid())
+  paymentId   String
+  invoiceId   String
+  amountMinor Int
+  createdAt   DateTime @default(now())
+
+  payment AgencyPayment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  invoice AgencyInvoice @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+
+  @@index([invoiceId])
+  @@index([paymentId])
+}
+
+model AgencyPaymentWebhookEvent {
+  id              String                     @id @default(cuid())
+  provider        AgencyPaymentProvider
+  providerEventId String
+  eventType       String
+  payloadHash     String
+  status          AgencyPaymentWebhookStatus @default(RECEIVED)
+  paymentId       String?
+  errorSafe       String?
+  receivedAt      DateTime                   @default(now())
+  processedAt     DateTime?
+
+  payment AgencyPayment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  @@unique([provider, providerEventId])
+}
+
+model AgencyRetainer {
+  id                  String                  @id @default(cuid())
+  companyId           String
+  primaryContactId    String?
+  projectId           String?
+  contractId          String?
+  name                String
+  description         String?                 @db.Text
+  status              AgencyRetainerStatus    @default(DRAFT)
+  currency            String
+  amountMinor         Int
+  billingInterval     AgencyRetainerInterval  @default(MONTHLY)
+  billingDay          Int?
+  issueMode           AgencyRetainerIssueMode @default(CREATE_DRAFT)
+  lineItemDescription String
+  startDate           DateTime
+  endDate             DateTime?
+  nextBillingDate     DateTime?
+  paymentTermsDays    Int                     @default(14)
+  ownerId             String
+  createdById         String
+  createdAt           DateTime                @default(now())
+  updatedAt           DateTime                @updatedAt
+
+  company        CrmCompany                  @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  primaryContact CrmContact?                 @relation(fields: [primaryContactId], references: [id], onDelete: SetNull)
+  project        AgencyProject?              @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  contract       AgencyContract?             @relation(fields: [contractId], references: [id], onDelete: SetNull)
+  owner          AdminUser                   @relation("AgencyRetainerOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  createdBy      AdminUser                   @relation("AgencyRetainerCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  billingPeriods AgencyRetainerBillingPeriod[]
+  invoices       AgencyInvoice[]
+  activities     AgencyBillingActivity[]
+
+  @@index([status, nextBillingDate])
+}
+
+model AgencyRetainerBillingPeriod {
+  id          String   @id @default(cuid())
+  retainerId  String
+  periodStart DateTime
+  periodEnd   DateTime
+  invoiceId   String?
+  createdAt   DateTime @default(now())
+
+  retainer AgencyRetainer @relation(fields: [retainerId], references: [id], onDelete: Cascade)
+  invoice  AgencyInvoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+
+  @@unique([retainerId, periodStart])
+}
+
+model AgencyInvoiceClientAccess {
+  id            String                        @id @default(cuid())
+  invoiceId     String
+  contactId     String
+  portalUserId  String?
+  role          AgencyBillingClientAccessRole @default(VIEWER)
+  grantedAt     DateTime                      @default(now())
+  revokedAt     DateTime?
+  grantedById   String
+  firstViewedAt DateTime?
+  lastViewedAt  DateTime?
+
+  invoice    AgencyInvoice     @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  contact    CrmContact        @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  portalUser ClientPortalUser? @relation(fields: [portalUserId], references: [id], onDelete: SetNull)
+  grantedBy  AdminUser         @relation("AgencyInvoiceAccessGranter", fields: [grantedById], references: [id], onDelete: Restrict)
+
+  @@unique([invoiceId, contactId])
+  @@index([portalUserId, invoiceId])
+}
+
+model AgencyClientBillingAccess {
+  id           String                        @id @default(cuid())
+  companyId    String?
+  contactId    String
+  portalUserId String?
+  role         AgencyBillingClientAccessRole @default(VIEWER)
+  grantedAt    DateTime                      @default(now())
+  revokedAt    DateTime?
+  grantedById  String
+
+  company    CrmCompany?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  contact    CrmContact        @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  portalUser ClientPortalUser? @relation(fields: [portalUserId], references: [id], onDelete: SetNull)
+  grantedBy  AdminUser         @relation("AgencyClientBillingAccessGranter", fields: [grantedById], references: [id], onDelete: Restrict)
+
+  @@unique([contactId, companyId])
+}
+
+model AgencyBillingActivity {
+  id                String                    @id @default(cuid())
+  invoiceId         String?
+  paymentId         String?
+  retainerId        String?
+  type              AgencyBillingActivityType
+  summary           String
+  actorUserId       String?
+  actorPortalUserId String?
+  clientVisible     Boolean                   @default(false)
+  metadata          Json?
+  createdAt         DateTime                  @default(now())
+
+  invoice         AgencyInvoice?    @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  payment         AgencyPayment?    @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  retainer        AgencyRetainer?   @relation(fields: [retainerId], references: [id], onDelete: SetNull)
+  actorUser       AdminUser?        @relation("AgencyBillingActivityAdmin", fields: [actorUserId], references: [id], onDelete: SetNull)
+  actorPortalUser ClientPortalUser? @relation(fields: [actorPortalUserId], references: [id], onDelete: SetNull)
+
+  @@index([invoiceId, createdAt])
+}
+
+// ─── Agency Operations V3 — Client Onboarding ───────────────────────────────
+
+enum AgencyOnboardingStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  WAITING_ON_CLIENT
+  UNDER_REVIEW
+  COMPLETED
+  CANCELLED
+}
+
+enum AgencyOnboardingWaitingOn {
+  CLIENT
+  AGENCY
+  NONE
+}
+
+enum AgencyOnboardingReminderMode {
+  MANUAL
+  AUTOMATIC
+}
+
+enum AgencyOnboardingQuestionType {
+  SHORT_TEXT
+  LONG_TEXT
+  EMAIL
+  PHONE
+  URL
+  NUMBER
+  DATE
+  SINGLE_SELECT
+  MULTI_SELECT
+  BOOLEAN
+  FILE_REQUEST
+}
+
+enum AgencyOnboardingReviewStatus {
+  PENDING
+  ACCEPTED
+  NEEDS_CLARIFICATION
+}
+
+enum AgencyOnboardingTemplateStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum AgencyOnboardingActivityType {
+  ONBOARDING_CREATED
+  ONBOARDING_STARTED
+  QUESTION_ANSWERED
+  FILE_UPLOADED
+  REQUIREMENT_SUBMITTED
+  ONBOARDING_SUBMITTED
+  CLARIFICATION_REQUESTED
+  RESPONSE_ACCEPTED
+  REQUIREMENT_ACCEPTED
+  ONBOARDING_COMPLETED
+  ONBOARDING_REOPENED
+  ONBOARDING_CANCELLED
+  REMINDER_SENT
+}
+
+enum AgencyOnboardingReminderType {
+  ONBOARDING
+  REQUIREMENT
+  CLARIFICATION
+}
+
+enum AgencyOnboardingReminderStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+model AgencyOnboardingTemplate {
+  id               String                       @id @default(cuid())
+  name             String
+  description      String?                      @db.Text
+  serviceType      AgencyServiceType?
+  status           AgencyOnboardingTemplateStatus @default(DRAFT)
+  systemKey        String?                      @unique
+  currentVersionId String?
+  welcomeText      String?                      @db.Text
+  createdById      String
+  createdAt        DateTime                     @default(now())
+  updatedAt        DateTime                     @updatedAt
+
+  createdBy AdminUser @relation("AgencyOnboardingTemplateCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  versions  AgencyOnboardingTemplateVersion[]
+  onboardings AgencyProjectOnboarding[]
+
+  @@index([status])
+}
+
+model AgencyOnboardingTemplateVersion {
+  id            String   @id @default(cuid())
+  templateId    String
+  versionNumber Int
+  welcomeText   String?  @db.Text
+  createdById   String
+  createdAt     DateTime @default(now())
+
+  template     AgencyOnboardingTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  createdBy    AdminUser                @relation("AgencyOnboardingTemplateVersionCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  sections     AgencyOnboardingTemplateSection[]
+  questions    AgencyOnboardingTemplateQuestion[]
+  requirements AgencyOnboardingTemplateRequirement[]
+  onboardings  AgencyProjectOnboarding[]
+
+  @@unique([templateId, versionNumber])
+}
+
+model AgencyOnboardingTemplateSection {
+  id            String  @id @default(cuid())
+  versionId     String
+  title         String
+  description   String? @db.Text
+  position      Int     @default(0)
+  clientVisible Boolean @default(true)
+
+  version      AgencyOnboardingTemplateVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  questions    AgencyOnboardingTemplateQuestion[]
+  requirements AgencyOnboardingTemplateRequirement[]
+}
+
+model AgencyOnboardingTemplateQuestion {
+  id             String                     @id @default(cuid())
+  versionId      String
+  sectionId      String
+  key            String
+  label          String
+  description    String?                    @db.Text
+  type           AgencyOnboardingQuestionType @default(SHORT_TEXT)
+  required       Boolean                    @default(false)
+  position       Int                        @default(0)
+  placeholder    String?
+  helpText       String?                    @db.Text
+  optionsJson    Json?
+  validationJson Json?
+  clientVisible  Boolean                    @default(true)
+
+  version AgencyOnboardingTemplateVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  section AgencyOnboardingTemplateSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@unique([versionId, key])
+}
+
+model AgencyOnboardingTemplateRequirement {
+  id           String                @id @default(cuid())
+  versionId    String
+  sectionId    String?
+  sourceKey    String
+  title        String
+  description  String?               @db.Text
+  type         AgencyRequirementType @default(OTHER)
+  required     Boolean               @default(true)
+  position     Int                   @default(0)
+  clientVisible Boolean              @default(true)
+  offsetDaysDue Int?
+
+  version AgencyOnboardingTemplateVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  section AgencyOnboardingTemplateSection? @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+
+  @@unique([versionId, sourceKey])
+}
+
+model AgencyProjectOnboarding {
+  id                     String                     @id @default(cuid())
+  projectId              String
+  templateId             String?
+  templateVersionId      String?
+  status                 AgencyOnboardingStatus     @default(NOT_STARTED)
+  waitingOn              AgencyOnboardingWaitingOn  @default(NONE)
+  ownerId                String?
+  primaryClientContactId String?
+  startedAt              DateTime?
+  submittedAt            DateTime?
+  completedAt            DateTime?
+  cancelledAt            DateTime?
+  targetCompletionDate   DateTime?
+  clientMessage          String?                    @db.Text
+  internalNotes          String?                    @db.Text
+  reminderMode           AgencyOnboardingReminderMode @default(MANUAL)
+  lastClientActivityAt   DateTime?
+  lastReminderAt         DateTime?
+  reminderCount          Int                        @default(0)
+  createdById            String
+  createdAt              DateTime                   @default(now())
+  updatedAt              DateTime                   @updatedAt
+
+  project         AgencyProject                  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  template        AgencyOnboardingTemplate?      @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  templateVersion AgencyOnboardingTemplateVersion? @relation(fields: [templateVersionId], references: [id], onDelete: SetNull)
+  owner           AdminUser?                     @relation("AgencyOnboardingOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  primaryClientContact CrmContact?               @relation("AgencyOnboardingPrimaryContact", fields: [primaryClientContactId], references: [id], onDelete: SetNull)
+  createdBy       AdminUser                      @relation("AgencyOnboardingCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  sections        AgencyOnboardingSection[]
+  questions       AgencyOnboardingQuestion[]
+  responses       AgencyOnboardingResponse[]
+  requirements    AgencyClientRequirement[]
+  fileSubmissions AgencyOnboardingFileSubmission[]
+  activities      AgencyOnboardingActivity[]
+  reminders       AgencyOnboardingReminder[]
+
+  @@index([projectId])
+  @@index([status, targetCompletionDate])
+  @@index([ownerId, status])
+}
+
+model AgencyOnboardingSection {
+  id            String   @id @default(cuid())
+  onboardingId  String
+  title         String
+  description   String?  @db.Text
+  position      Int      @default(0)
+  clientVisible Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  onboarding   AgencyProjectOnboarding @relation(fields: [onboardingId], references: [id], onDelete: Cascade)
+  questions    AgencyOnboardingQuestion[]
+  requirements AgencyClientRequirement[]
+
+  @@index([onboardingId, position])
+}
+
+model AgencyOnboardingQuestion {
+  id             String                     @id @default(cuid())
+  onboardingId   String
+  sectionId      String
+  key            String
+  label          String
+  description    String?                    @db.Text
+  type           AgencyOnboardingQuestionType @default(SHORT_TEXT)
+  required       Boolean                    @default(false)
+  position       Int                        @default(0)
+  placeholder    String?
+  helpText       String?                    @db.Text
+  optionsJson    Json?
+  validationJson Json?
+  clientVisible  Boolean                    @default(true)
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
+
+  onboarding      AgencyProjectOnboarding @relation(fields: [onboardingId], references: [id], onDelete: Cascade)
+  section         AgencyOnboardingSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  responses       AgencyOnboardingResponse[]
+  fileSubmissions AgencyOnboardingFileSubmission[]
+  reminders       AgencyOnboardingReminder[]
+
+  @@unique([onboardingId, key])
+  @@index([onboardingId, sectionId, position])
+}
+
+model AgencyOnboardingResponse {
+  id                      String                     @id @default(cuid())
+  onboardingId            String
+  questionId              String
+  respondedByPortalUserId String?
+  contactId               String?
+  valueText               String?                    @db.Text
+  valueJson               Json?
+  submittedAt             DateTime?
+  updatedAt               DateTime                   @updatedAt
+  reviewStatus            AgencyOnboardingReviewStatus @default(PENDING)
+  reviewedById            String?
+  reviewedAt              DateTime?
+  reviewNote              String?                    @db.Text
+
+  onboarding            AgencyProjectOnboarding @relation(fields: [onboardingId], references: [id], onDelete: Cascade)
+  question              AgencyOnboardingQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  respondedByPortalUser ClientPortalUser?       @relation("AgencyOnboardingResponsePortalUser", fields: [respondedByPortalUserId], references: [id], onDelete: SetNull)
+  contact               CrmContact?             @relation("AgencyOnboardingResponseContact", fields: [contactId], references: [id], onDelete: SetNull)
+  reviewedBy            AdminUser?              @relation("AgencyOnboardingResponseReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@unique([onboardingId, questionId])
+}
+
+model AgencyOnboardingFileSubmission {
+  id                      String    @id @default(cuid())
+  onboardingId            String
+  requirementId           String?
+  questionId              String?
+  projectFileId           String
+  submittedByPortalUserId String?
+  supersededAt            DateTime?
+  createdAt               DateTime  @default(now())
+
+  onboarding            AgencyProjectOnboarding @relation(fields: [onboardingId], references: [id], onDelete: Cascade)
+  requirement           AgencyClientRequirement? @relation(fields: [requirementId], references: [id], onDelete: SetNull)
+  question              AgencyOnboardingQuestion? @relation(fields: [questionId], references: [id], onDelete: SetNull)
+  projectFile           AgencyProjectFile       @relation(fields: [projectFileId], references: [id], onDelete: Restrict)
+  submittedByPortalUser ClientPortalUser?       @relation("AgencyOnboardingFileSubmissionPortalUser", fields: [submittedByPortalUserId], references: [id], onDelete: SetNull)
+
+  @@index([onboardingId])
+  @@index([requirementId])
+  @@index([questionId])
+}
+
+model AgencyOnboardingActivity {
+  id                String                     @id @default(cuid())
+  onboardingId      String
+  type              AgencyOnboardingActivityType
+  summary           String
+  actorUserId       String?
+  actorPortalUserId String?
+  entityType        String?
+  entityId          String?
+  metadata          Json?
+  clientVisible     Boolean                    @default(false)
+  createdAt         DateTime                   @default(now())
+
+  onboarding        AgencyProjectOnboarding @relation(fields: [onboardingId], references: [id], onDelete: Cascade)
+  actorUser         AdminUser?              @relation("AgencyOnboardingActivityAdmin", fields: [actorUserId], references: [id], onDelete: SetNull)
+  actorPortalUser   ClientPortalUser?       @relation("AgencyOnboardingActivityPortal", fields: [actorPortalUserId], references: [id], onDelete: SetNull)
+
+  @@index([onboardingId, createdAt])
+}
+
+model AgencyOnboardingReminder {
+  id                    String                       @id @default(cuid())
+  onboardingId          String
+  requirementId         String?
+  questionId            String?
+  recipientContactId    String?
+  recipientPortalUserId String?
+  type                  AgencyOnboardingReminderType @default(ONBOARDING)
+  dedupeKey             String                       @unique
+  scheduledFor          DateTime?
+  sentAt                DateTime?
+  status                AgencyOnboardingReminderStatus @default(PENDING)
+  attemptCount          Int                          @default(0)
+  createdAt             DateTime                     @default(now())
+
+  onboarding          AgencyProjectOnboarding @relation(fields: [onboardingId], references: [id], onDelete: Cascade)
+  requirement         AgencyClientRequirement? @relation(fields: [requirementId], references: [id], onDelete: SetNull)
+  question            AgencyOnboardingQuestion? @relation(fields: [questionId], references: [id], onDelete: SetNull)
+  recipientContact    CrmContact?             @relation("AgencyOnboardingReminderContact", fields: [recipientContactId], references: [id], onDelete: SetNull)
+  recipientPortalUser ClientPortalUser?       @relation("AgencyOnboardingReminderPortalUser", fields: [recipientPortalUserId], references: [id], onDelete: SetNull)
+
+  @@index([status, scheduledFor])
+  @@index([onboardingId])
+}
+
+// ─── Agency Operations V3.1 — Change Requests ───────────────────────────────
+
+enum AgencyChangeRequestOrigin {
+  CLIENT
+  ADMIN
+}
+
+enum AgencyChangeRequestStatus {
+  DRAFT
+  SUBMITTED
+  NEEDS_CLARIFICATION
+  UNDER_ASSESSMENT
+  AWAITING_CLIENT_APPROVAL
+  APPROVED
+  DECLINED
+  APPLIED
+  IMPLEMENTED
+  CANCELLED
+}
+
+enum AgencyChangeRequestClassification {
+  UNASSESSED
+  IN_SCOPE
+  OUT_OF_SCOPE
+}
+
+enum AgencyChangeRequestClientRole {
+  VIEWER
+  APPROVER
+}
+
+enum AgencyChangeRequestMessageType {
+  CLIENT_CLARIFICATION
+  AGENCY_CLARIFICATION_REQUEST
+}
+
+enum AgencyChangeRequestWorkItemType {
+  TASK
+  DELIVERABLE
+  REQUIREMENT
+}
+
+enum AgencyChangeRequestActivityType {
+  CREATED
+  SUBMITTED
+  CLARIFICATION_REQUESTED
+  CLARIFICATION_RECEIVED
+  ASSESSMENT_STARTED
+  ASSESSED_IN_SCOPE
+  ASSESSED_OUT_OF_SCOPE
+  SENT_FOR_APPROVAL
+  APPROVED
+  DECLINED
+  INVOICE_CREATED
+  APPLIED_TO_PROJECT
+  IMPLEMENTED
+  CANCELLED
+}
+
+model AgencyChangeRequestCounter {
+  year       Int      @id
+  lastNumber Int      @default(0)
+  updatedAt  DateTime @updatedAt
+}
+
+model AgencyChangeRequest {
+  id                               String                            @id @default(cuid())
+  changeRequestNumber              String                            @unique
+  projectId                        String
+  proposalAcceptanceId             String?
+  contractId                       String?
+  origin                           AgencyChangeRequestOrigin         @default(ADMIN)
+  requestedByPortalUserId          String?
+  requestedByAdminUserId           String?
+  requestedByContactId             String?
+  title                            String
+  requestDescription               String                            @db.Text
+  status                           AgencyChangeRequestStatus         @default(DRAFT)
+  classification                   AgencyChangeRequestClassification @default(UNASSESSED)
+  ownerId                          String?
+  currency                         String?
+  currentAssessmentId              String?
+  requirePaymentBeforeImplementation Boolean                         @default(false)
+  contractAmendmentRecommended     Boolean                           @default(false)
+  internalNotes                    String?                           @db.Text
+  submittedAt                      DateTime?
+  assessedAt                       DateTime?
+  sentForApprovalAt                DateTime?
+  approvedAt                       DateTime?
+  declinedAt                       DateTime?
+  appliedAt                        DateTime?
+  implementedAt                    DateTime?
+  cancelledAt                      DateTime?
+  createdById                      String
+  createdAt                        DateTime                          @default(now())
+  updatedAt                        DateTime                          @updatedAt
+
+  project                 AgencyProject                 @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  proposalAcceptance      AgencyProposalAcceptance?     @relation(fields: [proposalAcceptanceId], references: [id], onDelete: SetNull)
+  contract                AgencyContract?               @relation(fields: [contractId], references: [id], onDelete: SetNull)
+  owner                   AdminUser?                    @relation("AgencyChangeRequestOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  requestedByPortalUser   ClientPortalUser?             @relation("AgencyChangeRequestPortalRequester", fields: [requestedByPortalUserId], references: [id], onDelete: SetNull)
+  requestedByAdminUser    AdminUser?                    @relation("AgencyChangeRequestAdminRequester", fields: [requestedByAdminUserId], references: [id], onDelete: SetNull)
+  requestedByContact      CrmContact?                   @relation("AgencyChangeRequestContactRequester", fields: [requestedByContactId], references: [id], onDelete: SetNull)
+  createdBy               AdminUser                       @relation("AgencyChangeRequestCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  revisions     AgencyChangeRequestRevision[]
+  assessments   AgencyChangeRequestAssessment[]
+  clientAccess  AgencyChangeRequestClientAccess[]
+  approval      AgencyChangeRequestApproval?
+  decision      AgencyChangeRequestDecision?
+  messages      AgencyChangeRequestMessage[]
+  workItems     AgencyChangeRequestWorkItem[]
+  application   AgencyChangeRequestApplication?
+  activities    AgencyChangeRequestActivity[]
+  files         AgencyChangeRequestFile[]
+  tasks         AgencyProjectTask[]
+  deliverables  AgencyDeliverable[]
+  requirements  AgencyClientRequirement[]
+  invoice       AgencyInvoice?
+  supportRequests AgencySupportRequest[]
+
+  @@index([projectId, status])
+  @@index([status, updatedAt])
+  @@index([ownerId, status])
+  @@index([classification, status])
+  @@index([requestedByContactId])
+}
+
+model AgencyChangeRequestRevision {
+  id                      String   @id @default(cuid())
+  changeRequestId         String
+  revisionNumber          Int
+  title                   String
+  description             String   @db.Text
+  createdByPortalUserId   String?
+  createdByAdminUserId    String?
+  createdAt               DateTime @default(now())
+
+  changeRequest         AgencyChangeRequest @relation(fields: [changeRequestId], references: [id], onDelete: Cascade)
+  createdByPortalUser   ClientPortalUser?   @relation("AgencyChangeRequestRevisionPortal", fields: [createdByPortalUserId], references: [id], onDelete: SetNull)
+  createdByAdminUser    AdminUser?          @relation("AgencyChangeRequestRevisionAdmin", fields: [createdByAdminUserId], references: [id], onDelete: SetNull)
+
+  @@unique([changeRequestId, revisionNumber])
+}
+
+model AgencyChangeRequestAssessment {
+  id                       String                            @id @default(cuid())
+  changeRequestId          String
+  versionNumber            Int
+  classification           AgencyChangeRequestClassification
+  scopeImpactSummary       String?                           @db.Text
+  clientScopeImpactSummary String?                           @db.Text
+  timelineImpactDays       Int                               @default(0)
+  timelineImpactSummary    String?                           @db.Text
+  priceImpactMinor         Int                               @default(0)
+  currency                 String
+  implementationSummary    String?                           @db.Text
+  assessmentHash           String?
+  sentForApprovalAt        DateTime?
+  supersededAt             DateTime?
+  assessedById             String
+  createdAt                DateTime                          @default(now())
+  updatedAt                DateTime                          @updatedAt
+
+  changeRequest AgencyChangeRequest @relation(fields: [changeRequestId], references: [id], onDelete: Cascade)
+  assessedBy    AdminUser           @relation("AgencyChangeRequestAssessor", fields: [assessedById], references: [id], onDelete: Restrict)
+  approvals     AgencyChangeRequestApproval[]
+  decisions     AgencyChangeRequestDecision[]
+
+  @@unique([changeRequestId, versionNumber])
+  @@index([changeRequestId, versionNumber])
+}
+
+model AgencyChangeRequestClientAccess {
+  id              String                        @id @default(cuid())
+  changeRequestId String
+  contactId       String
+  portalUserId    String?
+  role            AgencyChangeRequestClientRole @default(VIEWER)
+  grantedAt       DateTime                      @default(now())
+  revokedAt       DateTime?
+  grantedById     String
+
+  changeRequest AgencyChangeRequest @relation(fields: [changeRequestId], references: [id], onDelete: Cascade)
+  contact       CrmContact          @relation("AgencyChangeRequestClientAccessContact", fields: [contactId], references: [id], onDelete: Cascade)
+  portalUser    ClientPortalUser?   @relation("AgencyChangeRequestClientAccessPortal", fields: [portalUserId], references: [id], onDelete: SetNull)
+  grantedBy     AdminUser           @relation("AgencyChangeRequestAccessGranter", fields: [grantedById], references: [id], onDelete: Restrict)
+
+  @@unique([changeRequestId, contactId])
+}
+
+model AgencyChangeRequestApproval {
+  id                         String   @id @default(cuid())
+  changeRequestId            String   @unique
+  assessmentId               String
+  portalUserId               String
+  contactId                  String
+  clientNameSnapshot         String
+  clientEmailSnapshot        String
+  approvedPriceImpactMinor   Int
+  currency                   String
+  approvedTimelineImpactDays Int      @default(0)
+  scopeImpactSnapshot        String?  @db.Text
+  timelineImpactSnapshot     String?  @db.Text
+  assessmentHash             String?
+  consentTextSnapshot        String   @db.Text
+  approvedAt                 DateTime @default(now())
+  createdAt                  DateTime @default(now())
+
+  changeRequest AgencyChangeRequest           @relation(fields: [changeRequestId], references: [id], onDelete: Cascade)
+  assessment    AgencyChangeRequestAssessment @relation(fields: [assessmentId], references: [id], onDelete: Restrict)
+  portalUser    ClientPortalUser              @relation("AgencyChangeRequestApprovalPortal", fields: [portalUserId], references: [id], onDelete: Restrict)
+  contact       CrmContact                    @relation("AgencyChangeRequestApprovalContact", fields: [contactId], references: [id], onDelete: Restrict)
+}
+
+model AgencyChangeRequestDecision {
+  id              String   @id @default(cuid())
+  changeRequestId String   @unique
+  assessmentId    String
+  portalUserId    String
+  contactId       String
+  comment         String?  @db.Text
+  declinedAt      DateTime @default(now())
+  createdAt       DateTime @default(now())
+
+  changeRequest AgencyChangeRequest           @relation(fields: [changeRequestId], references: [id], onDelete: Cascade)
+  assessment    AgencyChangeRequestAssessment @relation(fields: [assessmentId], references: [id], onDelete: Restrict)
+  portalUser    ClientPortalUser              @relation("AgencyChangeRequestDecisionPortal", fields: [portalUserId], references: [id], onDelete: Restrict)
+  contact       CrmContact                    @relation("AgencyChangeRequestDecisionContact", fields: [contactId], references: [id], onDelete: Restrict)
+}
+
+model AgencyChangeRequestMessage {
+  id                  String                         @id @default(cuid())
+  changeRequestId     String
+  type                AgencyChangeRequestMessageType
+  body                String                         @db.Text
+  clientVisible       Boolean                        @default(true)
+  actorUserId         String?
+  actorPortalUserId   String?
+  createdAt           DateTime                       @default(now())
+
+  changeRequest     AgencyChangeRequest @relation(fields: [changeRequestId], references: [id], onDelete: Cascade)
+  actorUser         AdminUser?          @relation("AgencyChangeRequestMessageAdmin", fields: [actorUserId], references: [id], onDelete: SetNull)
+  actorPortalUser   ClientPortalUser?   @relation("AgencyChangeRequestMessagePortal", fields: [actorPortalUserId], references: [id], onDelete: SetNull)
+
+  @@index([changeRequestId, createdAt])
+}
+
+model AgencyChangeRequestWorkItem {
+  id              String                          @id @default(cuid())
+  changeRequestId String
+  type            AgencyChangeRequestWorkItemType
+  title           String
+  description     String?                         @db.Text
+  clientVisible   Boolean                         @default(false)
+  position        Int                             @default(0)
+  createdAt       DateTime                        @default(now())
+
+  changeRequest AgencyChangeRequest @relation(fields: [changeRequestId], references: [id], onDelete: Cascade)
+
+  @@index([changeRequestId, position])
+}
+
+model AgencyChangeRequestApplication {
+  id                      String    @id @default(cuid())
+  changeRequestId         String    @unique
+  appliedById             String
+  appliedAt               DateTime  @default(now())
+  previousTargetDueDate   DateTime?
+  newTargetDueDate        DateTime?
+  applicationSnapshotJson Json?
+  createdAt               DateTime  @default(now())
+
+  changeRequest AgencyChangeRequest @relation(fields: [changeRequestId], references: [id], onDelete: Cascade)
+  appliedBy     AdminUser           @relation("AgencyChangeRequestApplier", fields: [appliedById], references: [id], onDelete: Restrict)
+}
+
+model AgencyChangeRequestActivity {
+  id                String                        @id @default(cuid())
+  changeRequestId   String
+  type              AgencyChangeRequestActivityType
+  summary           String
+  actorUserId       String?
+  actorPortalUserId String?
+  clientVisible     Boolean                       @default(false)
+  metadata          Json?
+  createdAt         DateTime                      @default(now())
+
+  changeRequest     AgencyChangeRequest @relation(fields: [changeRequestId], references: [id], onDelete: Cascade)
+  actorUser         AdminUser?          @relation("AgencyChangeRequestActivityAdmin", fields: [actorUserId], references: [id], onDelete: SetNull)
+  actorPortalUser   ClientPortalUser?   @relation("AgencyChangeRequestActivityPortal", fields: [actorPortalUserId], references: [id], onDelete: SetNull)
+
+  @@index([changeRequestId, createdAt])
+}
+
+model AgencyChangeRequestFile {
+  id                      String   @id @default(cuid())
+  changeRequestId         String
+  projectFileId           String
+  clientVisible           Boolean  @default(true)
+  submittedByPortalUserId String?
+  submittedByAdminUserId  String?
+  createdAt               DateTime @default(now())
+
+  changeRequest         AgencyChangeRequest @relation(fields: [changeRequestId], references: [id], onDelete: Cascade)
+  projectFile           AgencyProjectFile   @relation(fields: [projectFileId], references: [id], onDelete: Restrict)
+  submittedByPortalUser ClientPortalUser?   @relation("AgencyChangeRequestFilePortal", fields: [submittedByPortalUserId], references: [id], onDelete: SetNull)
+  submittedByAdminUser  AdminUser?          @relation("AgencyChangeRequestFileAdmin", fields: [submittedByAdminUserId], references: [id], onDelete: SetNull)
+
+  @@index([changeRequestId])
+}
+
+// --- Client Success V1 ---
+
+enum AgencyManagedWebsiteStatus {
+  ACTIVE
+  MAINTENANCE
+  PAUSED
+  ARCHIVED
+}
+
+enum AgencyManagedWebsiteCareStatus {
+  NOT_ENROLLED
+  ACTIVE
+  PAUSED
+  ENDED
+}
+
+enum AgencyManagedWebsitePlatform {
+  WORDPRESS
+  SHOPIFY
+  WEBFLOW
+  FRAMER
+  CUSTOM
+  OTHER
+}
+
+enum AgencyManagedWebsiteClientRole {
+  VIEWER
+  MEMBER
+  WEBSITE_ADMIN
+}
+
+enum AgencyWebsiteObservedStatus {
+  ONLINE
+  UNKNOWN
+  ISSUE_DETECTED
+}
+
+enum AgencyWebsiteStatusSource {
+  MANUAL
+  MONITORING_PROVIDER
+  UNKNOWN
+}
+
+enum AgencyWebsiteCareEventType {
+  MAINTENANCE
+  UPDATE
+  BACKUP
+  SECURITY
+  PERFORMANCE
+  CONTENT
+  DEPLOYMENT
+  DOMAIN
+  SSL
+  OTHER
+}
+
+enum AgencyWebsiteCareEventStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NEEDS_ATTENTION
+}
+
+enum AgencySupportRequestCategory {
+  WEBSITE_CHANGE
+  CONTENT_UPDATE
+  TECHNICAL_ISSUE
+  QUESTION
+  ACCESS_HELP
+  NEW_FEATURE
+  OTHER
+}
+
+enum AgencySupportRequestPriority {
+  NORMAL
+  IMPORTANT
+  URGENT
+}
+
+enum AgencySupportRequestStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_ON_CLIENT
+  RESOLVED
+  CLOSED
+}
+
+enum AgencySupportWaitingOn {
+  SMARTLANCE
+  CLIENT
+  NONE
+}
+
+enum AgencySupportMessageAuthorType {
+  CLIENT
+  SMARTLANCE
+}
+
+model AgencySupportRequestCounter {
+  year       Int      @id
+  lastNumber Int      @default(0)
+  updatedAt  DateTime @updatedAt
+}
+
+model AgencyManagedWebsite {
+  id                String                        @id @default(cuid())
+  companyId         String?
+  primaryProjectId  String?
+  name              String
+  domain            String                        @unique
+  productionUrl     String?
+  platform          AgencyManagedWebsitePlatform?
+  status            AgencyManagedWebsiteStatus    @default(ACTIVE)
+  careStatus        AgencyManagedWebsiteCareStatus @default(NOT_ENROLLED)
+  carePlanName      String?
+  launchDate        DateTime?
+  clientSummary     String?                       @db.Text
+  clientVisibleNotes String?                      @db.Text
+  nextMaintenanceAt DateTime?
+  lastMaintenanceAt DateTime?
+  observedStatus    AgencyWebsiteObservedStatus?  @default(UNKNOWN)
+  statusSource      AgencyWebsiteStatusSource     @default(UNKNOWN)
+  lastCheckedAt     DateTime?
+  sslStatusLabel    String?
+  hostingLabel      String?
+  createdById       String
+  createdAt         DateTime                      @default(now())
+  updatedAt         DateTime                      @updatedAt
+  archivedAt        DateTime?
+
+  company        CrmCompany?                      @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  primaryProject AgencyProject?                   @relation(fields: [primaryProjectId], references: [id], onDelete: SetNull)
+  createdBy      AdminUser                        @relation("AgencyManagedWebsiteCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  clientAccess   AgencyManagedWebsiteClientAccess[]
+  careEvents     AgencyWebsiteCareEvent[]
+  supportRequests AgencySupportRequest[]
+
+  @@index([companyId, status])
+}
+
+model AgencyManagedWebsiteClientAccess {
+  id           String                         @id @default(cuid())
+  websiteId    String
+  contactId    String
+  portalUserId String?
+  role         AgencyManagedWebsiteClientRole @default(MEMBER)
+  grantedAt    DateTime                       @default(now())
+  revokedAt    DateTime?
+  grantedById  String
+
+  website    AgencyManagedWebsite @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  contact    CrmContact           @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  portalUser ClientPortalUser?    @relation(fields: [portalUserId], references: [id], onDelete: SetNull)
+  grantedBy  AdminUser            @relation("AgencyManagedWebsiteAccessGranter", fields: [grantedById], references: [id], onDelete: Restrict)
+
+  @@unique([websiteId, contactId])
+  @@index([portalUserId, websiteId])
+}
+
+model AgencyWebsiteCareEvent {
+  id            String                      @id @default(cuid())
+  websiteId     String
+  type          AgencyWebsiteCareEventType  @default(MAINTENANCE)
+  status        AgencyWebsiteCareEventStatus @default(SCHEDULED)
+  title         String
+  clientSummary String?                     @db.Text
+  internalNotes String?                     @db.Text
+  startedAt     DateTime?
+  completedAt   DateTime?
+  performedById String?
+  clientVisible Boolean                     @default(true)
+  metadataJson  Json?
+  createdAt     DateTime                    @default(now())
+
+  website     AgencyManagedWebsite @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  performedBy AdminUser?           @relation("AgencyWebsiteCareEventPerformer", fields: [performedById], references: [id], onDelete: SetNull)
+
+  @@index([websiteId, completedAt])
+}
+
+model AgencySupportRequest {
+  id                      String                       @id @default(cuid())
+  supportNumber           String                       @unique
+  websiteId               String
+  projectId               String?
+  submittedByPortalUserId String
+  submittedByContactId    String
+  category                AgencySupportRequestCategory @default(OTHER)
+  priority                AgencySupportRequestPriority @default(NORMAL)
+  status                  AgencySupportRequestStatus   @default(OPEN)
+  subject                 String
+  description             String                       @db.Text
+  waitingOn               AgencySupportWaitingOn       @default(SMARTLANCE)
+  assignedToId            String?
+  changeRequestId         String?
+  createdAt               DateTime                     @default(now())
+  updatedAt               DateTime                     @updatedAt
+  resolvedAt              DateTime?
+  closedAt                DateTime?
+
+  website         AgencyManagedWebsite @relation(fields: [websiteId], references: [id], onDelete: Restrict)
+  project         AgencyProject?       @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  submittedByPortal ClientPortalUser   @relation("AgencySupportRequestSubmitter", fields: [submittedByPortalUserId], references: [id], onDelete: Restrict)
+  submittedByContact CrmContact        @relation(fields: [submittedByContactId], references: [id], onDelete: Restrict)
+  assignedTo      AdminUser?           @relation("AgencySupportRequestAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  changeRequest   AgencyChangeRequest? @relation(fields: [changeRequestId], references: [id], onDelete: SetNull)
+  messages        AgencySupportMessage[]
+  files           AgencySupportRequestFile[]
+
+  @@index([websiteId, status])
+  @@index([submittedByPortalUserId])
+  @@index([updatedAt])
+}
+
+model AgencySupportMessage {
+  id               String                         @id @default(cuid())
+  supportRequestId String
+  authorType       AgencySupportMessageAuthorType
+  portalUserId     String?
+  adminUserId      String?
+  body             String                         @db.Text
+  clientVisible    Boolean                        @default(true)
+  createdAt        DateTime                       @default(now())
+
+  supportRequest AgencySupportRequest @relation(fields: [supportRequestId], references: [id], onDelete: Cascade)
+  portalUser     ClientPortalUser?    @relation("AgencySupportMessagePortal", fields: [portalUserId], references: [id], onDelete: SetNull)
+  adminUser      AdminUser?           @relation("AgencySupportMessageAdmin", fields: [adminUserId], references: [id], onDelete: SetNull)
+
+  @@index([supportRequestId, createdAt])
+}
+
+model AgencySupportRequestFile {
+  id                      String   @id @default(cuid())
+  supportRequestId        String
+  projectFileId           String
+  clientVisible           Boolean  @default(true)
+  submittedByPortalUserId String?
+  submittedByAdminUserId  String?
+  createdAt               DateTime @default(now())
+
+  supportRequest        AgencySupportRequest @relation(fields: [supportRequestId], references: [id], onDelete: Cascade)
+  projectFile           AgencyProjectFile    @relation(fields: [projectFileId], references: [id], onDelete: Restrict)
+  submittedByPortalUser ClientPortalUser?    @relation("AgencySupportRequestFilePortal", fields: [submittedByPortalUserId], references: [id], onDelete: SetNull)
+  submittedByAdminUser  AdminUser?           @relation("AgencySupportRequestFileAdmin", fields: [submittedByAdminUserId], references: [id], onDelete: SetNull)
+
+  @@index([supportRequestId])
+}
+
+// --- Prospect Experience V1 ---
+
+enum AgencyWebsiteReviewStatus {
+  PENDING
+  FETCHING
+  ANALYZING
+  COMPLETED
+  FAILED
+}
+
+enum AgencyWebsiteReviewOverallDirection {
+  STRONG_FOUNDATION
+  FOCUSED_IMPROVEMENTS
+  SIGNIFICANT_OPPORTUNITY
+  INSUFFICIENT_DATA
+}
+
+enum AgencyWebsiteReviewFindingSeverity {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum AgencyWebsiteReviewFindingConfidence {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum AgencyWebsiteBriefStatus {
+  DRAFT
+  SUBMITTED
+  ARCHIVED
+}
+
+enum AgencyProspectRequestStatus {
+  SUBMITTED
+  BEING_REVIEWED
+  NEEDS_INFORMATION
+  PROPOSAL_READY
+  CLOSED
+}
+
+enum AgencyProspectRequestSourceDetail {
+  FREE_WEBSITE_REVIEW
+  WEBSITE_BRIEF
+  PROSPECT_WORKSPACE
+}
+
+enum AgencyProspectRequestMessageAuthorType {
+  PORTAL_USER
+  SMARTLANCE
+}
+
+enum AgencyProspectRequestActivityType {
+  REQUEST_SUBMITTED
+  INFORMATION_REQUESTED
+  PROSPECT_RESPONDED
+  STATUS_CHANGED
+  PROPOSAL_READY
+}
+
+model AgencyProspectProfile {
+  id              String   @id @default(cuid())
+  portalUserId    String   @unique
+  firstName       String?
+  lastName        String?
+  companyName     String?
+  phone           String?
+  primaryWebsite  String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  portalUser ClientPortalUser @relation(fields: [portalUserId], references: [id], onDelete: Cascade)
+  requests   AgencyProspectRequest[]
+
+  @@index([updatedAt])
+}
+
+model AgencyWebsiteReview {
+  id                String                              @id @default(cuid())
+  portalUserId      String?
+  claimTokenHash    String?                             @unique
+  claimTokenUsedAt  DateTime?
+  websiteUrl        String
+  normalizedDomain  String
+  businessName      String?
+  goalJson          Json?
+  status            AgencyWebsiteReviewStatus           @default(PENDING)
+  overallDirection  AgencyWebsiteReviewOverallDirection?
+  summary           String?                             @db.Text
+  aiFailedMessage   String?
+  promptVersion     String?
+  modelMetadataSafe Json?
+  startedAt         DateTime?
+  completedAt       DateTime?
+  failedAt          DateTime?
+  createdAt         DateTime                            @default(now())
+  updatedAt         DateTime                            @updatedAt
+
+  portalUser ClientPortalUser? @relation(fields: [portalUserId], references: [id], onDelete: SetNull)
+  pages      AgencyWebsiteReviewPage[]
+  evidence   AgencyWebsiteReviewEvidence[]
+  findings   AgencyWebsiteReviewFinding[]
+  briefs     AgencyWebsiteBrief[]
+  requests   AgencyProspectRequest[]
+
+  @@index([portalUserId, createdAt])
+  @@index([normalizedDomain, createdAt])
+  @@index([status])
+}
+
+model AgencyWebsiteReviewPage {
+  id          String   @id @default(cuid())
+  reviewId    String
+  url         String
+  title       String?
+  statusCode  Int?
+  contentHash String?
+  fetchedAt   DateTime @default(now())
+
+  review   AgencyWebsiteReview           @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  evidence AgencyWebsiteReviewEvidence[]
+
+  @@index([reviewId])
+}
+
+model AgencyWebsiteReviewEvidence {
+  id             String   @id @default(cuid())
+  reviewId       String
+  pageId         String?
+  category       String
+  type           String
+  label          String
+  valueText      String?  @db.Text
+  valueNumber    Float?
+  booleanValue   Boolean?
+  sourceUrl      String?
+  sourceSelector String?
+  excerpt        String?  @db.Text
+  createdAt      DateTime @default(now())
+
+  review   AgencyWebsiteReview                 @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  page     AgencyWebsiteReviewPage?            @relation(fields: [pageId], references: [id], onDelete: SetNull)
+  findings AgencyWebsiteReviewFindingEvidence[]
+
+  @@index([reviewId, category])
+}
+
+model AgencyWebsiteReviewFinding {
+  id             String                              @id @default(cuid())
+  reviewId       String
+  category       String
+  severity       AgencyWebsiteReviewFindingSeverity
+  title          String
+  explanation    String                              @db.Text
+  recommendation String?                             @db.Text
+  confidence     AgencyWebsiteReviewFindingConfidence
+  position       Int                                 @default(0)
+  isPriority     Boolean                             @default(false)
+  isStrength     Boolean                             @default(false)
+  createdAt      DateTime                            @default(now())
+
+  review    AgencyWebsiteReview                  @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  evidence  AgencyWebsiteReviewFindingEvidence[]
+
+  @@index([reviewId, position])
+}
+
+model AgencyWebsiteReviewFindingEvidence {
+  findingId  String
+  evidenceId String
+
+  finding  AgencyWebsiteReviewFinding  @relation(fields: [findingId], references: [id], onDelete: Cascade)
+  evidence AgencyWebsiteReviewEvidence @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+
+  @@id([findingId, evidenceId])
+  @@index([evidenceId])
+}
+
+model AgencyWebsiteBrief {
+  id                   String                   @id @default(cuid())
+  portalUserId         String?
+  claimTokenHash       String?                  @unique
+  claimTokenUsedAt     DateTime?
+  title                String                   @default("Website Project Brief")
+  projectType          String?
+  status               AgencyWebsiteBriefStatus @default(DRAFT)
+  sourceReviewId       String?
+  schemaVersion        Int                      @default(1)
+  answersJson          Json                     @default("{}")
+  completionPercent    Int                      @default(0)
+  completedSectionIds  Json                     @default("[]")
+  submittedSnapshotJson Json?
+  submittedAt          DateTime?
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+
+  portalUser   ClientPortalUser?    @relation(fields: [portalUserId], references: [id], onDelete: SetNull)
+  sourceReview AgencyWebsiteReview? @relation(fields: [sourceReviewId], references: [id], onDelete: SetNull)
+  requests     AgencyProspectRequest[]
+
+  @@index([portalUserId, updatedAt])
+  @@index([portalUserId, status])
+}
+
+model AgencyProspectRequest {
+  id                       String                            @id @default(cuid())
+  requestNumber            String                            @unique
+  portalUserId             String
+  prospectProfileId        String?
+  contactId                String?
+  briefId                  String?
+  reviewId                 String?
+  status                   AgencyProspectRequestStatus       @default(SUBMITTED)
+  title                    String
+  projectType              String?
+  sourceDetail             AgencyProspectRequestSourceDetail
+  submissionIdempotencyKey String                            @unique
+  briefSnapshotJson        Json
+  reviewSnapshotJson       Json?
+  contactSnapshotJson      Json?
+  submittedAt              DateTime                          @default(now())
+  updatedAt                DateTime                          @updatedAt
+  closedAt                 DateTime?
+
+  portalUser      ClientPortalUser         @relation(fields: [portalUserId], references: [id], onDelete: Cascade)
+  prospectProfile AgencyProspectProfile?   @relation(fields: [prospectProfileId], references: [id], onDelete: SetNull)
+  contact         CrmContact?              @relation("AgencyProspectRequestContact", fields: [contactId], references: [id], onDelete: SetNull)
+  brief           AgencyWebsiteBrief?      @relation(fields: [briefId], references: [id], onDelete: SetNull)
+  review          AgencyWebsiteReview?     @relation(fields: [reviewId], references: [id], onDelete: SetNull)
+  proposal        AgencyProposal?
+  messages        AgencyProspectRequestMessage[]
+  activities      AgencyProspectRequestActivity[]
+
+  @@index([portalUserId, status])
+  @@index([portalUserId, submittedAt])
+  @@index([contactId])
+}
+
+model AgencyProspectRequestMessage {
+  id           String                                 @id @default(cuid())
+  requestId    String
+  authorType   AgencyProspectRequestMessageAuthorType
+  portalUserId String?
+  adminUserId  String?
+  body         String                                 @db.Text
+  createdAt    DateTime                               @default(now())
+
+  request    AgencyProspectRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  portalUser ClientPortalUser?     @relation(fields: [portalUserId], references: [id], onDelete: SetNull)
+  adminUser  AdminUser?            @relation("AgencyProspectRequestMessageAdmin", fields: [adminUserId], references: [id], onDelete: SetNull)
+
+  @@index([requestId, createdAt])
+}
+
+model AgencyProspectRequestActivity {
+  id        String                            @id @default(cuid())
+  requestId String
+  type      AgencyProspectRequestActivityType
+  summary   String
+  metadata  Json?
+  createdAt DateTime                          @default(now())
+
+  request AgencyProspectRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([requestId, createdAt])
+}
+
+model AgencyProspectRequestCounter {
+  year       Int      @id
+  lastNumber Int      @default(0)
+  updatedAt  DateTime @updatedAt
 }

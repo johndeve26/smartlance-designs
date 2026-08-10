@@ -32,7 +32,7 @@ export async function SiteFooter() {
   }));
 
   return (
-    <Footer
+        <Footer
       footerNavigation={nav.footerNavigation}
       primaryCta={nav.primaryCta}
       company={{
@@ -42,6 +42,7 @@ export async function SiteFooter() {
         description: settings.footerDescription,
       }}
       socials={socials}
+      audienceEnabled={settings.audienceEnabled}
     />
   );
 }

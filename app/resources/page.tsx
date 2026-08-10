@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AudienceSubscribeSection } from "@/components/audience/subscribe-section-server";
 import { CTASection } from "@/components/ui/cta-section";
 import { StructuredData } from "@/components/ui/structured-data";
 import {
@@ -107,6 +108,12 @@ export default async function ResourcesPage() {
       <ResourcesLatestInsights posts={latestPosts} />
       <ResourcesTypeExplainer />
       <ResourcesReviewCta />
+
+      <section className="py-12 sm:py-14">
+        <div className="mx-auto max-w-[var(--container-max)] px-[var(--container-gutter)]">
+          <AudienceSubscribeSection source="RESOURCE" sourceUrl="/resources" variant="resource" />
+        </div>
+      </section>
 
       <CTASection
         title="Ready to Put the Advice Into Practice?"

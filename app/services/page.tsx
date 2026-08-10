@@ -292,6 +292,15 @@ export default async function ServicesPage() {
             </Link>
           </p>
           <p className="mx-auto mt-3 max-w-3xl text-sm text-muted">
+            Need more than the website?{" "}
+            <Link
+              href="/ai-automation"
+              className="font-semibold text-accent-text hover:underline"
+            >
+              Explore AI & Automation →
+            </Link>
+          </p>
+          <p className="mx-auto mt-3 max-w-3xl text-sm text-muted">
             Prefer to start from the business problem?{" "}
             <Link
               href="/solutions"

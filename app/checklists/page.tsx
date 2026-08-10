@@ -5,6 +5,7 @@ import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { SectionHeader } from "@/components/ui/section-header";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { AudienceSubscribeSection } from "@/components/audience/subscribe-section-server";
 import { CTASection } from "@/components/ui/cta-section";
 import { StructuredData } from "@/components/ui/structured-data";
 import { ChecklistCard } from "@/components/checklists/checklist-card";
@@ -142,6 +143,16 @@ export default async function ChecklistsArchivePage() {
           </Container>
         </Section>
       ) : null}
+
+      <section className="py-12 sm:py-14">
+        <Container>
+          <AudienceSubscribeSection
+            source="CHECKLIST"
+            sourceUrl="/checklists"
+            variant="resource"
+          />
+        </Container>
+      </section>
 
       <CTASection
         title="Planning a Website Redesign?"

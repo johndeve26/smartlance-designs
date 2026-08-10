@@ -59,7 +59,7 @@ import {
 import {
   createTemplate,
   instantiateTemplateIntoProject,
-  seedSystemTemplatesIfEmpty,
+  installStarterTemplates,
   updateTemplate,
 } from "@/lib/agency/templates";
 
@@ -353,20 +353,31 @@ export async function instantiateTemplateAction(formData: FormData) {
   }
 }
 
-export async function seedAgencyTemplatesAction() {
+export async function installStarterTemplatesAction() {
   await assertSameOrigin();
   const user = await requireAdminUser("manage_project_templates");
 
   try {
-    const result = await seedSystemTemplatesIfEmpty(user.id);
+    const result = await installStarterTemplates(user.id);
+    await writeAuditLog({
+      actorId: user.id,
+      action: "agency.templates.install_starters",
+      entityType: "AgencyProjectTemplate",
+      metadata: { created: result.created, skipped: result.skipped },
+    });
     revalidatePath("/admin/agency/templates");
     return { ok: true as const, ...result };
   } catch (err) {
     return {
       ok: false as const,
-      error: err instanceof Error ? err.message : "Could not seed templates.",
+      error: err instanceof Error ? err.message : "Could not install starter templates.",
     };
   }
+}
+
+/** @deprecated Use installStarterTemplatesAction */
+export async function seedAgencyTemplatesAction() {
+  return installStarterTemplatesAction();
 }
 
 export async function updateAgencyMilestoneAction(formData: FormData) {

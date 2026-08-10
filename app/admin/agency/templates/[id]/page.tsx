@@ -2,8 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdminUser } from "@/lib/admin/session";
 import { getTemplateById } from "@/lib/agency/templates";
-import { AgencySubNavBar } from "@/components/admin/agency/AgencySubNavBar";
 import { TemplateEditor } from "@/components/admin/agency/TemplateEditor";
+import { AdminDetailHeader } from "@/components/admin/patterns/AdminDetailHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -19,13 +19,12 @@ export default async function AgencyTemplateDetailPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <Link href="/admin/agency/templates" className="text-sm text-neutral-600 hover:underline">
-          ← Templates
-        </Link>
-        <h1 className="mt-2 text-2xl font-semibold">{template.name}</h1>
-      </div>
-      <AgencySubNavBar />
+      <Link href="/admin/agency/templates" className="text-sm text-muted hover:underline">
+        ← Templates
+      </Link>
+
+      <AdminDetailHeader title={template.name} subtitle={template.description ?? undefined} />
+
       <TemplateEditor
         template={{
           id: template.id,

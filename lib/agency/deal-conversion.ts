@@ -2,7 +2,7 @@ import type { AgencyServiceType } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { createProject } from "@/lib/agency/projects";
 
-function inferServiceType(deal: {
+export function inferServiceType(deal: {
   servicesInterested: string[];
   title: string;
 }): AgencyServiceType {

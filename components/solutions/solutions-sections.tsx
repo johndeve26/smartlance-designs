@@ -518,6 +518,85 @@ export function SolutionsTerritories({
         </Container>
       </Section>
 
+      {/* Operations & Automation */}
+      <Section
+        id="operations-automation"
+        tone="surface"
+        className="scroll-mt-28 !py-14 sm:!py-16 lg:!py-[4.5rem]"
+      >
+        <Container>
+          <div className="max-w-3xl">
+            <p className="eyebrow">Operations &amp; Automation</p>
+            <h2 className="mt-3 font-display text-[1.875rem] font-semibold leading-tight tracking-tight sm:text-4xl lg:text-[2.5rem]">
+              The Problem Isn&apos;t Always the Website — It&apos;s What Happens
+              After.
+            </h2>
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
+              Leads, enquiries and internal work often break down in the
+              handoffs between people and tools — not on the homepage.
+            </p>
+          </div>
+
+          <ul className="mt-10 grid gap-px overflow-hidden border border-border bg-border sm:mt-12 md:grid-cols-2">
+            {[
+              {
+                title: "Respond to Leads Faster",
+                line: "Capture, assign and follow up before interest cools.",
+                href: "/solutions/respond-to-leads-faster",
+              },
+              {
+                title: "Stop Leads Falling Through the Cracks",
+                line: "When enquiries arrive but ownership and follow-up stay unclear.",
+                href: "/solutions/stop-leads-falling-through-the-cracks",
+              },
+              {
+                title: "Automate Repetitive Work",
+                line: "Reduce manual copying, reminders and status updates.",
+                href: "/solutions/automate-repetitive-work",
+              },
+              {
+                title: "Automate Customer Enquiries",
+                line: "Handle common questions with approved answers and handoff.",
+                href: "/solutions/automate-customer-enquiries",
+              },
+              {
+                title: "Connect Business Tools",
+                line: "Make websites, CRM, email and messaging work together.",
+                href: "/solutions/connect-business-tools",
+              },
+              {
+                title: "Centralize Business Knowledge",
+                line: "Help staff find answers without searching five systems.",
+                href: "/solutions/centralize-business-knowledge",
+              },
+            ].map((item) => (
+              <li key={item.href} className="bg-surface">
+                <Link
+                  href={item.href}
+                  className="group flex h-full flex-col justify-between px-5 py-6 transition-colors hover:bg-surface-muted/60 focus-visible:bg-surface-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent sm:px-7 sm:py-8"
+                >
+                  <div>
+                    <h3 className="font-display text-lg font-semibold tracking-tight text-foreground group-hover:text-accent-text motion-reduce:transition-none sm:text-xl">
+                      {item.title}
+                    </h3>
+                    <p className="mt-2 text-[0.9375rem] leading-relaxed text-muted">
+                      {item.line}
+                    </p>
+                  </div>
+                  <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-accent-text">
+                    Explore solution
+                    <ArrowRight
+                      className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none"
+                      aria-hidden
+                    />
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </Container>
+      </Section>
+
       {/* Change & New */}
       <Section
         id="change-new"

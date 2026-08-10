@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createHash } from "node:crypto";
 import { legacyBlogRedirects } from "@/data/legacy-blog-redirects";
+import { legacyAiServiceRedirects } from "@/lib/public/ai-automation-routes";
 
 const ADMIN_SESSION_COOKIE = "smartlance_admin_session";
 
@@ -24,6 +25,9 @@ const redirects: Record<string, string> = {
   "/quote": "/contact",
   "/free-review": "/free-website-review",
   "/website-review": "/free-website-review",
+
+  // Legacy AI service paths → canonical AI & Automation hub
+  ...legacyAiServiceRedirects,
 
   // Main WordPress pages
   "/about-smartlance-design": "/about",
@@ -191,6 +195,17 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
+  if (pathname.startsWith("/workspace")) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-smartlance-workspace", "1");
+    const response = NextResponse.next({
+      request: { headers: requestHeaders },
+    });
+    response.headers.set("Cache-Control", "no-store");
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+    return response;
+  }
+
   // Static legacy redirects (WordPress era)
   const normalized = pathname.replace(/\/$/, "") || "/";
   const target = redirects[normalized];
@@ -220,6 +235,8 @@ export const config = {
     "/admin/:path*",
     "/portal",
     "/portal/:path*",
+    "/workspace",
+    "/workspace/:path*",
     "/services/:path*",
     "/solutions/:path*",
     "/platforms/:path*",

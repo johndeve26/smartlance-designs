@@ -2,70 +2,22 @@ import { NextResponse } from "next/server";
 import { siteConfig } from "@/lib/site";
 import { OUTBOUND_TIMEOUTS, timeoutSignal } from "@/lib/ops/request-timeout";
 import {
-  getAdminSiteSettingsExtras,
-  getSiteSettingsAdmin,
-} from "@/lib/repositories/siteSettingsRepository";
+  isEmailDeliveryConfigured,
+  isEmailDeliveryConfiguredFromEnv,
+  resolveNotificationRecipients,
+} from "@/lib/email/config";
+import {
+  sendTransactionalEmail,
+  escapeHeaderFragment,
+} from "@/lib/email/send";
+import {
+  formatContactEmailText,
+  formatReviewEmailText,
+  contactNotificationSubject,
+  reviewNotificationSubject,
+} from "@/lib/email/templates";
 
 type FormPayload = Record<string, unknown>;
-
-function escapePlain(value: unknown) {
-  return String(value ?? "")
-    .replace(/\r\n/g, "\n")
-    .trim();
-}
-
-/** Strip CR/LF for email headers / subject fragments */
-function escapeHeaderFragment(value: unknown) {
-  return escapePlain(value).replace(/[\r\n]+/g, " ");
-}
-
-function payloadRef(payload: FormPayload) {
-  const ref = escapeHeaderFragment(payload.reference);
-  return ref ? ` (${ref})` : "";
-}
-
-function formatContactEmail(payload: FormPayload, submittedAt: string) {
-  return [
-    "New Smartlance Project Enquiry",
-    "",
-    `Reference: ${escapePlain(payload.reference) || "—"}`,
-    `Submitted: ${submittedAt}`,
-    `Name: ${escapePlain(payload.name)}`,
-    `Email: ${escapePlain(payload.email)}`,
-    `Company: ${escapePlain(payload.company) || "—"}`,
-    `Website: ${escapePlain(payload.website) || "—"}`,
-    `Service: ${escapePlain(payload.service)}`,
-    `Budget: ${escapePlain(payload.budget) || "—"}`,
-    `Timeline: ${escapePlain(payload.timeline) || "—"}`,
-    `Referral source: ${escapePlain(payload.referralSource) || "—"}`,
-    payload.adminPath
-      ? `Admin: ${escapePlain(payload.adminPath)}`
-      : null,
-    "",
-    "Project details:",
-    escapePlain(payload.projectDetails),
-  ]
-    .filter((line) => line !== null)
-    .join("\n");
-}
-
-function formatReviewEmail(payload: FormPayload, submittedAt: string) {
-  return [
-    "New Free Website Review Request",
-    "",
-    `Reference: ${escapePlain(payload.reference) || "—"}`,
-    `Submitted: ${submittedAt}`,
-    `Name: ${escapePlain(payload.name)}`,
-    `Email: ${escapePlain(payload.email)}`,
-    `Website URL: ${escapePlain(payload.website)}`,
-    `Main concern: ${escapePlain(payload.mainConcern)}`,
-    payload.adminPath
-      ? `Admin: ${escapePlain(payload.adminPath)}`
-      : null,
-  ]
-    .filter((line) => line !== null)
-    .join("\n");
-}
 
 /** Simple in-memory sliding-window rate limit (per process). */
 const rateBuckets = new Map<string, number[]>();
@@ -97,50 +49,16 @@ export function getClientIp(request: Request): string {
   return request.headers.get("x-real-ip")?.trim() || "unknown";
 }
 
-async function getFormNotificationTargets() {
-  const row = await getSiteSettingsAdmin();
-  const presentation = getAdminSiteSettingsExtras(row);
-  const toEmail =
-    presentation.contactToEmail ||
-    presentation.formToEmail ||
-    process.env.CONTACT_TO_EMAIL ||
-    process.env.FORM_TO_EMAIL;
-  const fromEmail =
-    presentation.contactFromEmail ||
-    process.env.CONTACT_FROM_EMAIL ||
-    "Smartlance Designs <onboarding@resend.dev>";
-  return { toEmail, fromEmail };
-}
-
 export function formDeliveryConfiguredFromEnv(): boolean {
-  return (
-    Boolean(
-      process.env.RESEND_API_KEY &&
-        (process.env.CONTACT_TO_EMAIL || process.env.FORM_TO_EMAIL),
-    ) ||
-    Boolean(
-      process.env.FORM_WEBHOOK_URL ||
-        process.env.CONTACT_WEBHOOK_URL ||
-        process.env.WEBSITE_REVIEW_WEBHOOK_URL,
-    )
-  );
+  return isEmailDeliveryConfiguredFromEnv();
 }
 
 export async function formDeliveryConfigured(): Promise<boolean> {
-  if (
-    process.env.FORM_WEBHOOK_URL ||
-    process.env.CONTACT_WEBHOOK_URL ||
-    process.env.WEBSITE_REVIEW_WEBHOOK_URL
-  ) {
-    return true;
-  }
-
-  const { toEmail } = await getFormNotificationTargets();
-  return Boolean(process.env.RESEND_API_KEY && toEmail);
+  return isEmailDeliveryConfigured();
 }
 
 /**
- * Deliver form submissions via webhook and/or Resend.
+ * Deliver form submissions via webhook and/or shared transactional email service.
  * Secrets are server-only — never NEXT_PUBLIC_*.
  */
 export async function deliverFormSubmission(input: {
@@ -182,47 +100,31 @@ export async function deliverFormSubmission(input: {
     }
   }
 
-  const resendKey = process.env.RESEND_API_KEY;
-  const { toEmail, fromEmail } = await getFormNotificationTargets();
-
-  if (resendKey && toEmail) {
+  const recipients = await resolveNotificationRecipients();
+  if (recipients.length > 0) {
     const text =
       input.type === "contact"
-        ? formatContactEmail(input.payload, submittedAt)
-        : formatReviewEmail(input.payload, submittedAt);
+        ? formatContactEmailText(input.payload, submittedAt)
+        : formatReviewEmailText(input.payload, submittedAt);
     const subject =
       input.type === "contact"
-        ? `New Smartlance Project Enquiry${payloadRef(input.payload)}`
-        : `New Smartlance Website Review Request${payloadRef(input.payload)}`;
+        ? contactNotificationSubject(input.payload)
+        : reviewNotificationSubject(input.payload);
 
-    try {
-      const response = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${resendKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: fromEmail,
-          to: [toEmail],
-          reply_to: escapeHeaderFragment(input.payload.email) || undefined,
-          subject,
-          text,
-        }),
-        signal: timeoutSignal(OUTBOUND_TIMEOUTS.notification),
-      });
-      results.push({
-        channel: "email",
-        ok: response.ok,
-        detail: response.ok ? undefined : `HTTP ${response.status}`,
-      });
-    } catch (error) {
-      results.push({
-        channel: "email",
-        ok: false,
-        detail: error instanceof Error ? error.message : "Email failed",
-      });
-    }
+    const emailResult = await sendTransactionalEmail({
+      to: recipients,
+      subject,
+      text,
+      replyTo: escapeHeaderFragment(input.payload.email) || undefined,
+    });
+
+    results.push({
+      channel: "email",
+      ok: emailResult.success,
+      detail: emailResult.success
+        ? undefined
+        : emailResult.errorMessage || emailResult.errorCode,
+    });
   }
 
   if (results.length === 0) {
@@ -233,7 +135,6 @@ export async function deliverFormSubmission(input: {
     if (allowLog) {
       console.info("[form-submission:dev]", input.type, {
         submittedAt,
-        // Avoid logging full PII in production even with fallback
         keys: Object.keys(input.payload),
       });
       return { delivered: true, mode: "log" as const, results };
@@ -247,7 +148,7 @@ export async function deliverFormSubmission(input: {
           channel: "none",
           ok: false,
           detail:
-            "No FORM_WEBHOOK_URL / CONTACT_WEBHOOK_URL / Resend configured",
+            "No webhook or email delivery configured",
         },
       ],
     };

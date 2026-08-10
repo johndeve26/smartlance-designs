@@ -18,6 +18,7 @@ const initialValues: WebsiteReviewValues = {
   website: "",
   mainConcern: "Not Sure",
   _gotcha: "",
+  subscribeToUpdates: false,
 };
 
 export function WebsiteReviewForm({
@@ -218,6 +219,16 @@ export function WebsiteReviewForm({
           <p className="mt-1.5 text-xs text-error">{errors.mainConcern}</p>
         ) : null}
       </fieldset>
+
+      <label className="flex items-start gap-2 text-sm text-foreground">
+        <input
+          type="checkbox"
+          checked={values.subscribeToUpdates}
+          onChange={(e) => updateField("subscribeToUpdates", e.target.checked)}
+          className="mt-1"
+        />
+        <span>Send me occasional website, SEO and conversion insights.</span>
+      </label>
 
       <div className="absolute left-[-10000px] top-auto h-px w-px overflow-hidden" aria-hidden>
         <label htmlFor="review-gotcha">Leave blank</label>

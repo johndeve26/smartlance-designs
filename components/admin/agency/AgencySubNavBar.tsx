@@ -1,40 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-const links = [
-  { href: "/admin/agency", label: "Overview", exact: true },
-  { href: "/admin/agency/projects", label: "Projects" },
-  { href: "/admin/agency/templates", label: "Templates" },
-];
-
+/** @deprecated Primary agency navigation lives in Admin sidebar. Templates use agency layout. */
 export function AgencySubNavBar() {
-  const pathname = usePathname();
-  return (
-    <nav className="flex flex-wrap gap-1 border-b pb-3">
-      {links.map((link) => {
-        const active = link.exact
-          ? pathname === link.href
-          : pathname === link.href || pathname.startsWith(`${link.href}/`);
-        return (
-          <Link
-            key={link.href}
-            href={link.href}
-            className={cn(
-              "rounded px-3 py-1.5 text-sm font-medium",
-              active
-                ? "bg-neutral-900 text-white"
-                : "text-neutral-600 hover:bg-neutral-100",
-            )}
-          >
-            {link.label}
-          </Link>
-        );
-      })}
-    </nav>
-  );
+  return null;
 }
 
 export function AgencyBadge({

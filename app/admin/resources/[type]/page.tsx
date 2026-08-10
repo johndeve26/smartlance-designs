@@ -4,6 +4,8 @@ import { requireAdminUser, userCan } from "@/lib/admin/session";
 import { listResourcesAdmin } from "@/lib/repositories/resourcesRepository";
 import { ContentBulkTable } from "@/components/admin/ContentBulkTable";
 import { createResourceDraftAction } from "@/lib/admin/bulk-content-actions";
+import { AdminListPage } from "@/components/admin/patterns/AdminListPage";
+import { Button } from "@/components/ui/button";
 import type { ResourceKind } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -29,37 +31,48 @@ export default async function AdminResourceTypePage({ params }: PageProps) {
 
   const items = await listResourcesAdmin(kind);
 
+  const typeNote =
+    kind === "template" || kind === "tool"
+      ? "Technical IDs and scoring/engine logic are protected. Edit display copy and metadata only."
+      : kind === "checklist"
+        ? "Checklist item IDs are immutable — they power browser progress (localStorage)."
+        : undefined;
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <Link href="/admin/resources" className="text-sm text-neutral-500">
+    <AdminListPage
+      title={type.charAt(0).toUpperCase() + type.slice(1)}
+      description={
+        <>
+          <Link href="/admin/resources" className="text-accent-text hover:underline">
             ← Resources
           </Link>
-          <h1 className="mt-2 text-2xl font-semibold capitalize">{type}</h1>
-          {(kind === "template" || kind === "tool") && (
-            <p className="mt-1 text-sm text-amber-800">
-              Technical IDs and scoring/engine logic are protected. Edit display
-              copy and metadata only.
-            </p>
-          )}
-          {kind === "checklist" && (
-            <p className="mt-1 text-sm text-amber-800">
-              Checklist item IDs are immutable — they power browser progress
-              (localStorage).
-            </p>
-          )}
-        </div>
-        {canEdit && kind !== "template" && kind !== "tool" && kind !== "checklist" ? (
+          {typeNote ? (
+            <span className="mt-2 block text-warning-text">{typeNote}</span>
+          ) : null}
+        </>
+      }
+      action={
+        canEdit && kind !== "template" && kind !== "tool" && kind !== "checklist" ? (
           <form action={createResourceDraftAction}>
             <input type="hidden" name="type" value={type} />
-            <button type="submit" className="admin-btn-primary">
+            <Button type="submit" size="sm">
               New {kind}
-            </button>
+            </Button>
           </form>
-        ) : null}
-      </div>
-
+        ) : undefined
+      }
+      isEmpty={items.length === 0}
+      empty={{
+        title: `No ${type} yet`,
+        action:
+          canEdit && kind !== "template" && kind !== "tool" && kind !== "checklist" ? (
+            <form action={createResourceDraftAction}>
+              <input type="hidden" name="type" value={type} />
+              <Button type="submit">Create first {kind}</Button>
+            </form>
+          ) : undefined,
+      }}
+    >
       <ContentBulkTable
         family="resource"
         canPublish={canPublish}
@@ -81,6 +94,6 @@ export default async function AdminResourceTypePage({ params }: PageProps) {
           },
         }))}
       />
-    </div>
+    </AdminListPage>
   );
 }

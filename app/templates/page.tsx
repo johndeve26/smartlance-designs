@@ -5,6 +5,7 @@ import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { SectionHeader } from "@/components/ui/section-header";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { AudienceSubscribeSection } from "@/components/audience/subscribe-section-server";
 import { CTASection } from "@/components/ui/cta-section";
 import { StructuredData } from "@/components/ui/structured-data";
 import {
@@ -181,6 +182,16 @@ export default async function TemplatesArchivePage() {
           </ul>
         </Container>
       </Section>
+
+      <section className="py-12 sm:py-14">
+        <Container>
+          <AudienceSubscribeSection
+            source="TEMPLATE"
+            sourceUrl="/templates"
+            variant="resource"
+          />
+        </Container>
+      </section>
 
       <CTASection
         title="Need Help Turning a Brief Into a Website Plan?"

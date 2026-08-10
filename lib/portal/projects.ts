@@ -21,7 +21,6 @@ export async function getPortalHomeData(portalUserId: string) {
       projectNumber: true,
       name: true,
       status: true,
-      health: true,
       targetDueDate: true,
       updatedAt: true,
     },
@@ -130,7 +129,6 @@ export async function getPortalProject(portalUserId: string, projectId: string) 
       projectNumber: true,
       name: true,
       status: true,
-      health: true,
       summary: true,
       startDate: true,
       targetDueDate: true,
@@ -211,6 +209,13 @@ export async function submitDeliverableReview(input: {
   });
   if (!deliverable || !deliverable.clientVisible) {
     throw new Error("Deliverable not found.");
+  }
+
+  if (
+    deliverable.status !== "READY_FOR_REVIEW" &&
+    deliverable.status !== "CHANGES_REQUESTED"
+  ) {
+    throw new Error("This deliverable is not available for review.");
   }
 
   const projectIds = await listAccessibleProjectIds(input.portalUserId);

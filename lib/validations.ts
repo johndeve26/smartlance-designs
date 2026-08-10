@@ -55,6 +55,7 @@ export const contactFormSchema = z.object({
    * return fake success without persisting. Humans leave it empty.
    */
   _gotcha: z.string().max(200).optional().default(""),
+  subscribeToUpdates: z.boolean().optional().default(false),
 });
 
 export type ContactFormValues = z.infer<typeof contactFormSchema>;
@@ -90,6 +91,8 @@ export const websiteReviewSchema = z.object({
   ),
   /** Honeypot — see contactFormSchema */
   _gotcha: z.string().max(200).optional().default(""),
+  /** Explicit opt-in to audience updates — never pre-checked */
+  subscribeToUpdates: z.boolean().optional().default(false),
 });
 
 export type WebsiteReviewValues = z.infer<typeof websiteReviewSchema>;

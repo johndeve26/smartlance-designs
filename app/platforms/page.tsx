@@ -161,10 +161,11 @@ export default async function PlatformsPage() {
               The Right Platform for the Website You Actually Need
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-[1.7] text-muted sm:text-lg">
-              We design, build and improve websites across established content,
-              commerce and marketing platforms — choosing the technology around
-              the business rather than forcing every project into the same
-              system.
+              The right technology depends on what the business needs to build,
+              connect or automate. We design, build and improve websites across
+              established content, commerce and marketing platforms — choosing
+              systems around the business rather than forcing every project into
+              the same stack.
             </p>
             <nav
               className="-mx-5 mt-8 overflow-x-auto border-t border-border px-5 pt-5 sm:mx-0 sm:overflow-visible sm:px-0"

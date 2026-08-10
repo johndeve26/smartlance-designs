@@ -35,6 +35,7 @@ export type PublicSiteSettings = {
   locale: string;
   contactFormEnabled: boolean;
   freeReviewFormEnabled: boolean;
+  audienceEnabled: boolean;
   formSuccessMessage: string | null;
   formFallbackMessage: string | null;
   showPublicPricing: boolean;
@@ -83,6 +84,7 @@ export function fallbackPublicSiteSettings(): PublicSiteSettings {
     locale: siteConfig.locale,
     contactFormEnabled: true,
     freeReviewFormEnabled: true,
+    audienceEnabled: true,
     formSuccessMessage: null,
     formFallbackMessage: null,
     showPublicPricing: false,
@@ -115,6 +117,7 @@ function mapRow(row: {
   defaultLocale: string;
   contactFormEnabled: boolean;
   freeReviewFormEnabled: boolean;
+  audienceEnabled: boolean;
   formSuccessMessage: string | null;
   formFallbackMessage: string | null;
   showPublicPricing: boolean;
@@ -151,6 +154,7 @@ function mapRow(row: {
     locale: row.defaultLocale === "en" ? "en_US" : row.defaultLocale,
     contactFormEnabled: row.contactFormEnabled,
     freeReviewFormEnabled: row.freeReviewFormEnabled,
+    audienceEnabled: row.audienceEnabled,
     formSuccessMessage: row.formSuccessMessage,
     formFallbackMessage: row.formFallbackMessage,
     showPublicPricing: row.showPublicPricing,
@@ -179,6 +183,9 @@ async function loadPublicSettingsUncached(): Promise<PublicSiteSettings> {
 
 export async function getPublicSettings(): Promise<PublicSiteSettings> {
   if (!hasDatabaseUrl()) return fallbackPublicSiteSettings();
+  if (process.env.NODE_ENV === "test") {
+    return loadPublicSettingsUncached();
+  }
   return unstable_cache(loadPublicSettingsUncached, ["public-site-settings"], {
     tags: [CACHE_TAGS.siteSettings],
     revalidate: 300,
@@ -215,6 +222,8 @@ export const siteSettingsUpdateSchema = z.object({
   analyticsEnabled: z.boolean().optional(),
   contactFormEnabled: z.boolean().optional(),
   freeReviewFormEnabled: z.boolean().optional(),
+  audienceEnabled: z.boolean().optional(),
+  audienceRequireConfirmation: z.boolean().optional(),
   formSuccessMessage: z.string().max(500).nullable().optional(),
   formFallbackMessage: z.string().max(500).nullable().optional(),
   showPublicPricing: z.boolean().optional(),

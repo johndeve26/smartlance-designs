@@ -2,6 +2,8 @@ import { requireAdminUser, userCan } from "@/lib/admin/session";
 import { listAllTestimonialsAdmin } from "@/lib/repositories/testimonialsRepository";
 import { ContentBulkTable } from "@/components/admin/ContentBulkTable";
 import { createTestimonialDraftAction } from "@/lib/admin/bulk-content-actions";
+import { AdminListPage } from "@/components/admin/patterns/AdminListPage";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -12,24 +14,28 @@ export default async function AdminTestimonialsPage() {
   const items = await listAllTestimonialsAdmin();
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold">Testimonials</h1>
-          <p className="mt-1 text-sm text-neutral-600">
-            Only verified + published testimonials render publicly. Internal
-            notes never appear on the site.
-          </p>
-        </div>
-        {canEdit ? (
+    <AdminListPage
+      title="Testimonials"
+      description="Only verified + published testimonials render publicly. Internal notes never appear on the site."
+      action={
+        canEdit ? (
           <form action={createTestimonialDraftAction}>
-            <button type="submit" className="admin-btn-primary">
+            <Button type="submit" size="sm">
               New testimonial
-            </button>
+            </Button>
           </form>
-        ) : null}
-      </div>
-
+        ) : undefined
+      }
+      isEmpty={items.length === 0}
+      empty={{
+        title: "No testimonials yet",
+        action: canEdit ? (
+          <form action={createTestimonialDraftAction}>
+            <Button type="submit">Create first testimonial</Button>
+          </form>
+        ) : undefined,
+      }}
+    >
       <ContentBulkTable
         family="testimonial"
         canPublish={canPublish}
@@ -53,6 +59,6 @@ export default async function AdminTestimonialsPage() {
           },
         }))}
       />
-    </div>
+    </AdminListPage>
   );
 }

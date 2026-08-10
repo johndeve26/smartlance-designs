@@ -4,6 +4,7 @@ import { resolveMediaUrl } from "@/lib/media/urls";
 describe("resolveMediaUrl", () => {
   afterEach(() => {
     delete process.env.MEDIA_PUBLIC_BASE_URL;
+    delete process.env.NEXT_PUBLIC_MEDIA_PUBLIC_BASE_URL;
   });
 
   it("returns the original path when no public base is configured", () => {
@@ -13,6 +14,14 @@ describe("resolveMediaUrl", () => {
   });
 
   it("maps site-relative paths to the configured R2 public base", () => {
+    process.env.NEXT_PUBLIC_MEDIA_PUBLIC_BASE_URL =
+      "https://pub-4261197fb4914f20b677a4b3d5ff4253.r2.dev";
+    expect(resolveMediaUrl("/images/projects/padeya/hero.webp")).toBe(
+      "https://pub-4261197fb4914f20b677a4b3d5ff4253.r2.dev/images/projects/padeya/hero.webp",
+    );
+  });
+
+  it("falls back to MEDIA_PUBLIC_BASE_URL when public mirror is unset", () => {
     process.env.MEDIA_PUBLIC_BASE_URL =
       "https://pub-4261197fb4914f20b677a4b3d5ff4253.r2.dev";
     expect(resolveMediaUrl("/images/projects/padeya/hero.webp")).toBe(

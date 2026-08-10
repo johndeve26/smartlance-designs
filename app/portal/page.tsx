@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getPortalHomeData } from "@/lib/portal/projects";
 import { getPortalUser } from "@/lib/portal/session";
+import { getPortalHome } from "@/lib/portal/home";
+import { PortalPageHeader, PortalCard } from "@/components/portal/PortalShell";
+import { AttentionList } from "@/components/portal/AttentionList";
+import { ProjectSummaryCard } from "@/components/portal/ProjectSummaryCard";
+import { PortalWebsiteHomeCards } from "@/components/portal/PortalWebsiteCards";
+import { PortalTimelineList } from "@/components/portal/PortalTimelineList";
+import { ProductSectionHeader } from "@/components/ui/page-header";
 
 export const dynamic = "force-dynamic";
 
@@ -9,56 +15,66 @@ export default async function PortalHomePage() {
   const user = await getPortalUser();
   if (!user) redirect("/portal/login");
 
-  const data = await getPortalHomeData(user.id);
+  const home = await getPortalHome(user.id);
+  const actionable = home.attention.filter((a) => a.canAct);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Welcome back</h1>
-        <p className="mt-1 text-sm text-neutral-600">{user.email}</p>
-      </div>
+    <div className="space-y-8">
+      <PortalPageHeader title={home.greeting} description={home.subtitle} />
 
-      {data.needsAttention.length ? (
-        <section className="space-y-3 rounded-lg border bg-white p-4 shadow-sm">
-          <h2 className="font-semibold">Needs your attention</h2>
-          <ul className="divide-y text-sm">
-            {data.needsAttention.map((item) => (
-              <li key={`${item.kind}-${item.id}`} className="flex justify-between gap-2 py-2">
-                <div>
-                  <Link href={`/portal/projects/${item.projectId}`} className="font-medium hover:underline">
-                    {item.projectNumber} · {item.title}
-                  </Link>
-                  <p className="text-neutral-600">{item.projectName}</p>
-                </div>
-                <span className="text-neutral-500">{item.statusLabel}</span>
-              </li>
+      <section>
+        <ProductSectionHeader
+          title="Needs your attention"
+          action={
+            actionable.length > 0 ? (
+              <Link href="/portal/approvals" className="text-sm font-medium text-accent-text hover:underline">
+                View all
+              </Link>
+            ) : undefined
+          }
+        />
+        <AttentionList items={actionable} />
+      </section>
+
+      <section>
+        <ProductSectionHeader title="Active projects" />
+        {home.projects.length ? (
+          <div className="grid gap-4 md:grid-cols-2">
+            {home.projects.map((p) => (
+              <ProjectSummaryCard key={p.id} project={p} />
             ))}
-          </ul>
+          </div>
+        ) : (
+          <PortalCard>
+            <p className="text-body-sm">No active projects right now.</p>
+          </PortalCard>
+        )}
+        <div className="mt-3">
+          <Link href="/portal/projects" className="text-sm text-accent-text hover:underline">
+            View all projects
+          </Link>
+        </div>
+      </section>
+
+      {home.websites.length ? (
+        <section>
+          <ProductSectionHeader
+            title="Your websites"
+            action={
+              <Link href="/portal/websites" className="text-sm font-medium text-accent-text hover:underline">
+                View all
+              </Link>
+            }
+          />
+          <PortalWebsiteHomeCards websites={home.websites} />
         </section>
       ) : null}
 
-      <section className="space-y-3 rounded-lg border bg-white p-4 shadow-sm">
-        <h2 className="font-semibold">Your projects</h2>
-        <ul className="divide-y text-sm">
-          {data.projects.map((p) => (
-            <li key={p.id} className="flex justify-between gap-2 py-3">
-              <div>
-                <Link href={`/portal/projects/${p.id}`} className="font-medium hover:underline">
-                  {p.projectNumber} · {p.name}
-                </Link>
-                <p className="text-neutral-600">{p.statusLabel}</p>
-              </div>
-              {p.targetDueDate ? (
-                <span className="text-neutral-500">
-                  Due {new Date(p.targetDueDate).toLocaleDateString()}
-                </span>
-              ) : null}
-            </li>
-          ))}
-          {!data.projects.length ? (
-            <li className="py-4 text-neutral-500">No projects are shared with you yet.</li>
-          ) : null}
-        </ul>
+      <section>
+        <ProductSectionHeader title="Recent updates" />
+        <PortalCard>
+          <PortalTimelineList events={home.timeline} />
+        </PortalCard>
       </section>
     </div>
   );

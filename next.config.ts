@@ -27,8 +27,17 @@ function mediaRemotePatterns(): NonNullable<NextConfig["images"]>["remotePattern
   return patterns;
 }
 
+const mediaPublicBaseUrl =
+  process.env.NEXT_PUBLIC_MEDIA_PUBLIC_BASE_URL?.trim() ||
+  process.env.MEDIA_PUBLIC_BASE_URL?.trim() ||
+  "";
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  env: {
+    /** Mirror server media CDN base for client bundles (Logo, etc.) — avoids hydration mismatch. */
+    NEXT_PUBLIC_MEDIA_PUBLIC_BASE_URL: mediaPublicBaseUrl,
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: mediaRemotePatterns(),

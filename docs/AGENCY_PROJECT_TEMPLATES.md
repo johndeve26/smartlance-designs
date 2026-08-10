@@ -9,17 +9,13 @@
 
 ## System templates
 
-Seven generic starter templates are seeded when none exist:
+Seven generic starter templates are available via explicit admin action (**Install starter templates**). They are editable and identified by stable `systemKey` values:
 
-1. Website Design
-2. Website Redesign
-3. Landing Page
-4. E-commerce Website
-5. SEO Project
-6. Branding
-7. Website Maintenance
+- `website-design`, `website-redesign`, `landing-page`, `ecommerce`, `seo`, `branding`, `website-maintenance`
 
-These are editable admin templates — not claimed as proven Smartlance SOPs.
+Installation is idempotent: existing templates (including edited starters) are skipped. Partial installation creates only missing starters. Archived starters are not silently restored.
+
+**Templates are never auto-installed on page load.**
 
 ## Instantiation
 

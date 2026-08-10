@@ -16,8 +16,10 @@ import { Logo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import {
+  aiAutomationMenu,
+  companyMenu,
   headerTopNavigation,
-  industriesMenu,
+  mobileAiAutomationLinks,
   mobileResourcesLinks,
   mobileServicesLinks,
   mobileUtilityLinks,
@@ -26,12 +28,13 @@ import {
   servicesMegaMenu,
   solutionsMenu,
 } from "@/data/navigation";
+import { getWorkMenuLinks } from "@/lib/public/work-capabilities";
 import { isNavSectionActive } from "@/lib/navigation/active-section";
 import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
-import type { HeaderTopItem } from "@/data/navigation";
+import type { HeaderMenuId, HeaderTopItem } from "@/data/navigation";
 
-type OpenMenu = "services" | "solutions" | "industries" | "resources" | null;
+type OpenMenu = HeaderMenuId | null;
 
 type HeaderProps = {
   primaryCta?: { label: string; href: string };
@@ -106,10 +109,12 @@ function HeaderInteractive({
 
   const menuIds = {
     services: useId(),
+    "ai-automation": useId(),
     solutions: useId(),
-    industries: useId(),
+    work: useId(),
     resources: useId(),
-  };
+    company: useId(),
+  } as const;
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
@@ -395,10 +400,12 @@ function DesktopDropdown({
           aria-labelledby={`${panelId}-trigger`}
           className={cn(
             "absolute top-full z-50 pt-2",
-            item.menu === "mega-services" && "left-0 w-[44rem]",
-            item.menu === "mega-resources" && "left-1/2 w-[40rem] -translate-x-1/2",
-            (item.menu === "solutions" || item.menu === "industries") &&
-              "left-0 w-[22rem]",
+            item.menu === "mega-services" && "left-0 w-[36rem]",
+            item.menu === "ai-automation" && "left-0 w-[24rem]",
+            item.menu === "mega-resources" && "left-1/2 w-[32rem] -translate-x-1/2",
+            item.menu === "solutions" && "left-0 w-[22rem]",
+            item.menu === "work" && "left-0 w-[20rem]",
+            item.menu === "company" && "right-0 w-[20rem]",
           )}
           onMouseEnter={onCancelClose}
           onMouseLeave={onScheduleClose}
@@ -407,14 +414,20 @@ function DesktopDropdown({
             {item.menu === "mega-services" ? (
               <ServicesMegaPanel onNavigate={onClose} />
             ) : null}
+            {item.menu === "ai-automation" ? (
+              <CompactMenuPanel links={aiAutomationMenu} onNavigate={onClose} />
+            ) : null}
             {item.menu === "solutions" ? (
               <CompactMenuPanel links={solutionsMenu} onNavigate={onClose} />
             ) : null}
-            {item.menu === "industries" ? (
-              <CompactMenuPanel links={industriesMenu} onNavigate={onClose} />
+            {item.menu === "work" ? (
+              <CompactMenuPanel links={getWorkMenuLinks()} onNavigate={onClose} />
             ) : null}
             {item.menu === "mega-resources" ? (
               <ResourcesMegaPanel onNavigate={onClose} />
+            ) : null}
+            {item.menu === "company" ? (
+              <CompactMenuPanel links={companyMenu} onNavigate={onClose} />
             ) : null}
           </div>
         </div>
@@ -456,32 +469,23 @@ function MenuLink({
 function ServicesMegaPanel({ onNavigate }: { onNavigate: () => void }) {
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-3 gap-4">
-        {servicesMegaMenu.groups.map((group) => (
-          <div key={group.title}>
-            <p className="px-2 pb-2 text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-subtle">
-              {group.title}
-            </p>
-            <div className="flex flex-col gap-0.5">
-              {group.links.map((link) => (
-                <MenuLink key={link.href} link={link} onNavigate={onNavigate} />
-              ))}
-            </div>
-          </div>
-        ))}
+      <div>
+        <p className="px-2 pb-2 text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-subtle">
+          Services
+        </p>
+        <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
+          {servicesMegaMenu.links.map((link) => (
+            <MenuLink key={link.href} link={link} onNavigate={onNavigate} compact />
+          ))}
+        </div>
       </div>
       <div className="border-t border-border pt-3">
         <p className="px-2 pb-2 text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-subtle">
           Platforms
         </p>
-        <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 sm:grid-cols-3">
+        <div className="flex flex-col gap-0.5">
           {servicesMegaMenu.platforms.map((link) => (
-            <MenuLink
-              key={link.href}
-              link={link}
-              onNavigate={onNavigate}
-              compact
-            />
+            <MenuLink key={link.href} link={link} onNavigate={onNavigate} />
           ))}
         </div>
       </div>
@@ -504,7 +508,7 @@ function ServicesMegaPanel({ onNavigate }: { onNavigate: () => void }) {
 function ResourcesMegaPanel({ onNavigate }: { onNavigate: () => void }) {
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         {resourcesMegaMenu.groups.map((group) => (
           <div key={group.title}>
             <p className="px-2 pb-2 text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-subtle">
@@ -571,6 +575,23 @@ function MobileSectionLinks({
       </ul>
     );
   }
+  if (item.id === "ai-automation") {
+    return (
+      <ul className="space-y-1">
+        {mobileAiAutomationLinks.map((link) => (
+          <li key={link.href}>
+            <Link
+              href={link.href}
+              onClick={onNavigate}
+              className="block py-2 pl-2 text-[0.9375rem] text-muted hover:text-accent-text"
+            >
+              {link.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    );
+  }
   if (item.id === "solutions") {
     return (
       <ul className="space-y-1">
@@ -588,10 +609,10 @@ function MobileSectionLinks({
       </ul>
     );
   }
-  if (item.id === "industries") {
+  if (item.id === "work") {
     return (
       <ul className="space-y-1">
-        {industriesMenu.map((link) => (
+        {getWorkMenuLinks().map((link) => (
           <li key={link.href}>
             <Link
               href={link.href}
@@ -609,6 +630,23 @@ function MobileSectionLinks({
     return (
       <ul className="space-y-1">
         {mobileResourcesLinks.map((link) => (
+          <li key={link.href}>
+            <Link
+              href={link.href}
+              onClick={onNavigate}
+              className="block py-2 pl-2 text-[0.9375rem] text-muted hover:text-accent-text"
+            >
+              {link.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+  if (item.id === "company") {
+    return (
+      <ul className="space-y-1">
+        {companyMenu.map((link) => (
           <li key={link.href}>
             <Link
               href={link.href}

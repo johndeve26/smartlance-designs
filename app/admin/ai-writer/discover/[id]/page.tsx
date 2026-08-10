@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { requireAdminUser } from "@/lib/admin/session";
 import { prisma } from "@/lib/db";
 import { AIWriterSubnav } from "@/components/admin/ai-writer/AIWriterSubnav";
+import { PageHeader } from "@/components/ui/page-header";
+import { AdminPanel } from "@/components/admin/patterns/AdminPanel";
 import {
   convertOpportunityAction,
   updateOpportunityStatusAction,
@@ -57,37 +59,39 @@ export default async function OpportunityDetailPage({
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 pb-10">
-      <header className="space-y-3">
-        <nav className="text-sm text-neutral-500">
-          <Link href="/admin/ai-writer/discover" className="hover:text-neutral-800">
-            Topic Discovery
-          </Link>
-          <span className="mx-1.5">/</span>
-          <span className="text-neutral-800">Opportunity</span>
-        </nav>
-        <AIWriterSubnav current="/admin/ai-writer/discover" />
-        <div>
-          <p className="text-xs uppercase tracking-wide text-neutral-500">
-            Working title (not final)
-          </p>
-          <h1 className="mt-1 text-2xl font-semibold text-neutral-900">{opp.workingTitle}</h1>
-          <p className="mt-2 flex flex-wrap gap-2 text-sm">
-            <span className="rounded border px-2 py-0.5">{opp.badge || opp.recommendation}</span>
-            <span className="rounded border px-2 py-0.5">{opp.status}</span>
-            <span className="rounded border px-2 py-0.5">{opp.timeliness}</span>
-            {opp.higherFactualReview ? (
-              <span className="rounded border border-amber-300 bg-amber-50 px-2 py-0.5 text-amber-950">
-                Higher factual review
-              </span>
-            ) : null}
-            {opp.recurringSignal ? (
-              <span className="rounded border px-2 py-0.5">Recurring signal</span>
-            ) : null}
-          </p>
-        </div>
-      </header>
+      <PageHeader
+        title={opp.workingTitle}
+        description={
+          <>
+            <nav className="text-sm text-muted">
+              <Link href="/admin/ai-writer/discover" className="hover:text-foreground">
+                Topic Discovery
+              </Link>
+              <span className="mx-1.5">/</span>
+              <span className="text-foreground">Opportunity</span>
+            </nav>
+            <span className="mt-2 block text-xs uppercase tracking-wide text-muted">
+              Working title (not final)
+            </span>
+            <span className="mt-2 flex flex-wrap gap-2 text-sm">
+              <span className="rounded border border-border px-2 py-0.5">{opp.badge || opp.recommendation}</span>
+              <span className="rounded border border-border px-2 py-0.5">{opp.status}</span>
+              <span className="rounded border border-border px-2 py-0.5">{opp.timeliness}</span>
+              {opp.higherFactualReview ? (
+                <span className="rounded border border-warning bg-warning-soft/40 px-2 py-0.5 text-warning-text">
+                  Higher factual review
+                </span>
+              ) : null}
+              {opp.recurringSignal ? (
+                <span className="rounded border border-border px-2 py-0.5">Recurring signal</span>
+              ) : null}
+            </span>
+          </>
+        }
+      />
+      <AIWriterSubnav current="/admin/ai-writer/discover" />
 
-      <section className="space-y-4 rounded-lg border border-neutral-200 bg-white p-4 text-sm">
+      <AdminPanel className="space-y-4 text-sm">
         <Block title="Topic" body={opp.coreTopic} />
         <Block title="Reader need / question" body={opp.question || "—"} />
         <Block title="Why now" body={opp.whyNow || "—"} />
@@ -167,7 +171,7 @@ export default async function OpportunityDetailPage({
             ))}
           </dl>
         </div>
-      </section>
+      </AdminPanel>
 
       <section className="rounded-lg border border-neutral-200 bg-white p-4">
         <h2 className="text-sm font-semibold text-neutral-900">Actions</h2>

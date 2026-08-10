@@ -3,6 +3,8 @@ import { requireAdminUser, userCan } from "@/lib/admin/session";
 import { listAllSolutionsAdmin } from "@/lib/repositories/solutionsRepository";
 import { ContentBulkTable } from "@/components/admin/ContentBulkTable";
 import { createSolutionDraftAction } from "@/lib/admin/bulk-content-actions";
+import { AdminListPage } from "@/components/admin/patterns/AdminListPage";
+import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: "Solutions",
@@ -15,23 +17,29 @@ export default async function AdminSolutionsPage() {
   const solutions = await listAllSolutionsAdmin();
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="admin-page-title">Solutions</h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            {solutions.length} solution{solutions.length === 1 ? "" : "s"}
-          </p>
-        </div>
-        {canEdit ? (
+    <AdminListPage
+      title="Solutions"
+      description={`${solutions.length} solution${solutions.length === 1 ? "" : "s"}`}
+      action={
+        canEdit ? (
           <form action={createSolutionDraftAction}>
-            <button type="submit" className="admin-btn-primary">
+            <Button type="submit" size="sm">
               New solution
-            </button>
+            </Button>
           </form>
-        ) : null}
-      </div>
-
+        ) : undefined
+      }
+      isEmpty={solutions.length === 0}
+      empty={{
+        title: "No solutions yet",
+        description: "Create your first solution page.",
+        action: canEdit ? (
+          <form action={createSolutionDraftAction}>
+            <Button type="submit">Create first solution</Button>
+          </form>
+        ) : undefined,
+      }}
+    >
       <ContentBulkTable
         family="solution"
         canPublish={canPublish}
@@ -55,6 +63,6 @@ export default async function AdminSolutionsPage() {
           },
         }))}
       />
-    </div>
+    </AdminListPage>
   );
 }

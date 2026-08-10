@@ -23,6 +23,7 @@ import { AgencyBadge } from "@/components/admin/agency/AgencySubNavBar";
 import { contactDisplayName } from "@/lib/crm/normalize";
 import Link from "next/link";
 import type { getProjectAdminDetail } from "@/lib/agency/projects";
+import { AdminPanel } from "@/components/admin/patterns/AdminPanel";
 
 type Project = NonNullable<Awaited<ReturnType<typeof getProjectAdminDetail>>>;
 
@@ -37,7 +38,7 @@ export function ProjectDetailPanels({
 
   return (
     <div className="space-y-6">
-      <section className="admin-card grid gap-4 p-4 lg:grid-cols-2">
+      <AdminPanel className="grid gap-4 lg:grid-cols-2">
         <div className="space-y-2 text-sm">
           <p><strong>Number:</strong> {project.projectNumber}</p>
           <p>
@@ -95,7 +96,7 @@ export function ProjectDetailPanels({
             </AgencyBadge>
           </div>
         )}
-      </section>
+      </AdminPanel>
 
       <Panel title={`Milestones (${project.milestones.length})`}>
         <ul className="divide-y text-sm">
@@ -239,9 +240,9 @@ export function ProjectDetailPanels({
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="admin-card p-4">
+    <AdminPanel>
       <h2 className="font-semibold">{title}</h2>
       <div className="mt-3">{children}</div>
-    </section>
+    </AdminPanel>
   );
 }

@@ -1,7 +1,4 @@
-/**
- * Server-only environment validation.
- * Never import this module from client components.
- */
+import { validateAgencyPrivateStorageConfig } from "@/lib/agency/private-storage";
 
 export type EnvClass = "REQUIRED" | "OPTIONAL" | "DEVELOPMENT_ONLY" | "PUBLIC" | "SECRET";
 
@@ -28,13 +25,25 @@ export const ENV_CATALOG: Array<{
   class: EnvClass;
   notes: string;
 }> = [
+  { key: "CRM_INBOUND_SYNC_SECRET", class: "SECRET", notes: "Bearer token for POST /api/internal/crm-inbound-email-sync" },
+  { key: "CRM_SCHEDULER_SECRET", class: "SECRET", notes: "Bearer token for POST /api/internal/crm-sequence-scheduler" },
   { key: "DATABASE_URL", class: "SECRET", notes: "Required for Admin + CMS runtime" },
   { key: "DIRECT_URL", class: "SECRET", notes: "Optional; preferred for prisma migrate" },
   { key: "ADMIN_SESSION_SECRET", class: "SECRET", notes: "Required in production (≥32 chars)" },
   { key: "ADMIN_PREVIEW_SECRET", class: "SECRET", notes: "Optional; falls back to session secret" },
   { key: "ADMIN_BOOTSTRAP_EMAIL", class: "SECRET", notes: "Bootstrap only" },
   { key: "ADMIN_BOOTSTRAP_PASSWORD", class: "SECRET", notes: "Bootstrap only" },
-  { key: "RESEND_API_KEY", class: "SECRET", notes: "Email notification" },
+  { key: "RESEND_API_KEY", class: "SECRET", notes: "Email fallback when Admin SMTP disabled" },
+  { key: "AI_SECRETS_ENCRYPTION_KEY", class: "SECRET", notes: "AES key for Admin-stored secrets (SMTP passwords, AI provider keys)" },
+  { key: "APP_SECRETS_ENCRYPTION_KEY", class: "SECRET", notes: "Optional alias for dedicated app secrets encryption" },
+  { key: "SMTP_HOST", class: "SECRET", notes: "Env SMTP fallback when Admin SMTP disabled" },
+  { key: "SMTP_PORT", class: "OPTIONAL", notes: "Env SMTP port" },
+  { key: "SMTP_USER", class: "SECRET", notes: "Env SMTP username" },
+  { key: "SMTP_PASSWORD", class: "SECRET", notes: "Env SMTP password" },
+  { key: "SMTP_FROM_EMAIL", class: "OPTIONAL", notes: "Env SMTP from address" },
+  { key: "SMTP_FROM_NAME", class: "OPTIONAL", notes: "Env SMTP from display name" },
+  { key: "SMTP_REPLY_TO", class: "OPTIONAL", notes: "Env SMTP default reply-to" },
+  { key: "SMTP_SECURITY", class: "OPTIONAL", notes: "Env SMTP security mode: AUTO | TLS | STARTTLS | NONE" },
   { key: "CONTACT_TO_EMAIL", class: "OPTIONAL", notes: "Notification recipient" },
   { key: "CONTACT_FROM_EMAIL", class: "OPTIONAL", notes: "Verified sender" },
   { key: "FORM_WEBHOOK_URL", class: "SECRET", notes: "Alt notification channel" },
@@ -42,6 +51,9 @@ export const ENV_CATALOG: Array<{
   { key: "MEDIA_S3_SECRET_ACCESS_KEY", class: "SECRET", notes: "Object storage" },
   { key: "MEDIA_STORAGE_PROVIDER", class: "OPTIONAL", notes: "local (dev) or s3" },
   { key: "MEDIA_ALLOW_LOCAL_IN_PRODUCTION", class: "DEVELOPMENT_ONLY", notes: "Never set in real prod" },
+  { key: "AGENCY_PRIVATE_STORAGE_DRIVER", class: "OPTIONAL", notes: "local (dev) or s3 (required in production)" },
+  { key: "AGENCY_S3_BUCKET", class: "SECRET", notes: "Private agency project files bucket" },
+  { key: "AGENCY_ALLOW_LOCAL_IN_PRODUCTION", class: "DEVELOPMENT_ONLY", notes: "Never set in real prod" },
   { key: "ALLOW_FORM_LOG_FALLBACK", class: "DEVELOPMENT_ONLY", notes: "Never set in real prod" },
   { key: "AI_SECRETS_ENCRYPTION_KEY", class: "SECRET", notes: "AES key material for Admin-stored AI provider keys (falls back to ADMIN_SESSION_SECRET)" },
   { key: "OPENAI_API_KEY", class: "SECRET", notes: "Env fallback LLM key if Admin provider not set" },
@@ -113,6 +125,16 @@ export function validateServerEnv(options?: {
           "NEXT_PUBLIC_SITE_URL must be the real production origin (not localhost or preview).",
         severity: "error",
       });
+    } else if (
+      /DATABASE_URL|postgresql:\/\//i.test(siteUrl) ||
+      siteUrl.length > 120
+    ) {
+      issues.push({
+        key: "NEXT_PUBLIC_SITE_URL",
+        message:
+          "NEXT_PUBLIC_SITE_URL looks malformed (env file line break missing or secret embedded). Use a single canonical HTTPS origin only.",
+        severity: "error",
+      });
     }
 
     const mediaProvider = (process.env.MEDIA_STORAGE_PROVIDER || "local").toLowerCase();
@@ -121,6 +143,15 @@ export function validateServerEnv(options?: {
         key: "MEDIA_STORAGE_PROVIDER",
         message:
           "Production media requires S3-compatible storage (MEDIA_STORAGE_PROVIDER=s3). Local storage is blocked.",
+        severity: "error",
+      });
+    }
+
+    const agencyStorage = validateAgencyPrivateStorageConfig({ throwOnError: false });
+    for (const message of agencyStorage.issues) {
+      issues.push({
+        key: "AGENCY_PRIVATE_STORAGE_DRIVER",
+        message,
         severity: "error",
       });
     }

@@ -1,5 +1,6 @@
 import type { NavItem, SocialLink } from "@/types";
 import { siteConfig } from "@/lib/site";
+import { AI_AUTOMATION_HUB, aiAutomationPaths } from "@/lib/public/ai-automation-routes";
 
 export type NavLink = {
   label: string;
@@ -12,132 +13,178 @@ export type NavLinkGroup = {
   links: NavLink[];
 };
 
+export type HeaderMenuId =
+  | "mega-services"
+  | "ai-automation"
+  | "solutions"
+  | "work"
+  | "mega-resources"
+  | "company";
+
 export type HeaderTopItem =
-  | { id: "services"; label: string; href: string; menu: "mega-services" }
-  | { id: "solutions"; label: string; href: string; menu: "solutions" }
-  | { id: "work"; label: string; href: string }
-  | { id: "industries"; label: string; href: string; menu: "industries" }
-  | { id: "resources"; label: string; href: string; menu: "mega-resources" }
-  | { id: "about"; label: string; href: string };
+  | {
+      id: string;
+      label: string;
+      href: string;
+      menu: HeaderMenuId;
+    }
+  | {
+      id: string;
+      label: string;
+      href: string;
+    };
 
 /** Curated top-level header IA — mega menus defined separately below. */
 export const headerTopNavigation: HeaderTopItem[] = [
   { id: "services", label: "Services", href: "/services", menu: "mega-services" },
+  {
+    id: "ai-automation",
+    label: "AI & Automation",
+    href: AI_AUTOMATION_HUB,
+    menu: "ai-automation",
+  },
   { id: "solutions", label: "Solutions", href: "/solutions", menu: "solutions" },
-  { id: "work", label: "Work", href: "/work" },
-  { id: "industries", label: "Industries", href: "/industries", menu: "industries" },
+  { id: "work", label: "Work", href: "/work", menu: "work" },
   { id: "resources", label: "Resources", href: "/resources", menu: "mega-resources" },
-  { id: "about", label: "About", href: "/about" },
+  { id: "company", label: "Company", href: "/about", menu: "company" },
 ];
 
 export const servicesMegaMenu: {
-  groups: NavLinkGroup[];
+  links: NavLink[];
   platforms: NavLink[];
   actions: NavLink[];
 } = {
-  groups: [
+  links: [
+    { label: "Web Design", href: "/services/website-design" },
+    { label: "Development", href: "/services/website-development" },
+    { label: "SEO", href: "/seo" },
     {
-      title: "Build",
-      links: [
-        { label: "Website Design", href: "/services/website-design" },
-        { label: "Website Development", href: "/services/website-development" },
-        { label: "Website Redesign", href: "/services/website-redesign" },
-        {
-          label: "E-commerce Development",
-          href: "/services/ecommerce-development",
-        },
-        { label: "Landing Page Design", href: "/services/landing-page-design" },
-      ],
+      label: "Conversion",
+      href: "/services/conversion-rate-optimization",
     },
-    {
-      title: "Grow",
-      links: [
-        { label: "SEO", href: "/seo", description: "Search visibility built into the site" },
-        { label: "Local SEO", href: "/seo/local-seo" },
-        {
-          label: "Conversion Rate Optimization",
-          href: "/services/conversion-rate-optimization",
-        },
-        {
-          label: "Website Performance Optimization",
-          href: "/services/website-performance-optimization",
-        },
-      ],
-    },
-    {
-      title: "Improve",
-      links: [
-        { label: "Website Strategy", href: "/services/website-strategy" },
-        { label: "Website Audit", href: "/services/website-audit" },
-        { label: "Website Migration", href: "/services/website-migration" },
-        { label: "UI/UX Design", href: "/services/ui-ux-design" },
-      ],
-    },
+    { label: "Maintenance", href: "/services/website-maintenance" },
+    { label: "Digital Growth", href: "/services/digital-marketing" },
   ],
   platforms: [
-    { label: "WordPress", href: "/platforms/wordpress" },
-    { label: "Shopify", href: "/platforms/shopify" },
-    { label: "Webflow", href: "/platforms/webflow" },
-    { label: "WooCommerce", href: "/platforms/woocommerce" },
+    {
+      label: "Website & Commerce",
+      href: "/platforms#websites",
+      description: "WordPress, Shopify, Webflow and storefront platforms",
+    },
+    {
+      label: "CRM & Business",
+      href: "/platforms#connected",
+      description: "HubSpot, Salesforce and connected business stacks",
+    },
+    {
+      label: "AI & Automation",
+      href: "/platforms",
+      description: "Platforms for AI-enabled and automated workflows",
+    },
     { label: "View All Platforms", href: "/platforms" },
   ],
-  actions: [
-    { label: "View All Services", href: "/services" },
-    { label: "Pricing & Project Scope", href: "/pricing" },
-  ],
+  actions: [{ label: "View All Services", href: "/services" }],
 };
+
+export const aiAutomationMenu: NavLink[] = [
+  {
+    label: "AI & Automation Overview",
+    href: AI_AUTOMATION_HUB,
+    description: "Practical AI, automation and integrations for business workflows",
+  },
+  {
+    label: "AI Agents",
+    href: aiAutomationPaths["ai-agents"].path,
+    description: "Task-focused assistants with approved information and human handoff",
+  },
+  {
+    label: "Workflow Automation",
+    href: aiAutomationPaths["workflow-automation"].path,
+    description: "Stop moving information manually between tools",
+  },
+  {
+    label: "Voice AI",
+    href: aiAutomationPaths["voice-ai"].path,
+    description: "Professional inbound enquiry and routing workflows",
+  },
+  {
+    label: "CRM & Lead Automation",
+    href: aiAutomationPaths["crm-lead-automation"].path,
+    description: "Capture, qualify, assign and follow up on leads consistently",
+  },
+  {
+    label: "Integrations",
+    href: aiAutomationPaths.integrations.path,
+    description: "Connect websites, CRM, email, messaging and business APIs",
+  },
+  {
+    label: "Custom AI Tools",
+    href: aiAutomationPaths["custom-ai-tools"].path,
+    description: "Focused tools when off-the-shelf software does not fit",
+  },
+];
 
 export const solutionsMenu: NavLink[] = [
   {
-    label: "Website Not Generating Leads",
-    href: "/solutions/website-not-generating-leads",
-    description: "Turn traffic into qualified enquiries",
+    label: "Website Problems",
+    href: "/solutions#website-quality",
+    description: "Slow, outdated or underperforming websites",
   },
   {
-    label: "Website Not Ranking",
-    href: "/solutions/website-not-ranking",
-    description: "Improve search visibility and intent match",
+    label: "Growth Problems",
+    href: "/solutions#visibility",
+    description: "Search visibility and discovery challenges",
   },
   {
-    label: "Slow Website",
-    href: "/solutions/slow-website",
-    description: "Speed, stability and Core Web Vitals",
+    label: "Respond to Leads Faster",
+    href: "/solutions/respond-to-leads-faster",
+    description: "Follow-up is slow or inconsistent after enquiries arrive",
   },
   {
-    label: "Outdated Website",
-    href: "/solutions/outdated-website",
-    description: "Modernise design, UX and credibility",
+    label: "Automate Repetitive Work",
+    href: "/solutions/automate-repetitive-work",
+    description: "Manual copying and routine handoffs between tools",
   },
   {
-    label: "Low Website Conversions",
-    href: "/solutions/low-website-conversions",
-    description: "Clarify offers and conversion paths",
-  },
-  {
-    label: "New Business Website",
-    href: "/solutions/new-business-website",
-    description: "Launch with clear positioning from day one",
-  },
-  {
-    label: "E-commerce Growth",
-    href: "/solutions/ecommerce-growth",
-    description: "Improve product discovery and checkout flow",
-  },
-  {
-    label: "Local Visibility",
-    href: "/solutions/local-business-visibility",
-    description: "Get found by nearby customers",
+    label: "Connect Business Tools",
+    href: "/solutions/connect-business-tools",
+    description: "Systems that should share information but do not",
   },
   { label: "View All Solutions", href: "/solutions" },
 ];
 
-export const industriesMenu: NavLink[] = [
-  { label: "Short-Term Rentals", href: "/industries/short-term-rentals" },
-  { label: "Hospitality", href: "/industries/hospitality" },
-  { label: "Cabin Rentals", href: "/industries/cabin-rentals" },
-  { label: "Real Estate", href: "/industries/real-estate" },
-  { label: "Property Management", href: "/industries/property-management" },
-  { label: "Explore All Industries", href: "/industries" },
+export const workMenu: NavLink[] = [
+  {
+    label: "Websites",
+    href: "/work?capability=websites",
+    description: "Design, development and SEO projects",
+  },
+  {
+    label: "AI",
+    href: "/work?capability=ai",
+    description: "AI products, integrations and intelligent experiences",
+  },
+  {
+    label: "Automation",
+    href: "/work?capability=automation",
+    description: "Workflow automation and connected systems",
+  },
+  { label: "View All Work", href: "/work" },
+];
+
+export const companyMenu: NavLink[] = [
+  { label: "About", href: "/about", description: "Who we are and how we think" },
+  {
+    label: "How We Work",
+    href: "/how-we-work",
+    description: "Our structured client journey",
+  },
+  { label: "Contact", href: "/contact", description: "Tell us about your project" },
+  {
+    label: "Pricing",
+    href: "/pricing",
+    description: "Project scope and pricing guidance",
+  },
 ];
 
 export const resourcesMegaMenu: {
@@ -146,27 +193,19 @@ export const resourcesMegaMenu: {
 } = {
   groups: [
     {
+      title: "Free Tools",
+      links: [
+        { label: "Free Website Review", href: "/free-website-review" },
+        { label: "Website Brief Builder", href: "/website-brief" },
+        { label: "Project Planner", href: "/project-planner" },
+      ],
+    },
+    {
       title: "Learn",
       links: [
-        { label: "Insights", href: "/blog" },
         { label: "Guides", href: "/guides" },
+        { label: "Insights", href: "/blog" },
         { label: "Glossary", href: "/glossary" },
-      ],
-    },
-    {
-      title: "Make decisions",
-      links: [
-        { label: "Comparisons", href: "/compare" },
-        {
-          label: "Website Platform Selector",
-          href: "/tools/website-platform-selector",
-        },
-      ],
-    },
-    {
-      title: "Get things done",
-      links: [
-        { label: "Checklists", href: "/checklists" },
         { label: "Templates", href: "/templates" },
       ],
     },
@@ -174,38 +213,32 @@ export const resourcesMegaMenu: {
   footerLink: { label: "Explore All Resources", href: "/resources" },
 };
 
-/** Flattened mobile Services accordion (one level). */
+/** Flattened mobile Services accordion. */
 export const mobileServicesLinks: NavLink[] = [
-  { label: "Website Design", href: "/services/website-design" },
-  { label: "Website Development", href: "/services/website-development" },
-  { label: "Website Redesign", href: "/services/website-redesign" },
-  { label: "SEO", href: "/seo" },
-  { label: "E-commerce Development", href: "/services/ecommerce-development" },
-  {
-    label: "Conversion Rate Optimization",
-    href: "/services/conversion-rate-optimization",
-  },
+  ...servicesMegaMenu.links,
   { label: "View All Services", href: "/services" },
-  { label: "View All Platforms", href: "/platforms" },
+  ...servicesMegaMenu.platforms,
+];
+
+export const mobileAiAutomationLinks: NavLink[] = [
+  { label: "Overview", href: AI_AUTOMATION_HUB },
+  { label: "AI Agents", href: aiAutomationPaths["ai-agents"].path },
+  { label: "Workflow Automation", href: aiAutomationPaths["workflow-automation"].path },
+  { label: "Voice AI", href: aiAutomationPaths["voice-ai"].path },
+  { label: "CRM & Lead Automation", href: aiAutomationPaths["crm-lead-automation"].path },
+  { label: "Integrations", href: aiAutomationPaths.integrations.path },
 ];
 
 export const mobileResourcesLinks: NavLink[] = [
-  { label: "Insights", href: "/blog" },
-  { label: "Guides", href: "/guides" },
-  { label: "Comparisons", href: "/compare" },
+  ...resourcesMegaMenu.groups.flatMap((group) => group.links),
+  resourcesMegaMenu.footerLink,
   { label: "Checklists", href: "/checklists" },
-  { label: "Glossary", href: "/glossary" },
-  { label: "Templates", href: "/templates" },
-  {
-    label: "Website Platform Selector",
-    href: "/tools/website-platform-selector",
-  },
-  { label: "All Resources", href: "/resources" },
+  { label: "All Free Tools", href: "/free-tools" },
 ];
 
 export const mobileUtilityLinks: NavLink[] = [
   { label: "Project Planner", href: "/project-planner" },
-  { label: "Pricing & Project Scope", href: "/pricing" },
+  { label: "Pricing", href: "/pricing" },
   { label: "Contact", href: "/contact" },
 ];
 
@@ -228,52 +261,56 @@ export const mainNavigation: NavItem[] = headerTopNavigation.map((item) => ({
 
 export const footerNavigation = {
   services: [
-    { label: "Website Design", href: "/services/website-design" },
-    { label: "Website Development", href: "/services/website-development" },
-    { label: "Website Redesign", href: "/services/website-redesign" },
+    { label: "Web Design", href: "/services/website-design" },
+    { label: "Development", href: "/services/website-development" },
     { label: "SEO", href: "/seo" },
-    { label: "E-commerce Development", href: "/services/ecommerce-development" },
-    {
-      label: "Conversion Rate Optimization",
-      href: "/services/conversion-rate-optimization",
-    },
-    {
-      label: "Website Performance Optimization",
-      href: "/services/website-performance-optimization",
-    },
+    { label: "Conversion", href: "/services/conversion-rate-optimization" },
+    { label: "Maintenance", href: "/services/website-maintenance" },
+    { label: "Digital Growth", href: "/services/digital-marketing" },
     { label: "View All Services", href: "/services" },
   ],
+  aiAutomation: [
+    { label: "Overview", href: AI_AUTOMATION_HUB },
+    { label: "AI Agents", href: aiAutomationPaths["ai-agents"].path },
+    { label: "Workflow Automation", href: aiAutomationPaths["workflow-automation"].path },
+    { label: "Voice AI", href: aiAutomationPaths["voice-ai"].path },
+    { label: "CRM & Lead Automation", href: aiAutomationPaths["crm-lead-automation"].path },
+    { label: "Integrations", href: aiAutomationPaths.integrations.path },
+    { label: "Custom AI Tools", href: aiAutomationPaths["custom-ai-tools"].path },
+  ],
   solutions: [
-    {
-      label: "Website Not Generating Leads",
-      href: "/solutions/website-not-generating-leads",
-    },
-    { label: "Website Not Ranking", href: "/solutions/website-not-ranking" },
-    { label: "Slow Website", href: "/solutions/slow-website" },
-    { label: "Outdated Website", href: "/solutions/outdated-website" },
-    {
-      label: "Low Website Conversions",
-      href: "/solutions/low-website-conversions",
-    },
+    { label: "Website Problems", href: "/solutions#website-quality" },
+    { label: "Respond to Leads Faster", href: "/solutions/respond-to-leads-faster" },
+    { label: "Automate Repetitive Work", href: "/solutions/automate-repetitive-work" },
+    { label: "Connect Business Tools", href: "/solutions/connect-business-tools" },
     { label: "View All Solutions", href: "/solutions" },
   ],
-  explore: [
-    { label: "Work", href: "/work" },
-    { label: "Industries", href: "/industries" },
-    { label: "Platforms", href: "/platforms" },
-    { label: "Pricing & Project Scope", href: "/pricing" },
-    { label: "Project Planner", href: "/project-planner" },
+  work: [
+    { label: "Websites", href: "/work?capability=websites" },
+    { label: "AI", href: "/work?capability=ai" },
+    { label: "Automation", href: "/work?capability=automation" },
+    { label: "View All Work", href: "/work" },
+  ],
+  platforms: [
+    { label: "Website & Commerce", href: "/platforms#websites" },
+    { label: "CRM & Business", href: "/platforms#connected" },
+    { label: "View All Platforms", href: "/platforms" },
+  ],
+  company: [
     { label: "About", href: "/about" },
+    { label: "How We Work", href: "/how-we-work" },
     { label: "Contact", href: "/contact" },
+    { label: "Pricing", href: "/pricing" },
   ],
   resources: [
-    { label: "Insights", href: "/blog" },
+    { label: "Free Website Review", href: "/free-website-review" },
+    { label: "Website Brief Builder", href: "/website-brief" },
+    { label: "Project Planner", href: "/project-planner" },
+    { label: "Free Tools", href: "/free-tools" },
     { label: "Guides", href: "/guides" },
-    { label: "Comparisons", href: "/compare" },
-    { label: "Checklists", href: "/checklists" },
+    { label: "Insights", href: "/blog" },
     { label: "Glossary", href: "/glossary" },
     { label: "Templates", href: "/templates" },
-    { label: "Tools", href: "/tools" },
   ],
   legal: [
     { label: "Privacy Policy", href: "/legal/privacy-statement" },
@@ -323,9 +360,10 @@ export const companyDetails = {
   socialLinks,
 };
 
-/** @deprecated Use servicesMegaMenu — kept for any legacy imports during transition */
+/** @deprecated Use servicesMegaMenu — kept for legacy imports during transition */
 export const desktopResourceNavGroups = resourcesMegaMenu.groups;
 export const mobileResourceNavGroups = resourcesMegaMenu.groups;
 export const desktopPlatformNavGroups: NavLinkGroup[] = [];
 export const mobileServiceNavGroups: NavLinkGroup[] = [];
 export const mobilePlatformNavGroups: NavLinkGroup[] = [];
+export const industriesMenu: NavLink[] = [];

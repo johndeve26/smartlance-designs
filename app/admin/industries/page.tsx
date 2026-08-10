@@ -2,6 +2,8 @@ import { requireAdminUser, userCan } from "@/lib/admin/session";
 import { listAllIndustriesAdmin } from "@/lib/repositories/industriesRepository";
 import { ContentBulkTable } from "@/components/admin/ContentBulkTable";
 import { createIndustryDraftAction } from "@/lib/admin/bulk-content-actions";
+import { AdminListPage } from "@/components/admin/patterns/AdminListPage";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -12,27 +14,31 @@ export default async function AdminIndustriesPage() {
   const items = await listAllIndustriesAdmin();
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold">Industries</h1>
-          <p className="mt-1 text-sm text-neutral-600">
-            Hub-only catalogue. Verified experience requires related Work.
-          </p>
-        </div>
-        {canEdit ? (
+    <AdminListPage
+      title="Industries"
+      description="Industry hub catalogue. Verified experience requires related Work."
+      action={
+        canEdit ? (
           <form action={createIndustryDraftAction}>
-            <button type="submit" className="admin-btn-primary">
+            <Button type="submit" size="sm">
               New industry
-            </button>
+            </Button>
           </form>
-        ) : null}
-      </div>
-
+        ) : undefined
+      }
+      isEmpty={items.length === 0}
+      empty={{
+        title: "No industries yet",
+        action: canEdit ? (
+          <form action={createIndustryDraftAction}>
+            <Button type="submit">Create first industry</Button>
+          </form>
+        ) : undefined,
+      }}
+    >
       <ContentBulkTable
         family="industry"
         canPublish={canPublish}
-        emptyMessage="No industries yet."
         columns={[
           { key: "title", header: "Name", isTitle: true },
           { key: "group", header: "Group" },
@@ -52,6 +58,6 @@ export default async function AdminIndustriesPage() {
           },
         }))}
       />
-    </div>
+    </AdminListPage>
   );
 }

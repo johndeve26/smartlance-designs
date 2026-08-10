@@ -5,6 +5,8 @@ import { can } from "@/lib/admin/rbac";
 import { getMediaAsset } from "@/lib/repositories/mediaRepository";
 import { findMediaUsages } from "@/lib/media/usage";
 import { MediaDetailActions } from "@/components/admin/media/MediaDetailActions";
+import { AdminPanel } from "@/components/admin/patterns/AdminPanel";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const dynamic = "force-dynamic";
 
@@ -22,53 +24,61 @@ export default async function AdminMediaDetailPage({
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <Link href="/admin/media" className="text-sm text-neutral-600 hover:underline">
-        ← Media library
-      </Link>
+      <PageHeader
+        title={asset.title || asset.filename}
+        breadcrumbs={
+          <Link href="/admin/media" className="text-accent-text hover:underline">
+            ← Media library
+          </Link>
+        }
+        description={
+          <span className="break-all font-mono text-xs">{asset.publicUrl}</span>
+        }
+      />
+
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="overflow-hidden rounded-lg border bg-white">
+        <AdminPanel flush className="overflow-hidden p-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={asset.publicUrl}
             alt={asset.altText || ""}
             className="w-full object-contain"
           />
-        </div>
+        </AdminPanel>
+
         <div className="space-y-4">
-          <div>
-            <h1 className="text-xl font-semibold">{asset.title || asset.filename}</h1>
-            <p className="mt-1 text-sm text-neutral-500 break-all">{asset.publicUrl}</p>
-          </div>
-          <dl className="grid grid-cols-2 gap-3 text-sm">
-            <div>
-              <dt className="text-neutral-500">Type</dt>
-              <dd>{asset.mimeType}</dd>
-            </div>
-            <div>
-              <dt className="text-neutral-500">Size</dt>
-              <dd>{Math.round(asset.byteSize / 1024)} KB</dd>
-            </div>
-            <div>
-              <dt className="text-neutral-500">Dimensions</dt>
-              <dd>
-                {asset.width && asset.height
-                  ? `${asset.width}×${asset.height}`
-                  : "—"}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-neutral-500">Source</dt>
-              <dd>{asset.sourceType}</dd>
-            </div>
-            <div>
-              <dt className="text-neutral-500">Status</dt>
-              <dd>{asset.status}</dd>
-            </div>
-            <div>
-              <dt className="text-neutral-500">Created</dt>
-              <dd>{asset.createdAt.toISOString().slice(0, 10)}</dd>
-            </div>
-          </dl>
+          <AdminPanel>
+            <dl className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <dt className="text-muted">Type</dt>
+                <dd>{asset.mimeType}</dd>
+              </div>
+              <div>
+                <dt className="text-muted">Size</dt>
+                <dd>{Math.round(asset.byteSize / 1024)} KB</dd>
+              </div>
+              <div>
+                <dt className="text-muted">Dimensions</dt>
+                <dd>
+                  {asset.width && asset.height
+                    ? `${asset.width}×${asset.height}`
+                    : "—"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-muted">Source</dt>
+                <dd>{asset.sourceType}</dd>
+              </div>
+              <div>
+                <dt className="text-muted">Status</dt>
+                <dd>{asset.status}</dd>
+              </div>
+              <div>
+                <dt className="text-muted">Created</dt>
+                <dd>{asset.createdAt.toISOString().slice(0, 10)}</dd>
+              </div>
+            </dl>
+          </AdminPanel>
 
           <MediaDetailActions
             asset={{
@@ -83,24 +93,24 @@ export default async function AdminMediaDetailPage({
             publishedUsageCount={publishedUsages.length}
           />
 
-          <section>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
+          <AdminPanel>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">
               Usage ({usages.length})
             </h2>
             {usages.length === 0 ? (
-              <p className="mt-2 text-sm text-neutral-600">Not referenced.</p>
+              <p className="mt-2 text-sm text-muted">Not referenced.</p>
             ) : (
               <ul className="mt-2 space-y-1 text-sm">
                 {usages.map((u) => (
                   <li key={`${u.entityType}-${u.entityId}-${u.field}`}>
                     {u.href ? (
-                      <Link href={u.href} className="text-[#F47A48] hover:underline">
+                      <Link href={u.href} className="text-accent-text hover:underline">
                         {u.label}
                       </Link>
                     ) : (
                       u.label
                     )}{" "}
-                    <span className="text-neutral-500">
+                    <span className="text-muted">
                       ({u.field}
                       {u.published ? ", published" : ""})
                     </span>
@@ -109,13 +119,13 @@ export default async function AdminMediaDetailPage({
               </ul>
             )}
             {publishedUsages.length > 0 ? (
-              <p className="mt-2 text-sm text-amber-800">
+              <p className="mt-2 text-sm text-warning-text">
                 This asset is currently used by {publishedUsages.length} published
                 record(s). Permanent deletion is blocked unless forced by Super
                 Admin.
               </p>
             ) : null}
-          </section>
+          </AdminPanel>
         </div>
       </div>
     </div>

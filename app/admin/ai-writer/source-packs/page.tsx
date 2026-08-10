@@ -2,6 +2,8 @@ import Link from "next/link";
 import { requireAdminUser } from "@/lib/admin/session";
 import { prisma } from "@/lib/db";
 import { AIWriterSubnav } from "@/components/admin/ai-writer/AIWriterSubnav";
+import { PageHeader } from "@/components/ui/page-header";
+import { AdminPanel } from "@/components/admin/patterns/AdminPanel";
 import {
   ensureDiscoveryDefaultsAction,
   saveSourcePackAction,
@@ -27,20 +29,20 @@ export default async function SourcePacksPage({
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 pb-10">
-      <header className="space-y-3">
-        <nav className="text-sm text-neutral-500">
-          <Link href="/admin/ai-writer/discover" className="hover:text-neutral-800">
-            Topic Discovery
-          </Link>
-          <span className="mx-1.5">/</span>
-          <span className="text-neutral-800">Source Packs</span>
-        </nav>
-        <h1 className="text-2xl font-semibold">Source Packs</h1>
-        <p className="text-sm text-neutral-600">
-          Trusted places to watch for a topic or industry. Feeds are validated safely (SSRF-safe).
-        </p>
-        <AIWriterSubnav current="/admin/ai-writer/discover" />
-      </header>
+      <PageHeader
+        title="Source Packs"
+        description="Trusted places to watch for a topic or industry. Feeds are validated safely (SSRF-safe)."
+        breadcrumbs={
+          <nav className="text-sm text-muted">
+            <Link href="/admin/ai-writer/discover" className="hover:text-foreground">
+              Topic Discovery
+            </Link>
+            <span className="mx-1.5">/</span>
+            <span className="text-foreground">Source Packs</span>
+          </nav>
+        }
+      />
+      <AIWriterSubnav current="/admin/ai-writer/discover" />
 
       {tested ? (
         <p className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm">

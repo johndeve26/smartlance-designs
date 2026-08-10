@@ -1,0 +1,277 @@
+// Append to schema.prisma — Agency Proposals V2
+
+enum AgencyProposalStatus {
+  DRAFT
+  INTERNAL_REVIEW
+  SENT
+  CHANGES_REQUESTED
+  ACCEPTED
+  DECLINED
+  EXPIRED
+  ARCHIVED
+}
+
+enum AgencyProposalLineItemType {
+  SERVICE
+  ADD_ON
+  DISCOUNT
+  OTHER
+}
+
+enum AgencyProposalClientRole {
+  VIEWER
+  DECISION_MAKER
+}
+
+enum AgencyProposalClientResponseType {
+  CHANGES_REQUESTED
+  DECLINED
+}
+
+enum AgencyProposalActivityType {
+  PROPOSAL_CREATED
+  VERSION_CREATED
+  SENT
+  VIEWED
+  CHANGES_REQUESTED
+  DECLINED
+  ACCEPTED
+  PROJECT_CREATED
+}
+
+enum AgencyProposalSectionType {
+  OVERVIEW
+  GOALS
+  SCOPE
+  DELIVERABLES
+  TIMELINE
+  PRICING
+  ASSUMPTIONS
+  EXCLUSIONS
+  REVISION_POLICY
+  NEXT_STEPS
+  CLIENT_RESPONSIBILITIES
+}
+
+model AgencyProposalCounter {
+  year       Int      @id
+  lastNumber Int      @default(0)
+  updatedAt  DateTime @updatedAt
+}
+
+model AgencyProposal {
+  id                String               @id @default(cuid())
+  proposalNumber    String               @unique
+  dealId            String?
+  companyId         String?
+  primaryContactId  String
+  title             String
+  summary           String?              @db.Text
+  status            AgencyProposalStatus @default(DRAFT)
+  currency          String               @default("USD")
+  currentVersionId  String?
+  acceptedVersionId String?
+  ownerId           String
+  createdById       String
+  internalNotes     String?              @db.Text
+  sentAt            DateTime?
+  acceptedAt        DateTime?
+  declinedAt        DateTime?
+  expiresAt         DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  deal           CrmDeal?    @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  company        CrmCompany? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  primaryContact CrmContact  @relation(fields: [primaryContactId], references: [id], onDelete: Restrict)
+  owner          AdminUser   @relation("AgencyProposalOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  createdBy      AdminUser   @relation("AgencyProposalCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  versions    AgencyProposalVersion[]
+  clientAccess AgencyProposalClientAccess[]
+  responses   AgencyProposalClientResponse[]
+  acceptance  AgencyProposalAcceptance?
+  activities  AgencyProposalActivity[]
+  project     AgencyProject?
+
+  @@index([status, updatedAt])
+  @@index([ownerId, status])
+  @@index([dealId])
+  @@index([companyId])
+  @@index([primaryContactId])
+}
+
+model AgencyProposalVersion {
+  id               String    @id @default(cuid())
+  proposalId       String
+  versionNumber    Int
+  title            String
+  intro            String?   @db.Text
+  scopeSummary     String?   @db.Text
+  timelineSummary  String?   @db.Text
+  estimatedStart   DateTime?
+  estimatedDuration String?
+  pricingSubtotal  Decimal   @db.Decimal(12, 2)
+  discountAmount   Decimal?  @db.Decimal(12, 2)
+  taxAmount        Decimal?  @db.Decimal(12, 2)
+  totalAmount      Decimal   @db.Decimal(12, 2)
+  currency         String    @default("USD")
+  assumptionsText  String?   @db.Text
+  exclusionsText   String?   @db.Text
+  termsSummary     String?   @db.Text
+  revisionPolicy   String?   @db.Text
+  validUntil       DateTime?
+  createdById      String
+  createdAt        DateTime  @default(now())
+  publishedAt      DateTime?
+
+  proposal     AgencyProposal              @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  createdBy    AdminUser                   @relation("AgencyProposalVersionCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  sections     AgencyProposalSection[]
+  scopeItems   AgencyProposalScopeItem[]
+  deliverables AgencyProposalDeliverableItem[]
+  lineItems    AgencyProposalLineItem[]
+  responses    AgencyProposalClientResponse[]
+
+  @@unique([proposalId, versionNumber])
+  @@index([proposalId])
+}
+
+model AgencyProposalSection {
+  id                String                  @id @default(cuid())
+  proposalVersionId String
+  sectionType       AgencyProposalSectionType
+  title             String
+  body              String?                 @db.Text
+  position          Int
+
+  version AgencyProposalVersion @relation(fields: [proposalVersionId], references: [id], onDelete: Cascade)
+
+  @@index([proposalVersionId, position])
+}
+
+model AgencyProposalScopeItem {
+  id                String  @id @default(cuid())
+  proposalVersionId String
+  title             String
+  description       String? @db.Text
+  position          Int
+  included          Boolean @default(true)
+  clientVisible     Boolean @default(true)
+
+  version AgencyProposalVersion @relation(fields: [proposalVersionId], references: [id], onDelete: Cascade)
+
+  @@index([proposalVersionId, position])
+}
+
+model AgencyProposalDeliverableItem {
+  id                String  @id @default(cuid())
+  proposalVersionId String
+  title             String
+  description       String? @db.Text
+  quantity          Int     @default(1)
+  position          Int
+
+  version AgencyProposalVersion @relation(fields: [proposalVersionId], references: [id], onDelete: Cascade)
+
+  @@index([proposalVersionId, position])
+}
+
+model AgencyProposalLineItem {
+  id                   String                     @id @default(cuid())
+  proposalVersionId    String
+  name                 String
+  description          String?                    @db.Text
+  quantity             Decimal                    @db.Decimal(10, 2)
+  unitPrice            Decimal                    @db.Decimal(12, 2)
+  amount               Decimal                    @db.Decimal(12, 2)
+  position             Int
+  type                 AgencyProposalLineItemType @default(SERVICE)
+  isOptional           Boolean                    @default(false)
+  isSelectedByDefault  Boolean                    @default(false)
+
+  version AgencyProposalVersion @relation(fields: [proposalVersionId], references: [id], onDelete: Cascade)
+
+  @@index([proposalVersionId, position])
+}
+
+model AgencyProposalClientAccess {
+  id           String                 @id @default(cuid())
+  proposalId   String
+  contactId    String
+  portalUserId String?
+  role         AgencyProposalClientRole @default(VIEWER)
+  grantedAt    DateTime               @default(now())
+  revokedAt    DateTime?
+  grantedById  String
+  firstViewedAt DateTime?
+  lastViewedAt  DateTime?
+
+  proposal   AgencyProposal    @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  contact    CrmContact        @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  portalUser ClientPortalUser? @relation(fields: [portalUserId], references: [id], onDelete: SetNull)
+  grantedBy  AdminUser         @relation("AgencyProposalAccessGranter", fields: [grantedById], references: [id], onDelete: Restrict)
+
+  @@unique([proposalId, contactId])
+  @@index([portalUserId, proposalId])
+  @@index([contactId])
+}
+
+model AgencyProposalClientResponse {
+  id               String                           @id @default(cuid())
+  proposalId       String
+  versionId        String
+  portalUserId     String
+  contactId        String
+  responseType     AgencyProposalClientResponseType
+  comment          String?                          @db.Text
+  createdAt        DateTime                         @default(now())
+
+  proposal   AgencyProposal        @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  version    AgencyProposalVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  portalUser ClientPortalUser      @relation(fields: [portalUserId], references: [id], onDelete: Restrict)
+  contact    CrmContact            @relation(fields: [contactId], references: [id], onDelete: Restrict)
+
+  @@index([proposalId, createdAt])
+}
+
+model AgencyProposalAcceptance {
+  id                     String   @id @default(cuid())
+  proposalId             String   @unique
+  acceptedVersionId      String
+  portalUserId           String
+  contactId              String
+  acceptedAt             DateTime @default(now())
+  acceptedTotal          Decimal  @db.Decimal(12, 2)
+  currency               String
+  selectedOptionalItemIds Json
+  scopeHash              String?
+  termsAcknowledged      Boolean  @default(true)
+
+  proposal   AgencyProposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  portalUser ClientPortalUser @relation(fields: [portalUserId], references: [id], onDelete: Restrict)
+  contact    CrmContact     @relation(fields: [contactId], references: [id], onDelete: Restrict)
+  project    AgencyProject?
+
+  @@index([acceptedVersionId])
+}
+
+model AgencyProposalActivity {
+  id                String                   @id @default(cuid())
+  proposalId        String
+  type              AgencyProposalActivityType
+  summary           String
+  actorUserId       String?
+  actorPortalUserId String?
+  entityType        String?
+  entityId          String?
+  metadata          Json?
+  clientVisible     Boolean                  @default(false)
+  createdAt         DateTime                 @default(now())
+
+  proposal        AgencyProposal    @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  actorUser       AdminUser?        @relation("AgencyProposalActivityAdmin", fields: [actorUserId], references: [id], onDelete: SetNull)
+  actorPortalUser ClientPortalUser? @relation(fields: [actorPortalUserId], references: [id], onDelete: SetNull)
+
+  @@index([proposalId, createdAt])
+}

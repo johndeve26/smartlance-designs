@@ -11,6 +11,7 @@ import {
   deliverFormSubmission,
   formDeliveryConfigured,
 } from "@/lib/forms";
+import { tryOptionalAudienceSubscribe } from "@/lib/audience/service";
 import type { ContactFormValues, WebsiteReviewValues } from "@/lib/validations";
 import { getPublicSettings } from "@/lib/repositories/siteSettingsRepository";
 
@@ -221,8 +222,9 @@ async function attemptNotification(input: {
 }
 
 export async function submitContactEnquiry(input: {
-  data: Omit<ContactFormValues, "_gotcha">;
+  data: Omit<ContactFormValues, "_gotcha" | "subscribeToUpdates">;
   sourcePath?: string;
+  subscribeToUpdates?: boolean;
 }): Promise<SubmitResult> {
   if (!hasDatabaseUrl()) {
     return {
@@ -294,6 +296,27 @@ export async function submitContactEnquiry(input: {
     },
   });
 
+  await tryOptionalAudienceSubscribe({
+    name: input.data.name,
+    email: input.data.email,
+    source: "CONTACT",
+    sourceUrl: input.sourcePath || "/contact",
+    optedIn: Boolean(input.subscribeToUpdates),
+  });
+
+  const { tryIntegrateEnquiryWithCrm } = await import("@/lib/crm/enquiry-integration");
+  void tryIntegrateEnquiryWithCrm({
+    enquiryId: enquiry.id,
+    reference,
+    type: "CONTACT",
+    name: input.data.name,
+    email: input.data.email,
+    company: input.data.company,
+    website: input.data.website,
+    service: input.data.service,
+    sourcePath: input.sourcePath || "/contact",
+  });
+
   return {
     ok: true,
     code: "RECEIVED",
@@ -303,8 +326,9 @@ export async function submitContactEnquiry(input: {
 }
 
 export async function submitWebsiteReviewEnquiry(input: {
-  data: Omit<WebsiteReviewValues, "_gotcha">;
+  data: Omit<WebsiteReviewValues, "_gotcha" | "subscribeToUpdates">;
   sourcePath?: string;
+  subscribeToUpdates?: boolean;
 }): Promise<SubmitResult> {
   if (!hasDatabaseUrl()) {
     return {
@@ -364,6 +388,26 @@ export async function submitWebsiteReviewEnquiry(input: {
       website: input.data.website,
       mainConcern: input.data.mainConcern,
     },
+  });
+
+  await tryOptionalAudienceSubscribe({
+    name: input.data.name,
+    email: input.data.email,
+    source: "WEBSITE_REVIEW",
+    sourceUrl: input.sourcePath || "/free-website-review",
+    optedIn: Boolean(input.subscribeToUpdates),
+  });
+
+  const { tryIntegrateEnquiryWithCrm } = await import("@/lib/crm/enquiry-integration");
+  void tryIntegrateEnquiryWithCrm({
+    enquiryId: enquiry.id,
+    reference,
+    type: "WEBSITE_REVIEW",
+    name: input.data.name,
+    email: input.data.email,
+    website: input.data.website,
+    mainConcern: input.data.mainConcern,
+    sourcePath: input.sourcePath || "/free-website-review",
   });
 
   return {

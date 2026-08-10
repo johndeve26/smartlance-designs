@@ -1,22 +1,17 @@
 import Link from "next/link";
 import { requireAdminUser } from "@/lib/admin/session";
 import { can } from "@/lib/admin/rbac";
-import { countInsightsByStatus } from "@/lib/repositories/insightsRepository";
-import { countWorkByStatus } from "@/lib/repositories/workRepository";
-import { countServicesByStatus } from "@/lib/repositories/servicesRepository";
-import { listAuditLogs } from "@/lib/repositories/auditRepository";
 import { hasDatabaseUrl } from "@/lib/db";
-import { countMediaByStatus } from "@/lib/repositories/mediaRepository";
-import { getSystemStatus } from "@/lib/ops/system-status";
+import { getAdminDashboardHome } from "@/lib/admin/dashboard-home";
 import {
-  countNewEnquiries,
-  countNotificationFailures,
-  listEnquiries,
-} from "@/lib/enquiries/service";
-import { formDeliveryConfigured } from "@/lib/forms";
-import { getPublicSettings } from "@/lib/repositories/siteSettingsRepository";
-import { getAIWriterDashboard } from "@/lib/ai/editorial-service";
-import { runContentQualityAudit } from "@/lib/ops/content-quality-audit";
+  AdminAttentionList,
+  AdminSection,
+  AdminStatGrid,
+} from "@/components/admin/patterns/AdminDashboardPanels";
+import { PageHeader } from "@/components/ui/page-header";
+import { AGENCY_PROJECT_STATUS_LABELS } from "@/lib/agency/constants";
+import { CRM_DEAL_STAGE_LABELS } from "@/lib/crm/constants";
+import { formatRelativeTime } from "@/lib/ui/format";
 
 export const dynamic = "force-dynamic";
 
@@ -26,226 +21,129 @@ export default async function AdminDashboardPage() {
   if (!hasDatabaseUrl()) {
     return (
       <div>
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
-        <p className="mt-2 text-sm text-neutral-600">
-          DATABASE_URL is not configured.
-        </p>
+        <PageHeader title="Dashboard" description="DATABASE_URL is not configured." />
       </div>
     );
   }
 
-  const canViewEnquiries = can(user.role, "view_enquiries");
-  const canUseAiWriter = can(user.role, "use_ai_writer");
-  const canManageAiSettings = can(user.role, "manage_ai_settings");
-  const canEditDraft = can(user.role, "edit_draft");
-  const canRunLinkHealth = can(user.role, "run_link_health");
+  const canViewCrm = can(user.role, "view_crm");
+  const canViewProjects = can(user.role, "view_projects");
+  const canViewBilling = can(user.role, "view_billing");
 
-  const [
-    services,
-    work,
-    insights,
-    audit,
-    media,
-    system,
-    newEnquiries,
-    deliveryFailures,
-    settings,
-    recentEnquiries,
-    aiDash,
-    contentAudit,
-    emailDeliveryConfigured,
-  ] = await Promise.all([
-    countServicesByStatus(),
-    countWorkByStatus(),
-    countInsightsByStatus(),
-    listAuditLogs({ limit: 12 }),
-    countMediaByStatus(),
-    getSystemStatus(),
-    canViewEnquiries
-      ? countNewEnquiries()
-      : Promise.resolve({ contact: 0, review: 0, total: 0 }),
-    canViewEnquiries ? countNotificationFailures(24) : Promise.resolve(0),
-    getPublicSettings(),
-    canViewEnquiries
-      ? listEnquiries({ pageSize: 5, includeSpam: false })
-      : Promise.resolve({ items: [], total: 0, page: 1, pageSize: 5 }),
-    canUseAiWriter ? getAIWriterDashboard() : Promise.resolve(null),
-    canEditDraft ? runContentQualityAudit() : Promise.resolve(null),
-    formDeliveryConfigured(),
-  ]);
+  const home = await getAdminDashboardHome();
 
-  const cards = [
-    { label: "Services published", value: services.PUBLISHED },
-    { label: "Work published", value: work.PUBLISHED },
-    { label: "Insights published", value: insights.PUBLISHED },
-    { label: "Media assets", value: media.total },
-    ...(canViewEnquiries
-      ? [
-          { label: "New contact enquiries", value: newEnquiries.contact },
-          { label: "New review requests", value: newEnquiries.review },
-          { label: "Delivery failures (24h)", value: deliveryFailures },
-        ]
-      : []),
-    ...(canUseAiWriter && aiDash
-      ? [
-          { label: "AI needs review", value: aiDash.needsReview },
-          { label: "AI drafting", value: aiDash.drafting },
-        ]
-      : []),
-    ...(canEditDraft && contentAudit
-      ? [
-          {
-            label: "Content audit — high priority",
-            value: contentAudit.summary.highPriority,
-          },
-        ]
-      : []),
-    { label: "Environment", value: system.environment },
-  ];
+  const filteredAttention = home.attention.filter((item) => {
+    if (item.id === "inbox" || item.id === "proposals") return canViewCrm || can(user.role, "view_proposals");
+    if (item.id === "contracts") return can(user.role, "view_contracts");
+    if (item.id === "invoices") return canViewBilling;
+    if (item.id === "projects-client" || item.id === "onboarding") return canViewProjects;
+    if (item.id === "support") return can(user.role, "view_support");
+    return true;
+  });
 
-  const aiLinks = [
-    ...(canUseAiWriter
-      ? ([
-          ["/admin/ai-writer", "AI Editorial Studio"],
-          ["/admin/ai-writer/discover", "Topic discovery"],
-          ["/admin/ai-writer/new", "New AI project"],
-        ] as const)
-      : []),
-    ...(canManageAiSettings
-      ? ([["/admin/ai-writer/settings", "AI Writer settings"]] as const)
-      : []),
-    ...(canEditDraft
-      ? ([["/admin/content-audit", "Content quality audit"]] as const)
-      : []),
-  ];
-
-  const operationsLinks = [
-    ...(canViewEnquiries ? ([["/admin/enquiries", "Enquiries"]] as const) : []),
-    ["/admin/media", "Media library"],
-    ["/admin/navigation", "Navigation"],
-    ["/admin/seo", "SEO health"],
-    ...(canRunLinkHealth ? ([["/admin/link-health", "Link health"]] as const) : []),
-    ["/admin/settings", "Site settings"],
-    ["/admin/system", "System status"],
-  ] as const;
+  const filteredStats = home.stats.filter((stat) => {
+    if (stat.label === "Open leads") return canViewCrm;
+    if (stat.label === "Active projects") return canViewProjects;
+    if (stat.label === "Overdue invoices") return canViewBilling;
+    if (stat.label === "Open support") return can(user.role, "view_support");
+    return true;
+  });
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-neutral-900">Dashboard</h1>
-        <p className="mt-1 text-sm text-neutral-600">
-          Content, operations, and enquiry overview.
-        </p>
-      </div>
+    <div className="mx-auto max-w-6xl space-y-8">
+      <PageHeader
+        title="Dashboard"
+        description="What needs attention across sales, delivery, and billing."
+      />
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {cards.map((card) => (
-          <div
-            key={card.label}
-            className="rounded-lg border border-neutral-200 bg-white p-4"
-          >
-            <div className="text-2xl font-semibold text-neutral-900">
-              {card.value}
-            </div>
-            <div className="mt-1 text-xs font-medium uppercase tracking-wide text-neutral-500">
-              {card.label}
-            </div>
-          </div>
-        ))}
-      </div>
+      <AdminSection title="Needs attention">
+        <AdminAttentionList items={filteredAttention} />
+      </AdminSection>
 
-      <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
-        {aiLinks.length > 0 ? (
-          <section className="rounded-lg border border-neutral-200 bg-white p-4">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
-              AI &amp; content
-            </h2>
-            <ul className="mt-3 space-y-2 text-sm">
-              {aiLinks.map(([href, label]) => (
-                <li key={href}>
-                  <Link className="text-[#F47A48] hover:underline" href={href}>
-                    {label}
-                  </Link>
-                </li>
+      {filteredStats.length > 0 ? (
+        <AdminSection title="At a glance">
+          <AdminStatGrid stats={filteredStats} />
+        </AdminSection>
+      ) : null}
+
+      {canViewCrm && home.pipeline.length > 0 ? (
+        <AdminSection title="Sales pipeline" description="Open deals by stage">
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {home.pipeline
+              .filter((p) => p.count > 0)
+              .slice(0, 6)
+              .map((stage) => (
+                <div
+                  key={stage.stage}
+                  className="rounded-lg border border-border bg-surface px-4 py-3"
+                >
+                  <p className="text-sm font-medium text-foreground">
+                    {CRM_DEAL_STAGE_LABELS[stage.stage as keyof typeof CRM_DEAL_STAGE_LABELS] ??
+                      stage.stage}
+                  </p>
+                  <p className="mt-1 text-sm text-muted">
+                    {stage.count} deal{stage.count === 1 ? "" : "s"}
+                    {stage.totalAmount > 0
+                      ? ` · ${stage.totalAmount.toLocaleString()} total`
+                      : null}
+                  </p>
+                </div>
               ))}
-            </ul>
-            {canUseAiWriter && aiDash ? (
-              <p className="mt-4 text-xs text-neutral-500">
-                AI provider: {aiDash.provider.label}. Research:{" "}
-                {aiDash.research.label}.
-                {aiDash.failedRuns > 0
-                  ? ` ${aiDash.failedRuns} failed run(s) in the last 7 days.`
-                  : null}
-              </p>
-            ) : null}
-          </section>
-        ) : null}
+          </div>
+        </AdminSection>
+      ) : null}
 
-        <section className="rounded-lg border border-neutral-200 bg-white p-4">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
-            Operations
-          </h2>
-          <ul className="mt-3 space-y-2 text-sm">
-            {operationsLinks.map(([href, label]) => (
-              <li key={href}>
-                <Link className="text-[#F47A48] hover:underline" href={href}>
-                  {label}
+      {canViewProjects && home.activeProjects.length > 0 ? (
+        <AdminSection
+          title="Active delivery"
+          action={
+            <Link
+              href="/admin/agency/projects"
+              className="text-sm font-medium text-accent-text hover:underline"
+            >
+              All projects
+            </Link>
+          }
+        >
+          <ul className="divide-y divide-border rounded-lg border border-border bg-surface">
+            {home.activeProjects.map((project) => (
+              <li key={project.id}>
+                <Link
+                  href={project.href}
+                  className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-surface-muted/50"
+                >
+                  <div className="min-w-0">
+                    <p className="font-medium text-foreground">{project.name}</p>
+                    <p className="text-sm text-muted">
+                      {project.clientName ?? "No company"} ·{" "}
+                      {AGENCY_PROJECT_STATUS_LABELS[
+                        project.status as keyof typeof AGENCY_PROJECT_STATUS_LABELS
+                      ] ?? project.status}
+                    </p>
+                  </div>
+                  <span className="text-sm text-accent-text">Open</span>
                 </Link>
               </li>
             ))}
           </ul>
-          <p className="mt-4 text-xs text-neutral-500">
-            Contact form: {settings.contactFormEnabled ? "Enabled" : "Disabled"}
-            . Review form:{" "}
-            {settings.freeReviewFormEnabled ? "Enabled" : "Disabled"}. Email
-            notification:{" "}
-            {emailDeliveryConfigured ? "Configured" : "Not configured"}.
-          </p>
-        </section>
+        </AdminSection>
+      ) : null}
 
-        <section className="rounded-lg border border-neutral-200 bg-white p-4 xl:col-span-1">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
-            {canViewEnquiries ? "Recent enquiries" : "Recent activity"}
-          </h2>
-          {canViewEnquiries ? (
-            <ul className="mt-3 space-y-2 text-sm">
-              {recentEnquiries.items.map((item) => (
-                <li key={item.id} className="border-b border-neutral-100 pb-2">
-                  <Link
-                    href={
-                      item.type === "CONTACT"
-                        ? `/admin/enquiries/contact/${item.id}`
-                        : `/admin/enquiries/reviews/${item.id}`
-                    }
-                    className="font-medium text-[#F47A48] hover:underline"
-                  >
-                    {item.reference}
-                  </Link>
-                  <div className="text-xs text-neutral-500">
-                    {item.name || "—"} · {item.status} ·{" "}
-                    {item.submittedAt.toISOString().slice(0, 10)}
-                  </div>
-                </li>
-              ))}
-              {!recentEnquiries.items.length ? (
-                <li className="text-neutral-500">No new enquiries.</li>
-              ) : null}
-            </ul>
-          ) : (
-            <ul className="mt-3 space-y-2 text-sm">
-              {audit.items.map((item) => (
-                <li key={item.id} className="border-b border-neutral-100 pb-2">
-                  <div className="font-medium text-neutral-900">{item.action}</div>
-                  <div className="text-xs text-neutral-500">
-                    {item.entityType} ·{" "}
-                    {item.createdAt.toISOString().slice(0, 16).replace("T", " ")}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      </div>
+      {home.recentActivity.length > 0 ? (
+        <AdminSection title="Recent activity">
+          <ul className="space-y-2">
+            {home.recentActivity.map((item) => (
+              <li
+                key={item.id}
+                className="flex items-start justify-between gap-4 rounded-lg border border-border bg-surface px-4 py-2.5 text-sm"
+              >
+                <span className="text-foreground">{item.summary}</span>
+                <span className="shrink-0 text-subtle">{formatRelativeTime(item.createdAt)}</span>
+              </li>
+            ))}
+          </ul>
+        </AdminSection>
+      ) : null}
     </div>
   );
 }

@@ -27,6 +27,7 @@ const initialValues: ContactFormValues = {
   timeline: "",
   referralSource: "",
   _gotcha: "",
+  subscribeToUpdates: false,
 };
 
 export function ContactForm({
@@ -348,6 +349,19 @@ export function ContactForm({
           ))}
         </select>
       </Field>
+
+      <label className="flex items-start gap-2 text-sm text-foreground">
+        <input
+          type="checkbox"
+          name="subscribeToUpdates"
+          checked={values.subscribeToUpdates}
+          onChange={(e) => updateField("subscribeToUpdates", e.target.checked)}
+          className="mt-1"
+        />
+        <span>
+          Send me occasional website, SEO and conversion insights.
+        </span>
+      </label>
 
       <div
         className="absolute left-[-10000px] top-auto h-px w-px overflow-hidden"

@@ -5,6 +5,7 @@ import { listEnquiries } from "@/lib/enquiries/service";
 import { EnquiryFilters } from "@/components/admin/enquiries/EnquiryFilters";
 import { EnquiryTable } from "@/components/admin/enquiries/EnquiryTable";
 import { EnquiryExportButton } from "@/components/admin/enquiries/EnquiryExportButton";
+import { AdminListPage } from "@/components/admin/patterns/AdminListPage";
 import type { EnquiryStatus } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -41,35 +42,42 @@ export default async function AdminContactEnquiriesPage({
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <Link href="/admin/enquiries" className="text-sm text-neutral-500 hover:underline">
+    <AdminListPage
+      title="Contact enquiries"
+      description={
+        <>
+          <Link href="/admin/enquiries" className="text-accent-text hover:underline">
             ← All enquiries
           </Link>
-          <h1 className="mt-1 text-2xl font-semibold">Contact enquiries</h1>
-          <p className="mt-1 text-sm text-neutral-600">{total} matching</p>
-        </div>
-        {can(user.role, "export_enquiries") ? (
+          <span className="mt-1 block">{total} matching</span>
+        </>
+      }
+      action={
+        can(user.role, "export_enquiries") ? (
           <EnquiryExportButton type="CONTACT" />
-        ) : null}
-      </div>
-      <EnquiryFilters
-        basePath="/admin/enquiries/contact"
-        defaults={{
-          q: sp.q || "",
-          type: "",
-          status: sp.status || "",
-          delivery: sp.delivery || "",
-          range: sp.range || "",
-        }}
-      />
+        ) : undefined
+      }
+      filters={
+        <EnquiryFilters
+          basePath="/admin/enquiries/contact"
+          defaults={{
+            q: sp.q || "",
+            type: "",
+            status: sp.status || "",
+            delivery: sp.delivery || "",
+            range: sp.range || "",
+          }}
+        />
+      }
+      isEmpty={items.length === 0}
+      empty={{ title: "No contact enquiries yet" }}
+    >
       <EnquiryTable items={items} empty="No contact enquiries yet." />
       {total > pageSize ? (
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-muted">
           Showing page {page} ({pageSize} per page).
         </p>
       ) : null}
-    </div>
+    </AdminListPage>
   );
 }

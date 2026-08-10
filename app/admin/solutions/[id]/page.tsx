@@ -14,6 +14,8 @@ import { JsonField } from "@/components/admin/JsonField";
 import { SeoFields } from "@/components/admin/SeoFields";
 import { SolutionAiPanel } from "@/components/admin/content-assistants/AiPanels";
 import { ImproveFieldButton } from "@/components/admin/content-assistants/ImproveFieldButton";
+import { AdminDetailHeader } from "@/components/admin/patterns/AdminDetailHeader";
+import { StatusBadge } from "@/components/admin/StatusBadge";
 
 export const metadata: Metadata = {
   title: "Edit solution",
@@ -59,13 +61,12 @@ export default async function AdminSolutionEditPage({
   if (sp.slug) message = "Slug updated.";
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <div className="mb-4">
-        <h1 className="admin-page-title">{solution.name}</h1>
-        <p className="mt-1 font-mono text-xs text-neutral-500">
-          {solution.slug} · {solution.id}
-        </p>
-      </div>
+    <div className="mx-auto max-w-3xl space-y-6">
+      <AdminDetailHeader
+        title={solution.name}
+        subtitle={`${solution.slug} · ${solution.id}`}
+        secondaryActions={<StatusBadge status={solution.status} />}
+      />
 
       <form className="space-y-4">
         <input type="hidden" name="id" value={solution.id} />

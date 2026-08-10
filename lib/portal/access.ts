@@ -1,6 +1,26 @@
-import type { AdminRole } from "@prisma/client";
+import type { AdminRole, AgencyProjectClientRole } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { can } from "@/lib/admin/rbac";
+
+/** VIEWER is read-only for project-scoped client actions (approvals, uploads, etc.). */
+export function portalProjectRoleCanAct(role: AgencyProjectClientRole | null | undefined) {
+  return role != null && role !== "VIEWER";
+}
+
+export async function getPortalProjectRole(input: {
+  projectId: string;
+  portalUserId: string;
+}) {
+  const access = await prisma.agencyProjectClientAccess.findFirst({
+    where: {
+      projectId: input.projectId,
+      portalUserId: input.portalUserId,
+      revokedAt: null,
+    },
+    select: { role: true },
+  });
+  return access?.role ?? null;
+}
 
 export async function listAccessibleProjectIds(portalUserId: string) {
   const rows = await prisma.agencyProjectClientAccess.findMany({
@@ -105,7 +125,17 @@ export async function listAccessibleProjects(input: {
     accessId: row.id,
     role: row.role,
     grantedAt: row.grantedAt,
-    project: row.project,
+    project: {
+      id: row.project.id,
+      projectNumber: row.project.projectNumber,
+      name: row.project.name,
+      status: row.project.status,
+      targetDueDate: row.project.targetDueDate,
+      updatedAt: row.project.updatedAt,
+      owner: row.project.owner,
+      primaryContact: row.project.primaryContact,
+      _count: row.project._count,
+    },
   }));
 }
 
@@ -123,31 +153,81 @@ export async function getAccessibleProjectById(input: {
 
   return prisma.agencyProject.findUnique({
     where: { id: input.projectId },
-    include: {
+    select: {
+      id: true,
+      projectNumber: true,
+      name: true,
+      status: true,
+      summary: true,
+      startDate: true,
+      targetDueDate: true,
       milestones: {
         where: { clientVisible: true },
         orderBy: { position: "asc" },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          status: true,
+          dueDate: true,
+          completedAt: true,
+        },
       },
       requirements: {
         where: { clientVisible: true },
         orderBy: [{ dueDate: "asc" }, { createdAt: "asc" }],
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          type: true,
+          status: true,
+          dueDate: true,
+        },
       },
       deliverables: {
         where: { clientVisible: true },
         orderBy: { updatedAt: "desc" },
-        include: {
-          versions: { orderBy: { versionNumber: "desc" }, take: 1 },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          type: true,
+          status: true,
+          versions: {
+            orderBy: { versionNumber: "desc" },
+            take: 1,
+            select: {
+              id: true,
+              versionNumber: true,
+              externalUrl: true,
+              notes: true,
+              submittedAt: true,
+            },
+          },
         },
       },
       updates: {
         where: { clientVisible: true },
         orderBy: { createdAt: "desc" },
         take: 10,
+        select: {
+          id: true,
+          title: true,
+          body: true,
+          createdAt: true,
+        },
       },
       activities: {
         where: { clientVisible: true },
         orderBy: { createdAt: "desc" },
         take: 20,
+        select: {
+          id: true,
+          type: true,
+          summary: true,
+          createdAt: true,
+        },
       },
     },
   });

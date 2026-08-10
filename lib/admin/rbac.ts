@@ -34,9 +34,33 @@ export type AdminCapability =
   | "view_projects"
   | "manage_projects"
   | "manage_project_templates"
+  | "view_proposals"
+  | "manage_proposals"
+  | "send_proposals"
+  | "view_contracts"
+  | "manage_contracts"
+  | "send_contracts"
+  | "sign_contracts"
+  | "manage_contract_templates"
+  | "view_billing"
+  | "manage_billing"
+  | "record_payments"
+  | "manage_retainers"
+  | "view_onboarding"
+  | "manage_onboarding"
+  | "manage_onboarding_templates"
+  | "view_change_requests"
+  | "manage_change_requests"
+  | "view_websites"
+  | "manage_websites"
+  | "view_support"
+  | "manage_support"
   | "use_ai_writer"
   | "manage_ai_settings"
-  | "approve_ai_cms";
+  | "approve_ai_cms"
+  | "manage_email_profiles"
+  | "manage_email_routing"
+  | "choose_email_sender";
 
 const ROLE_CAPABILITIES: Record<AdminRole, ReadonlySet<AdminCapability>> = {
   SUPER_ADMIN: new Set([
@@ -72,9 +96,33 @@ const ROLE_CAPABILITIES: Record<AdminRole, ReadonlySet<AdminCapability>> = {
     "view_projects",
     "manage_projects",
     "manage_project_templates",
+    "view_proposals",
+    "manage_proposals",
+    "send_proposals",
+    "view_contracts",
+    "manage_contracts",
+    "send_contracts",
+    "sign_contracts",
+    "manage_contract_templates",
+    "view_billing",
+    "manage_billing",
+    "record_payments",
+    "manage_retainers",
+    "view_onboarding",
+    "manage_onboarding",
+    "manage_onboarding_templates",
+    "view_change_requests",
+    "manage_change_requests",
+    "view_websites",
+    "manage_websites",
+    "view_support",
+    "manage_support",
     "use_ai_writer",
     "manage_ai_settings",
     "approve_ai_cms",
+    "manage_email_profiles",
+    "manage_email_routing",
+    "choose_email_sender",
   ]),
   EDITOR: new Set([
     "login",
@@ -102,9 +150,31 @@ const ROLE_CAPABILITIES: Record<AdminRole, ReadonlySet<AdminCapability>> = {
     "view_projects",
     "manage_projects",
     "manage_project_templates",
+    "view_proposals",
+    "manage_proposals",
+    "send_proposals",
+    "view_contracts",
+    "manage_contracts",
+    "send_contracts",
+    "sign_contracts",
+    "manage_contract_templates",
+    "view_billing",
+    "manage_billing",
+    "record_payments",
+    "manage_retainers",
+    "view_onboarding",
+    "manage_onboarding",
+    "manage_onboarding_templates",
+    "view_change_requests",
+    "manage_change_requests",
+    "view_websites",
+    "manage_websites",
+    "view_support",
+    "manage_support",
     "use_ai_writer",
     "manage_ai_settings",
     "approve_ai_cms",
+    "choose_email_sender",
   ]),
   CONTENT_MANAGER: new Set([
     "login",

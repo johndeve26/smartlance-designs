@@ -14,37 +14,20 @@ describe("admin navigation IA", () => {
   it("defines the expected sidebar groups", () => {
     expect(adminNavigation.map((g) => g.label)).toEqual([
       "Overview",
-      "Content",
-      "Editorial",
-      "Site Management",
-      "Operations",
+      "Sales",
       "Agency",
+      "Commercial",
+      "Client Success",
+      "Content",
+      "Marketing / SEO",
       "System",
     ]);
   });
 
-  it("orders content entities for CMS workflows", () => {
-    const content = adminNavigation.find((g) => g.id === "content");
-    expect(content?.items.map((i) => i.label)).toEqual([
-      "Homepage",
-      "Services",
-      "Solutions",
-      "Platforms",
-      "Industries",
-      "Work",
-      "Testimonials",
-    ]);
-  });
-
-  it("keeps editorial tools separate", () => {
-    const editorial = adminNavigation.find((g) => g.id === "editorial");
-    expect(editorial?.items.map((i) => i.label)).toEqual([
-      "Insights",
-      "Resources",
-      "AI Writer",
-      "Topic Intelligence",
-      "Content Audit",
-    ]);
+  it("includes CRM sub-items under Sales", () => {
+    const sales = adminNavigation.find((g) => g.id === "sales");
+    expect(sales?.items.map((i) => i.label)).toContain("Contacts");
+    expect(sales?.items.map((i) => i.label)).toContain("Deals");
   });
 
   it("uses only valid internal admin hrefs", () => {
@@ -56,35 +39,32 @@ describe("admin navigation IA", () => {
 
   it("maps active routes for nested editors", () => {
     expect(activeAdminNavItemId("/admin/services/abc")).toBe("services");
-    expect(activeAdminNavItemId("/admin/resources/comparison/abc")).toBe(
-      "resources",
-    );
+    expect(activeAdminNavItemId("/admin/resources/comparison/abc")).toBe("resources");
     expect(activeAdminNavItemId("/admin/ai-writer/abc")).toBe("ai-writer");
-    expect(activeAdminNavItemId("/admin/ai-writer/discover")).toBe(
-      "topic-intelligence",
-    );
-    expect(activeAdminNavItemId("/admin/content-audit")).toBe("content-audit");
     expect(activeAdminNavItemId("/admin/seo")).toBe("seo");
     expect(activeAdminNavItemId("/admin/enquiries/contact/1")).toBe("enquiries");
+    expect(activeAdminNavItemId("/admin/crm/contacts/abc")).toBe("crm-contacts");
+    expect(activeAdminNavItemId("/admin/agency/projects/abc")).toBe("agency-projects");
+    expect(activeAdminNavItemId("/admin/agency/onboarding/abc")).toBe("agency-onboarding");
+    expect(activeAdminNavItemId("/admin/agency/proposals/abc")).toBe("agency-proposals");
   });
 
-  it("distinguishes AI Writer from Topic Intelligence", () => {
-    expect(isAdminNavItemActive("/admin/ai-writer/discover", "topic-intelligence")).toBe(
-      true,
-    );
-    expect(isAdminNavItemActive("/admin/ai-writer/discover", "ai-writer")).toBe(
-      false,
-    );
-    expect(isAdminNavItemActive("/admin/ai-writer/settings", "ai-writer")).toBe(
-      true,
-    );
+  it("does not highlight Projects for all agency routes", () => {
+    expect(isAdminNavItemActive("/admin/agency/billing", "agency-projects")).toBe(false);
+    expect(isAdminNavItemActive("/admin/agency/proposals", "agency-proposals")).toBe(true);
+  });
+
+  it("distinguishes CRM hub from contacts", () => {
+    expect(isAdminNavItemActive("/admin/crm", "crm")).toBe(true);
+    expect(isAdminNavItemActive("/admin/crm/contacts", "crm")).toBe(false);
+    expect(isAdminNavItemActive("/admin/crm/contacts", "crm-contacts")).toBe(true);
   });
 
   it("filters navigation by role capabilities", () => {
     const editor = filterAdminNavigation("EDITOR" as AdminRole);
     const labels = editor.flatMap((g) => g.items.map((i) => i.label));
     expect(labels).toContain("Services");
-    expect(labels).toContain("AI Writer");
+    expect(labels).toContain("AI");
     expect(labels).not.toContain("Users");
 
     const reviewer = filterAdminNavigation("REVIEWER" as AdminRole);
@@ -95,12 +75,22 @@ describe("admin navigation IA", () => {
   });
 
   it("hides super-admin items from editors", () => {
-    expect(itemAllowed("EDITOR", { id: "users", label: "Users", href: "/admin/users", capability: "manage_users" })).toBe(
-      false,
-    );
-    expect(itemAllowed("SUPER_ADMIN", { id: "users", label: "Users", href: "/admin/users", capability: "manage_users" })).toBe(
-      true,
-    );
+    expect(
+      itemAllowed("EDITOR", {
+        id: "users",
+        label: "Users",
+        href: "/admin/users",
+        capability: "manage_users",
+      }),
+    ).toBe(false);
+    expect(
+      itemAllowed("SUPER_ADMIN", {
+        id: "users",
+        label: "Users",
+        href: "/admin/users",
+        capability: "manage_users",
+      }),
+    ).toBe(true);
   });
 
   it("builds admin breadcrumbs", () => {
@@ -108,9 +98,7 @@ describe("admin navigation IA", () => {
       { label: "Admin", href: "/admin" },
       { label: "Services" },
     ]);
-    expect(adminBreadcrumbs("/admin/ai-writer/discover")[2]?.label).toBe(
-      "Topic Intelligence",
-    );
+    expect(adminBreadcrumbs("/admin/crm/contacts")[2]?.label).toBe("Contacts");
   });
 
   it("exposes a public site URL for View Site", () => {

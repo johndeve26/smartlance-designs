@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireAdminUser } from "@/lib/admin/session";
 import { can } from "@/lib/admin/rbac";
 import {
@@ -7,6 +8,9 @@ import {
 import { getDeploymentEnvStatus } from "@/lib/admin/deployment-env-status";
 import { getSystemStatus } from "@/lib/ops/system-status";
 import { SettingsForm } from "@/components/admin/SettingsForm";
+import { PageHeader } from "@/components/ui/page-header";
+import { AdminPanel } from "@/components/admin/patterns/AdminPanel";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -20,25 +24,26 @@ export default async function AdminSettingsPage() {
 
   if (!settings) {
     return (
-      <div>
-        <h1 className="text-2xl font-semibold">Settings</h1>
-        <p className="mt-2 text-sm text-neutral-600">
-          Site settings not initialized. Run{" "}
-          <code>npm run content:import:phase4</code>.
-        </p>
+      <div className="space-y-5">
+        <PageHeader
+          title="Settings"
+          description={
+            <>
+              Site settings not initialized. Run{" "}
+              <code>npm run content:import:phase4</code>.
+            </>
+          }
+        />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Site settings</h1>
-        <p className="mt-1 text-sm text-neutral-600">
-          Public configuration is DB-managed. Deployment secrets stay in
-          environment variables and are never shown here.
-        </p>
-      </div>
+      <PageHeader
+        title="Site settings"
+        description="Public configuration is DB-managed. Deployment secrets stay in environment variables and are never shown here."
+      />
       <SettingsForm
         settings={{
           siteName: settings.siteName,
@@ -64,6 +69,8 @@ export default async function AdminSettingsPage() {
           analyticsEnabled: settings.analyticsEnabled,
           contactFormEnabled: settings.contactFormEnabled,
           freeReviewFormEnabled: settings.freeReviewFormEnabled,
+          audienceEnabled: settings.audienceEnabled,
+          audienceRequireConfirmation: settings.audienceRequireConfirmation,
           formSuccessMessage: settings.formSuccessMessage,
           formFallbackMessage: settings.formFallbackMessage,
           showPublicPricing: settings.showPublicPricing,
@@ -86,6 +93,15 @@ export default async function AdminSettingsPage() {
         }}
         deploymentEnvRows={deploymentEnvRows}
       />
+      <AdminPanel>
+        <h2 className="text-section-heading">Email delivery</h2>
+        <p className="mt-1 text-body-sm">
+          SMTP outbound and inbound mailbox sync are configured on the Email screen.
+        </p>
+        <Button asChild variant="secondary" size="sm" className="mt-3">
+          <Link href="/admin/email">Open Email settings</Link>
+        </Button>
+      </AdminPanel>
     </div>
   );
 }

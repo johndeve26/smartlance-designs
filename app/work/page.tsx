@@ -19,7 +19,7 @@ export const metadata: Metadata = buildMetadata({
 export default async function WorkPage({
   searchParams,
 }: {
-  searchParams: Promise<{ platform?: string }>;
+  searchParams: Promise<{ platform?: string; capability?: string }>;
 }) {
   const params = await searchParams;
   const projects = await loadPublishedWork();
@@ -80,6 +80,7 @@ export default async function WorkPage({
           <PortfolioFilters
             projects={projects}
             initialPlatform={params.platform}
+            initialCapability={params.capability}
           />
         </Container>
       </Section>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireAdminUser } from "@/lib/admin/session";
 import { prisma } from "@/lib/db";
 import { AIWriterSubnav } from "@/components/admin/ai-writer/AIWriterSubnav";
+import { PageHeader } from "@/components/ui/page-header";
 import { TopicDiscoveryExploreForm } from "@/components/admin/ai-writer/TopicDiscoveryExploreForm";
 import {
   bulkImportSeedsAction,
@@ -144,25 +145,20 @@ export default async function TopicDiscoveryPage({
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 pb-10">
-      <header className="space-y-3">
-        <nav className="text-sm text-neutral-500">
-          <Link href="/admin/ai-writer" className="hover:text-neutral-800">
-            AI Writer
-          </Link>
-          <span className="mx-1.5">/</span>
-          <span className="text-neutral-800">Topic Intelligence</span>
-        </nav>
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">
-            Topic Intelligence
-          </h1>
-          <p className="mt-1 max-w-2xl text-sm text-neutral-600">
-            Find worthwhile topics to write, update, expand, monitor, or ignore by combining
-            Smartlance content gaps with current industry and search signals.
-          </p>
-        </div>
-        <AIWriterSubnav current="/admin/ai-writer/discover" />
-      </header>
+      <PageHeader
+        title="Topic Intelligence"
+        description="Find worthwhile topics to write, update, expand, monitor, or ignore by combining Smartlance content gaps with current industry and search signals."
+        breadcrumbs={
+          <nav className="text-sm text-muted">
+            <Link href="/admin/ai-writer" className="hover:text-foreground">
+              AI Writer
+            </Link>
+            <span className="mx-1.5">/</span>
+            <span className="text-foreground">Topic Intelligence</span>
+          </nav>
+        }
+      />
+      <AIWriterSubnav current="/admin/ai-writer/discover" />
 
       {notice ? (
         <p className="text-sm text-emerald-800">✓ {notice}</p>

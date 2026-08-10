@@ -4,7 +4,7 @@ import {
   getConfiguredStorageProviderName,
 } from "@/lib/media/storage";
 import { fallbackPublicSiteSettings } from "@/lib/repositories/siteSettingsRepository";
-import { formDeliveryConfigured } from "@/lib/forms";
+import { isEmailDeliveryConfigured } from "@/lib/email/config";
 import { getAIProviderStatus } from "@/lib/ai/providers";
 import { getResearchProviderStatus } from "@/lib/ai/research";
 import { getDiscoveryProviderStatus } from "@/lib/ai/topic-intelligence/providers";
@@ -90,7 +90,7 @@ export async function getSystemStatus(): Promise<SystemStatus> {
     };
   }
 
-  const emailOk = await formDeliveryConfigured();
+  const emailOk = await isEmailDeliveryConfigured();
   const emailDelivery = {
     state: (emailOk ? "configured" : "not_configured") as ConfigState,
     label: emailOk ? "Configured" : "Not configured",

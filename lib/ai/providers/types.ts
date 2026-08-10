@@ -46,7 +46,7 @@ export interface AIProvider {
 export class AIProviderNotConfiguredError extends Error {
   constructor(providerId = "ai") {
     super(
-      `AI provider "${providerId}" is not configured. Add an API key in Admin → AI Writer → Settings (or set the env fallback) and retry.`,
+      `AI provider "${providerId}" is not configured. Add an API key in Admin → AI → Settings (or set the env fallback) and retry.`,
     );
     this.name = "AIProviderNotConfiguredError";
   }

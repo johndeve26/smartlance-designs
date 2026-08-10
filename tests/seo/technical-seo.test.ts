@@ -125,6 +125,8 @@ describe("sitemap builder", () => {
     expect(urls.some((u) => u === origin || u === `${origin}/`)).toBe(true);
     expect(urls.some((u) => u.endsWith("/services"))).toBe(true);
     expect(urls.some((u) => u.endsWith("/blog"))).toBe(true);
+    expect(urls.some((u) => u.endsWith("/how-we-work"))).toBe(true);
+    expect(urls.some((u) => u.endsWith("/free-tools"))).toBe(true);
   });
 });
 

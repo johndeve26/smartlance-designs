@@ -77,7 +77,7 @@ export function ContentBulkTable({
             return (
               <Link
                 href={row.href}
-                className="font-medium text-[#F47A48] hover:underline"
+                className="font-medium text-accent-text hover:underline"
               >
                 {row.title}
               </Link>

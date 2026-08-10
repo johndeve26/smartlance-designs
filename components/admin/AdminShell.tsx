@@ -3,17 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Menu, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
 import type { SessionUser } from "@/lib/admin/session";
-import { logoutAction } from "@/lib/admin/auth-actions";
 import { filterAdminNavigation } from "@/lib/admin/navigation-active";
 import { adminBreadcrumbs } from "@/lib/admin/navigation-active";
-import { roleLabel } from "@/lib/admin/rbac";
 import type { AdminRole } from "@prisma/client";
-import {
-  AdminSidebarNav,
-  ViewSiteLink,
-} from "@/components/admin/AdminSidebarNav";
+import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { AdminTopbar } from "@/components/admin/AdminTopbar";
 import "@/components/admin/admin.css";
 
 const SIDEBAR_COLLAPSED_KEY = "admin-sidebar-collapsed";
@@ -21,14 +17,14 @@ const SIDEBAR_COLLAPSED_KEY = "admin-sidebar-collapsed";
 type AdminShellProps = {
   user: SessionUser | null;
   isDev: boolean;
-  newEnquiryCount?: number;
+  badgeCounts?: { enquiries?: number; inbox?: number; support?: number };
   children: ReactNode;
 };
 
 export function AdminShell({
   user,
   isDev,
-  newEnquiryCount = 0,
+  badgeCounts = {},
   children,
 }: AdminShellProps) {
   const pathname = usePathname() ?? "";
@@ -106,7 +102,6 @@ export function AdminShell({
 
   return (
     <div className="admin-root fixed inset-0 z-[200] flex overflow-hidden bg-white">
-      {/* Desktop sidebar */}
       <aside
         className={`admin-sidebar hidden shrink-0 flex-col border-r border-white/5 lg:flex ${
           collapsed ? "w-[4.25rem]" : "w-60"
@@ -119,7 +114,7 @@ export function AdminShell({
               collapsed ? "text-center" : ""
             }`}
           >
-            <div className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-[#F47A48]">
+            <div className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-[var(--admin-accent)]">
               {collapsed ? "SL" : "Smartlance"}
             </div>
             {!collapsed ? (
@@ -128,11 +123,10 @@ export function AdminShell({
           </Link>
         </div>
         <div className="flex-1 overflow-y-auto p-2">
-          <AdminSidebarNav
+          <AdminSidebar
             groups={visibleGroups}
-            pathname={pathname}
+            badgeCounts={badgeCounts}
             collapsed={collapsed}
-            newEnquiryCount={newEnquiryCount}
           />
         </div>
         <div className="hidden border-t border-white/10 p-2 lg:block">
@@ -154,7 +148,6 @@ export function AdminShell({
         </div>
       </aside>
 
-      {/* Mobile drawer backdrop */}
       {mobileOpen ? (
         <button
           type="button"
@@ -164,7 +157,6 @@ export function AdminShell({
         />
       ) : null}
 
-      {/* Mobile drawer */}
       <aside
         id="admin-mobile-drawer"
         className={`admin-sidebar fixed inset-y-0 left-0 z-[230] flex w-[min(100%,18rem)] flex-col shadow-xl transition-transform lg:hidden ${
@@ -174,7 +166,7 @@ export function AdminShell({
       >
         <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
           <Link href="/admin" onClick={closeMobile} className="min-w-0">
-            <div className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-[#F47A48]">
+            <div className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-[var(--admin-accent)]">
               Smartlance
             </div>
             <div className="text-sm font-medium text-white">Admin</div>
@@ -189,93 +181,24 @@ export function AdminShell({
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-2" key={pathname}>
-          <AdminSidebarNav
+          <AdminSidebar
             groups={visibleGroups}
-            pathname={pathname}
-            newEnquiryCount={newEnquiryCount}
+            badgeCounts={badgeCounts}
             onNavigate={closeMobile}
           />
         </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-14 shrink-0 items-center gap-3 border-b border-neutral-200 bg-white px-4 lg:px-5">
-          <button
-            ref={menuButtonRef}
-            type="button"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-neutral-200 lg:hidden"
-            aria-expanded={mobileOpen}
-            aria-controls="admin-mobile-drawer"
-            aria-label={mobileOpen ? "Close menu" : "Open menu"}
-            onClick={() => setMobileOpen((v) => !v)}
-          >
-            <Menu className="h-5 w-5" />
-          </button>
-
-          <div className="min-w-0 flex-1">
-            <nav aria-label="Breadcrumb" className="hidden sm:block">
-              <ol className="flex flex-wrap items-center gap-1 text-sm text-neutral-500">
-                {breadcrumbs.map((crumb, i) => (
-                  <li key={`${crumb.label}-${i}`} className="flex items-center gap-1">
-                    {i > 0 ? <span className="text-neutral-300">/</span> : null}
-                    {crumb.href && i < breadcrumbs.length - 1 ? (
-                      <Link
-                        href={crumb.href}
-                        className="hover:text-neutral-900"
-                      >
-                        {crumb.label}
-                      </Link>
-                    ) : (
-                      <span
-                        className={
-                          i === breadcrumbs.length - 1
-                            ? "font-medium text-neutral-900"
-                            : undefined
-                        }
-                      >
-                        {crumb.label}
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ol>
-            </nav>
-            <p className="truncate text-sm font-medium text-neutral-900 sm:hidden">
-              {pageTitle}
-            </p>
-          </div>
-
-          <div className="flex shrink-0 items-center gap-3">
-            <ViewSiteLink className="hidden md:inline-flex" />
-            <span
-              className={`hidden rounded px-2 py-0.5 text-xs font-semibold sm:inline ${
-                isDev
-                  ? "bg-amber-100 text-amber-800"
-                  : "bg-emerald-100 text-emerald-800"
-              }`}
-            >
-              {isDev ? "Dev" : "Prod"}
-            </span>
-            {user ? (
-              <div className="flex items-center gap-2 border-l border-neutral-200 pl-3">
-                <div className="hidden text-right text-xs leading-tight sm:block">
-                  <p className="font-medium text-neutral-900">{user.name}</p>
-                  <p className="text-neutral-500">{roleLabel(user.role)}</p>
-                </div>
-                <form action={logoutAction}>
-                  <button
-                    type="submit"
-                    className="rounded-md border border-neutral-200 px-2.5 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
-                  >
-                    Log out
-                  </button>
-                </form>
-              </div>
-            ) : (
-              <span className="text-xs text-neutral-500">Not signed in</span>
-            )}
-          </div>
-        </header>
+        <AdminTopbar
+          breadcrumbs={breadcrumbs}
+          pageTitle={pageTitle}
+          user={user}
+          isDev={isDev}
+          mobileOpen={mobileOpen}
+          menuButtonRef={menuButtonRef}
+          onToggleMobile={() => setMobileOpen((v) => !v)}
+        />
 
         <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
           <div className="flex-1 overflow-y-auto bg-neutral-50 p-4 sm:p-6">

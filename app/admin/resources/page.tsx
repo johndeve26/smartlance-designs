@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireAdminUser } from "@/lib/admin/session";
 import { countResourcesByType } from "@/lib/repositories/resourcesRepository";
 import { countInsightsByStatus } from "@/lib/repositories/insightsRepository";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const dynamic = "force-dynamic";
 
@@ -23,21 +24,18 @@ export default async function AdminResourcesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Resources</h1>
-        <p className="mt-1 text-sm text-neutral-600">
-          Guides, Comparisons, Checklists, Glossary, Templates and Tools.
-          Insights stay under Insights (single source of truth).
-        </p>
-      </div>
+      <PageHeader
+        title="Resources"
+        description="Guides, Comparisons, Checklists, Glossary, Templates and Tools. Insights stay under Insights (single source of truth)."
+      />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <Link
           href="/admin/insights"
-          className="rounded-lg border border-neutral-200 bg-white p-4 hover:border-[#F47A48]"
+          className="rounded-lg border border-border bg-surface p-4 transition-colors hover:border-border-strong hover:bg-surface-muted/30"
         >
-          <div className="text-lg font-semibold">Insights</div>
-          <div className="mt-2 text-sm text-neutral-600">
+          <div className="text-lg font-semibold text-foreground">Insights</div>
+          <div className="mt-2 text-sm text-muted">
             Published {insights.PUBLISHED} · Draft {insights.DRAFT} · Archived{" "}
             {insights.ARCHIVED}
           </div>
@@ -52,10 +50,10 @@ export default async function AdminResourcesPage() {
             <Link
               key={item.type}
               href={`/admin/resources/${item.type}`}
-              className="rounded-lg border border-neutral-200 bg-white p-4 hover:border-[#F47A48]"
+              className="rounded-lg border border-border bg-surface p-4 transition-colors hover:border-border-strong hover:bg-surface-muted/30"
             >
-              <div className="text-lg font-semibold">{item.label}</div>
-              <div className="mt-2 text-sm text-neutral-600">
+              <div className="text-lg font-semibold text-foreground">{item.label}</div>
+              <div className="mt-2 text-sm text-muted">
                 Published {counts.PUBLISHED} · Draft {counts.DRAFT} · Archived{" "}
                 {counts.ARCHIVED}
               </div>

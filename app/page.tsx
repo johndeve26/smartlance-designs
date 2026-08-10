@@ -20,13 +20,13 @@ import {
   type WhySmartlanceItem,
 } from "@/components/home/why-smartlance";
 import { ProcessSection } from "@/components/home/process-section";
-import {
-  FreeReviewTeaser,
-  type ReviewChecklistItem,
-} from "@/components/home/free-review-teaser";
-import { TestimonialsSection } from "@/components/home/testimonials-section";
-import { HomeSeoSection } from "@/components/home/seo-section";
 import { HomeBlogSection } from "@/components/home/blog-section";
+import { FreeToolsSection } from "@/components/home/free-tools-section";
+import { ClientPortalSection } from "@/components/home/client-portal-section";
+import { HomeAiAutomationSection, HomeCoreCapabilitiesSection } from "@/components/home/ai-automation-section";
+import { HomeCapabilityStrip } from "@/components/home/capability-strip";
+import { HomeFinalCtaSection } from "@/components/home/final-cta-section";
+import { homepageProcessSteps } from "@/lib/public/how-we-work-content";
 import { getHomepageContent } from "@/lib/repositories/homepageRepository";
 import {
   loadHomepageWorkShowcase,
@@ -38,9 +38,6 @@ import {
   problemPoints as typedProblemPoints,
   growthSystemSteps as typedGrowthSteps,
   whySmartlanceItems as typedWhyItems,
-  processSteps as typedProcessSteps,
-  reviewChecklist as typedReviewChecklist,
-  seoHighlights as typedSeoHighlights,
   homepageServiceItems as typedServiceItems,
 } from "@/data/home";
 import { buildPageMetadata } from "@/lib/seo";
@@ -88,7 +85,7 @@ export default async function HomePage() {
     loadPublishedIndustries(),
   ]);
   const { heroProject, selectedProjects } = workShowcase;
-  const { insights, testimonials } = editorial;
+  const { insights } = editorial;
   const sections = home?.sections ?? {};
   const visibility = home?.sectionVisibility ?? {};
 
@@ -111,16 +108,7 @@ export default async function HomePage() {
   const processSteps =
     asArray<ProcessStep>(sections.processSteps).length > 0
       ? asArray<ProcessStep>(sections.processSteps)
-      : typedProcessSteps;
-  const reviewChecklist =
-    asArray<ReviewChecklistItem>(sections.reviewChecklist).length > 0
-      ? asArray<ReviewChecklistItem>(sections.reviewChecklist)
-      : typedReviewChecklist;
-  const seoHighlights =
-    asArray<string>(sections.seoHighlights).length > 0
-      ? asArray<string>(sections.seoHighlights)
-      : typedSeoHighlights;
-
+      : homepageProcessSteps;
   const curatedServiceItems = (
     asArray<HomepageServiceItem>(home?.curatedServiceItems).length > 0
       ? asArray<HomepageServiceItem>(home?.curatedServiceItems)
@@ -134,14 +122,15 @@ export default async function HomePage() {
   );
 
   const hero = home?.hero ?? {
-    eyebrow: "Website design, development & SEO",
+    eyebrow: "Websites, growth, AI & automation",
     headline: "Websites Built to Rank, Convert and Grow.",
     headlineAccent: "Rank",
-    supporting: siteConfig.description,
+    supporting:
+      "Smartlance designs and builds websites, growth systems and digital solutions that help businesses attract customers, work smarter and scale with less friction.",
     primaryCtaLabel: "Tell Us About Your Project",
     primaryCtaHref: "/contact",
-    secondaryCtaLabel: "View Our Work",
-    secondaryCtaHref: "/work",
+    secondaryCtaLabel: "Get a Free Website Review",
+    secondaryCtaHref: "/free-website-review",
   };
 
   return (
@@ -157,40 +146,32 @@ export default async function HomePage() {
         secondaryCtaHref={hero.secondaryCtaHref}
         heroProject={heroProject}
       />
+      <HomeCapabilityStrip />
       {isVisible(visibility, "proofBarItems") ? (
         <TrustStrip items={proofBarItems} />
       ) : null}
       {isVisible(visibility, "problemPoints") ? (
         <ProblemSection points={problemPoints} />
       ) : null}
-      {isVisible(visibility, "curatedServiceItems") &&
-      curatedServiceItems.length > 0 ? (
-        <HomeServices items={curatedServiceItems} />
-      ) : null}
-      {isVisible(visibility, "growthSystemSteps") ? (
-        <GrowthSystemSection steps={growthSystemSteps} />
-      ) : null}
+      <FreeToolsSection />
       <HomePortfolio selectedProjects={selectedProjects} />
-      <HomeIndustriesTeaser industries={industries} />
-      {isVisible(visibility, "whySmartlanceItems") ? (
-        <WhySmartlance items={whySmartlanceItems} />
-      ) : null}
+      <HomeCoreCapabilitiesSection />
+      <HomeAiAutomationSection />
       {isVisible(visibility, "processSteps") ? (
         <ProcessSection steps={processSteps} />
       ) : null}
-      {isVisible(visibility, "reviewChecklist") ? (
-        <FreeReviewTeaser checklist={reviewChecklist} />
+      {isVisible(visibility, "whySmartlanceItems") ? (
+        <WhySmartlance items={whySmartlanceItems} />
       ) : null}
-      {isVisible(visibility, "testimonials") && testimonials.length > 0 ? (
-        <TestimonialsSection items={testimonials} />
-      ) : null}
-      {isVisible(visibility, "seoHighlights") ? (
-        <HomeSeoSection highlights={seoHighlights} />
+      <HomeIndustriesTeaser industries={industries} />
+      <ClientPortalSection />
+      {isVisible(visibility, "growthSystemSteps") ? (
+        <GrowthSystemSection steps={growthSystemSteps} />
       ) : null}
       {isVisible(visibility, "insights") ? (
         <HomeBlogSection posts={insights} />
       ) : null}
-      {/* Page ends on the global pre-footer CTA — no second closing CTA here. */}
+      <HomeFinalCtaSection />
     </>
   );
 }

@@ -4,9 +4,10 @@ import { requireAdminUser } from "@/lib/admin/session";
 import { getDealPrefill } from "@/lib/agency/deal-conversion";
 import { listAdminUsersForSelect } from "@/lib/agency/projects";
 import { listTemplates } from "@/lib/agency/templates";
-import { AgencySubNavBar } from "@/components/admin/agency/AgencySubNavBar";
 import { ProjectCreateForm } from "@/components/admin/agency/ProjectCreateForm";
 import { contactDisplayName } from "@/lib/crm/normalize";
+import { AdminDetailHeader } from "@/components/admin/patterns/AdminDetailHeader";
+import { AdminPanel } from "@/components/admin/patterns/AdminPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -43,20 +44,20 @@ export default async function NewAgencyProjectPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <Link href="/admin/agency/projects" className="text-sm text-neutral-600 hover:underline">
-          ← Projects
-        </Link>
-        <h1 className="mt-2 text-2xl font-semibold">New Project</h1>
-        {dealPrefill ? (
-          <p className="mt-1 text-sm text-neutral-600">
-            Prefilled from deal: {dealPrefill.deal.title} ·{" "}
-            {contactDisplayName(dealPrefill.deal.contact)}
-          </p>
-        ) : null}
-      </div>
-      <AgencySubNavBar />
-      <div className="admin-card max-w-2xl p-4">
+      <Link href="/admin/agency/projects" className="text-sm text-muted hover:underline">
+        ← Projects
+      </Link>
+
+      <AdminDetailHeader
+        title="New Project"
+        subtitle={
+          dealPrefill
+            ? `Prefilled from deal: ${dealPrefill.deal.title} · ${contactDisplayName(dealPrefill.deal.contact)}`
+            : undefined
+        }
+      />
+
+      <AdminPanel className="max-w-2xl">
         <ProjectCreateForm
           owners={owners}
           templates={templates.map((t) => ({
@@ -66,7 +67,7 @@ export default async function NewAgencyProjectPage({
           }))}
           prefill={prefill}
         />
-      </div>
+      </AdminPanel>
     </div>
   );
 }

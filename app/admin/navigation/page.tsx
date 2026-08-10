@@ -6,6 +6,8 @@ import {
   type NavDraftItem,
 } from "@/lib/repositories/navigationRepository";
 import { NavigationEditor } from "@/components/admin/NavigationEditor";
+import { PageHeader } from "@/components/ui/page-header";
+import { AdminPanel } from "@/components/admin/patterns/AdminPanel";
 import type { NavigationMenuKey } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -25,13 +27,10 @@ export default async function AdminNavigationPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Navigation</h1>
-        <p className="mt-1 text-sm text-neutral-600">
-          Manage approved header, CTA and footer locations. Public design stays
-          code-controlled.
-        </p>
-      </div>
+      <PageHeader
+        title="Navigation"
+        description="Manage approved header, CTA and footer locations. Public design stays code-controlled."
+      />
 
       <div className="flex flex-wrap gap-2">
         {menus.map((m) => (
@@ -40,8 +39,8 @@ export default async function AdminNavigationPage({
             href={`/admin/navigation?menu=${m.menuKey}`}
             className={`rounded-full px-3 py-1 text-sm ${
               m.menuKey === menuKey
-                ? "bg-neutral-900 text-white"
-                : "border border-neutral-300 bg-white"
+                ? "bg-foreground text-background"
+                : "border border-border bg-surface hover:bg-surface-muted/50"
             }`}
           >
             {navigationMenuLabel(m.menuKey)}
@@ -51,11 +50,13 @@ export default async function AdminNavigationPage({
       </div>
 
       {!menus.length ? (
-        <p className="rounded border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-          No navigation menus yet. Run{" "}
-          <code>npm run content:import:phase4</code> to import current public
-          navigation.
-        </p>
+        <AdminPanel className="border-warning bg-warning-soft/40">
+          <p className="text-sm text-warning-text">
+            No navigation menus yet. Run{" "}
+            <code>npm run content:import:phase4</code> to import current public
+            navigation.
+          </p>
+        </AdminPanel>
       ) : current ? (
         <NavigationEditor
           menuKey={current.menuKey}

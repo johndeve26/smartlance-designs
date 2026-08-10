@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { industriesCatalog } from "@/data/industries";
 import {
   catalogToDetail,
@@ -6,8 +6,44 @@ import {
 } from "@/lib/repositories/industriesRepository";
 import { resolveCanonicalUrl } from "@/lib/seo/canonical";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
-import { buildPublicSitemapEntries } from "@/lib/seo/sitemap-entries";
 import { buildResourcePageMetadata } from "@/lib/seo/resource-metadata";
+
+vi.mock("@/lib/db", () => ({
+  hasDatabaseUrl: vi.fn(() => false),
+  prisma: {
+    managedPage: { findMany: vi.fn().mockResolvedValue([]) },
+    service: { findMany: vi.fn().mockResolvedValue([]) },
+    solution: { findMany: vi.fn().mockResolvedValue([]) },
+    platform: { findMany: vi.fn().mockResolvedValue([]) },
+    industry: { findMany: vi.fn().mockResolvedValue([]) },
+    insight: { findMany: vi.fn().mockResolvedValue([]) },
+    cmsResource: {
+      findMany: vi.fn().mockResolvedValue([]),
+      findFirst: vi.fn().mockResolvedValue(null),
+    },
+    workProject: { findMany: vi.fn().mockResolvedValue([]) },
+    siteSettings: { findUnique: vi.fn().mockResolvedValue(null) },
+  },
+}));
+
+vi.mock("@/lib/seo/canonical", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/seo/canonical")>();
+  return {
+    ...actual,
+    getSiteOrigin: vi.fn().mockResolvedValue("https://smartlancedesigns.com"),
+  };
+});
+
+import { hasDatabaseUrl, prisma } from "@/lib/db";
+import { buildPublicSitemapEntries } from "@/lib/seo/sitemap-entries";
+
+const mockHasDatabaseUrl = vi.mocked(hasDatabaseUrl);
+const mockIndustryFindMany = vi.mocked(prisma.industry.findMany);
+
+beforeEach(() => {
+  mockHasDatabaseUrl.mockReturnValue(false);
+  mockIndustryFindMany.mockResolvedValue([]);
+});
 
 describe("industry detail routing", () => {
   it("maps catalog industries to public detail shape", () => {
@@ -47,12 +83,27 @@ describe("industry detail routing", () => {
     expect(metadata.robots).toEqual({ index: false, follow: false });
   });
 
-  it("includes published industry URLs in sitemap", async () => {
+  it("includes catalog industry URLs in sitemap when DB is unavailable", async () => {
+    mockHasDatabaseUrl.mockReturnValue(false);
     const entries = await buildPublicSitemapEntries();
     const urls = entries.map((entry) => entry.url);
     expect(
       urls.some((url) => url.endsWith("/industries/short-term-rentals")),
     ).toBe(true);
+    expect(mockIndustryFindMany).not.toHaveBeenCalled();
+  });
+
+  it("includes published DB industry URLs in sitemap when DB is available", async () => {
+    mockHasDatabaseUrl.mockReturnValue(true);
+    mockIndustryFindMany.mockResolvedValue([
+      { slug: "short-term-rentals", updatedAt: new Date("2026-01-01") },
+    ] as Awaited<ReturnType<typeof mockIndustryFindMany>>);
+    const entries = await buildPublicSitemapEntries();
+    const urls = entries.map((entry) => entry.url);
+    expect(
+      urls.some((url) => url.endsWith("/industries/short-term-rentals")),
+    ).toBe(true);
+    expect(mockIndustryFindMany).toHaveBeenCalled();
   });
 });
 

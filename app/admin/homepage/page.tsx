@@ -14,6 +14,8 @@ import {
 import { JsonField } from "@/components/admin/JsonField";
 import { SeoFields } from "@/components/admin/SeoFields";
 import { HomepageAiPanel } from "@/components/admin/content-assistants/AiPanels";
+import { PageHeader } from "@/components/ui/page-header";
+import { AdminPanel } from "@/components/admin/patterns/AdminPanel";
 
 export const metadata: Metadata = {
   title: "Homepage",
@@ -40,33 +42,30 @@ export default async function AdminHomepagePage({ searchParams }: PageProps) {
   const opportunityId = params.opportunityId?.trim() || undefined;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="admin-page-title">Homepage</h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            Hero, CTAs, section JSON, and SEO — edits save as draft until you
-            publish
-          </p>
-        </div>
-        <div className="rounded border border-neutral-200 bg-white px-3 py-2 text-sm">
-          {hasDraft ? (
-            <span className="font-medium text-amber-800">Draft changes</span>
-          ) : (
-            <span className="font-medium text-emerald-800">
-              No unpublished changes
-            </span>
-          )}
-          <p className="mt-0.5 text-xs text-neutral-500">
-            Live site uses the published Homepage until you publish.
-          </p>
-        </div>
-      </div>
+    <div className="mx-auto max-w-3xl space-y-6">
+      <PageHeader
+        title="Homepage"
+        description="Hero, CTAs, section JSON, and SEO — edits save as draft until you publish"
+        action={
+          <AdminPanel className="text-sm">
+            {hasDraft ? (
+              <span className="font-medium text-warning-text">Draft changes</span>
+            ) : (
+              <span className="font-medium text-success-text">
+                No unpublished changes
+              </span>
+            )}
+            <p className="mt-0.5 text-xs text-muted">
+              Live site uses the published Homepage until you publish.
+            </p>
+          </AdminPanel>
+        }
+      />
 
       {!home ? (
-        <div className="admin-empty mb-4">
+        <AdminPanel className="text-sm text-muted">
           No homepage record yet. Saving a draft will create one.
-        </div>
+        </AdminPanel>
       ) : null}
 
       {params.saved ? (
@@ -84,10 +83,10 @@ export default async function AdminHomepagePage({ searchParams }: PageProps) {
       ) : null}
 
       {opportunityId ? (
-        <div className="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+        <AdminPanel className="border-warning bg-warning-soft/40 text-sm text-warning-text">
           Suggested by Topic Intelligence. Review context, then generate a
           proposal when ready — nothing runs automatically.
-        </div>
+        </AdminPanel>
       ) : null}
 
       <HomepageAiPanel user={user} opportunityId={opportunityId} />

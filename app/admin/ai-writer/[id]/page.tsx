@@ -28,6 +28,7 @@ import {
   toggleSourceAction,
   updateProjectMetaAction,
 } from "@/lib/admin/ai-writer-actions";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const dynamic = "force-dynamic";
 
@@ -50,42 +51,46 @@ export default async function AIProjectPage({ params }: PageProps) {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <Link href="/admin/ai-writer" className="text-sm text-neutral-500">
-            ← AI Writer
-          </Link>
-          <h1 className="mt-2 text-2xl font-semibold">{project.title}</h1>
-          <p className="mt-1 text-sm text-neutral-600">
-            {project.mode} · <span className="font-mono text-xs">{project.status}</span>
-            {project.approvedAt ? (
-              <> · Approved {project.approvedAt.toISOString().slice(0, 16)}</>
-            ) : null}
-            {project.linkedInsight ? (
-              <>
-                {" "}
-                · Linked:{" "}
-                <Link
-                  href={`/admin/insights/${project.linkedInsight.id}`}
-                  className="underline"
-                >
-                  {project.linkedInsight.title}
-                </Link>
-              </>
-            ) : null}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <form action={duplicateProjectAction}>
-            <input type="hidden" name="id" value={project.id} />
-            <button className="rounded border px-3 py-2 text-sm">Duplicate</button>
-          </form>
-          <form action={archiveProjectAction}>
-            <input type="hidden" name="id" value={project.id} />
-            <button className="rounded border px-3 py-2 text-sm">Archive</button>
-          </form>
-        </div>
-      </div>
+      <PageHeader
+        title={project.title}
+        description={
+          <>
+            <Link href="/admin/ai-writer" className="text-accent-text hover:underline">
+              ← AI Writer
+            </Link>
+            <span className="mt-2 block">
+              {project.mode} · <span className="font-mono text-xs">{project.status}</span>
+              {project.approvedAt ? (
+                <> · Approved {project.approvedAt.toISOString().slice(0, 16)}</>
+              ) : null}
+              {project.linkedInsight ? (
+                <>
+                  {" "}
+                  · Linked:{" "}
+                  <Link
+                    href={`/admin/insights/${project.linkedInsight.id}`}
+                    className="underline"
+                  >
+                    {project.linkedInsight.title}
+                  </Link>
+                </>
+              ) : null}
+            </span>
+          </>
+        }
+        action={
+          <div className="flex flex-wrap gap-2">
+            <form action={duplicateProjectAction}>
+              <input type="hidden" name="id" value={project.id} />
+              <button className="rounded-md border border-border px-3 py-2 text-sm">Duplicate</button>
+            </form>
+            <form action={archiveProjectAction}>
+              <input type="hidden" name="id" value={project.id} />
+              <button className="rounded-md border border-border px-3 py-2 text-sm">Archive</button>
+            </form>
+          </div>
+        }
+      />
 
       <div
         className={`rounded-lg border px-4 py-3 text-sm ${

@@ -229,28 +229,28 @@ export const growthSystemFlow = growthSystemSteps.map((step) => step.title);
 
 export const problemPoints = [
   {
-    title: "Hard to find on Google",
-    description: "The right customers search — but land on competitors instead.",
-  },
-  {
-    title: "Visitors leave without enquiring",
+    title: "Website not generating enquiries",
     description: "Traffic arrives, but pages do not guide people to act.",
   },
   {
-    title: "Slow mobile experience",
-    description: "Key pages feel awkward or sluggish on a phone.",
+    title: "Hard to find online",
+    description: "The right customers search — but land on competitors instead.",
   },
   {
-    title: "Outdated design",
+    title: "Leads take too long to follow up",
+    description: "Enquiries sit in inboxes while response time slips.",
+  },
+  {
+    title: "Too much repetitive manual work",
+    description: "Staff copy data and repeat the same steps between tools.",
+  },
+  {
+    title: "Business tools do not communicate",
+    description: "CRM, website, email and operations systems stay disconnected.",
+  },
+  {
+    title: "Website feels outdated",
     description: "The site no longer reflects the quality of the business.",
-  },
-  {
-    title: "Weak messaging",
-    description: "New visitors cannot quickly tell what you do or who you help.",
-  },
-  {
-    title: "Difficult to update",
-    description: "Simple content changes require developer help every time.",
   },
 ];
 

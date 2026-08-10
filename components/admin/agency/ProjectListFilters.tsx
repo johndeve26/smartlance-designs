@@ -6,6 +6,10 @@ import {
   AGENCY_PROJECT_STATUS_LABELS,
   AGENCY_SERVICE_TYPE_LABELS,
 } from "@/lib/agency/constants";
+import { AdminPanel } from "@/components/admin/patterns/AdminPanel";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 
 type Owner = { id: string; name: string };
 
@@ -24,51 +28,55 @@ export function ProjectListFilters({ owners }: { owners: Owner[] }) {
   }
 
   return (
-    <form
-      className="admin-card flex flex-wrap gap-2 p-4"
-      onSubmit={(e) => {
-        e.preventDefault();
-        const fd = new FormData(e.currentTarget);
-        push({
-          q: String(fd.get("q") || "") || undefined,
-          status: String(fd.get("status") || "") || undefined,
-          health: String(fd.get("health") || "") || undefined,
-          ownerId: String(fd.get("ownerId") || "") || undefined,
-          serviceType: String(fd.get("serviceType") || "") || undefined,
-        });
-      }}
-    >
-      <input
-        name="q"
-        defaultValue={sp.get("q") ?? ""}
-        placeholder="Search projects…"
-        className="admin-input min-w-[200px] flex-1"
-      />
-      <select name="status" defaultValue={sp.get("status") ?? ""} className="admin-input">
-        <option value="">All statuses</option>
-        {Object.entries(AGENCY_PROJECT_STATUS_LABELS).map(([k, v]) => (
-          <option key={k} value={k}>{v}</option>
-        ))}
-      </select>
-      <select name="health" defaultValue={sp.get("health") ?? ""} className="admin-input">
-        <option value="">All health</option>
-        {Object.entries(AGENCY_PROJECT_HEALTH_LABELS).map(([k, v]) => (
-          <option key={k} value={k}>{v}</option>
-        ))}
-      </select>
-      <select name="ownerId" defaultValue={sp.get("ownerId") ?? ""} className="admin-input">
-        <option value="">All owners</option>
-        {owners.map((o) => (
-          <option key={o.id} value={o.id}>{o.name}</option>
-        ))}
-      </select>
-      <select name="serviceType" defaultValue={sp.get("serviceType") ?? ""} className="admin-input">
-        <option value="">All services</option>
-        {Object.entries(AGENCY_SERVICE_TYPE_LABELS).map(([k, v]) => (
-          <option key={k} value={k}>{v}</option>
-        ))}
-      </select>
-      <button type="submit" className="admin-btn admin-btn-secondary">Filter</button>
-    </form>
+    <AdminPanel className="flex flex-wrap gap-2">
+      <form
+        className="flex flex-wrap gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const fd = new FormData(e.currentTarget);
+          push({
+            q: String(fd.get("q") || "") || undefined,
+            status: String(fd.get("status") || "") || undefined,
+            health: String(fd.get("health") || "") || undefined,
+            ownerId: String(fd.get("ownerId") || "") || undefined,
+            serviceType: String(fd.get("serviceType") || "") || undefined,
+          });
+        }}
+      >
+        <Input
+          name="q"
+          defaultValue={sp.get("q") ?? ""}
+          placeholder="Search projects…"
+          className="min-w-[200px] flex-1"
+        />
+        <Select name="status" defaultValue={sp.get("status") ?? ""}>
+          <option value="">All statuses</option>
+          {Object.entries(AGENCY_PROJECT_STATUS_LABELS).map(([k, v]) => (
+            <option key={k} value={k}>{v}</option>
+          ))}
+        </Select>
+        <Select name="health" defaultValue={sp.get("health") ?? ""}>
+          <option value="">All health</option>
+          {Object.entries(AGENCY_PROJECT_HEALTH_LABELS).map(([k, v]) => (
+            <option key={k} value={k}>{v}</option>
+          ))}
+        </Select>
+        <Select name="ownerId" defaultValue={sp.get("ownerId") ?? ""}>
+          <option value="">All owners</option>
+          {owners.map((o) => (
+            <option key={o.id} value={o.id}>{o.name}</option>
+          ))}
+        </Select>
+        <Select name="serviceType" defaultValue={sp.get("serviceType") ?? ""}>
+          <option value="">All services</option>
+          {Object.entries(AGENCY_SERVICE_TYPE_LABELS).map(([k, v]) => (
+            <option key={k} value={k}>{v}</option>
+          ))}
+        </Select>
+        <Button type="submit" variant="outline" size="sm">
+          Filter
+        </Button>
+      </form>
+    </AdminPanel>
   );
 }

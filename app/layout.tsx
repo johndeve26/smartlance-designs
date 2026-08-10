@@ -90,7 +90,8 @@ export default async function RootLayout({
   const headerList = await headers();
   const isAdminRoute = headerList.get("x-smartlance-admin") === "1";
   const isPortalRoute = headerList.get("x-smartlance-portal") === "1";
-  const hidePublicChrome = isAdminRoute || isPortalRoute;
+  const isWorkspaceRoute = headerList.get("x-smartlance-workspace") === "1";
+  const hidePublicChrome = isAdminRoute || isPortalRoute || isWorkspaceRoute;
   const org = organizationJsonLd({
     name: settings.siteName,
     legalName: settings.businessName,

@@ -9,6 +9,7 @@ import { MigrationSolutionPage } from "@/components/solutions/solution-migration
 import { NewBusinessSolutionPage } from "@/components/solutions/solution-new-business-page";
 import { EcommerceGrowthSolutionPage } from "@/components/solutions/solution-ecommerce-page";
 import { LocalVisibilitySolutionPage } from "@/components/solutions/solution-local-visibility-page";
+import { OperationsSolutionPage } from "@/components/solutions/operations-solution-page";
 import {
   getPublishedSolutionBySlug,
   getSolutionPageContentBySlug,
@@ -27,6 +28,10 @@ import {
   isRankingSolutionContent,
   type SolutionPageContent,
 } from "@/data/solution-pages";
+import {
+  getOperationsSolution,
+  operationsSolutionSlugs,
+} from "@/lib/public/operations-solutions-content";
 import { buildMetadata, buildPageMetadata } from "@/lib/seo";
 
 type SolutionSlugPageProps = {
@@ -35,15 +40,24 @@ type SolutionSlugPageProps = {
 
 export async function generateStaticParams() {
   const solutions = await listPublishedSolutions();
-  return solutions.map((solution) => ({
-    slug: solution.slug,
-  }));
+  const dbSlugs = solutions.map((solution) => ({ slug: solution.slug }));
+  const opsSlugs = operationsSolutionSlugs.map((slug) => ({ slug }));
+  return [...dbSlugs, ...opsSlugs];
 }
 
 export async function generateMetadata({
   params,
 }: SolutionSlugPageProps): Promise<Metadata> {
   const { slug } = await params;
+  const operations = getOperationsSolution(slug);
+  if (operations) {
+    return buildPageMetadata({
+      title: operations.metaTitle,
+      description: operations.metaDescription,
+      path: `/solutions/${slug}`,
+    });
+  }
+
   const solution = await getPublishedSolutionBySlug(slug);
 
   if (!solution) {
@@ -69,6 +83,11 @@ export default async function SolutionSlugPage({
   params,
 }: SolutionSlugPageProps) {
   const { slug } = await params;
+  const operations = getOperationsSolution(slug);
+  if (operations) {
+    return <OperationsSolutionPage content={operations} />;
+  }
+
   const solution = await getPublishedSolutionBySlug(slug);
   const pageContent = await getSolutionPageContentBySlug(slug);
 

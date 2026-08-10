@@ -362,9 +362,12 @@ async function loadPublicNavigationUncached(): Promise<PublicNavigationBundle> {
   const footer = {
     services:
       mapFooter(byKey.FOOTER_SERVICES) || footerNavigation.services,
+    aiAutomation: footerNavigation.aiAutomation,
     solutions: footerNavigation.solutions,
-    explore:
-      mapFooter(byKey.FOOTER_COMPANY) || footerNavigation.explore,
+    work: footerNavigation.work,
+    platforms: footerNavigation.platforms,
+    company:
+      mapFooter(byKey.FOOTER_COMPANY) || footerNavigation.company,
     resources:
       mapFooter(byKey.FOOTER_RESOURCES) || footerNavigation.resources,
     legal: mapFooter(byKey.FOOTER_LEGAL) || footerNavigation.legal,
@@ -445,7 +448,7 @@ export async function seedNavigationFromCode(input?: {
     },
     {
       key: "FOOTER_COMPANY",
-      items: footerNavigation.explore.map((l, i) => ({
+      items: footerNavigation.company.map((l, i) => ({
         label: l.label,
         href: l.href,
         displayOrder: i,

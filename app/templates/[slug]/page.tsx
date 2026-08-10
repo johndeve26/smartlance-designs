@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { AudienceSubscribeSection } from "@/components/audience/subscribe-section-server";
 import { CTASection } from "@/components/ui/cta-section";
 import { StructuredData } from "@/components/ui/structured-data";
 import { BlogCard } from "@/components/ui/blog-card";
@@ -166,6 +167,11 @@ export default async function TemplateDetailPage({ params }: PageProps) {
               <Button asChild>
                 <a href="#project-brief">Use the Template</a>
               </Button>
+              {template.slug === "website-project-brief-template" ? (
+                <Button asChild variant="outline">
+                  <Link href="/website-brief">Open interactive builder</Link>
+                </Button>
+              ) : null}
             </div>
           </div>
         </Container>
@@ -301,6 +307,16 @@ export default async function TemplateDetailPage({ params }: PageProps) {
               </div>
             </div>
           ) : null}
+        </Container>
+      </Section>
+
+      <Section className="!pt-0 !pb-12 print:hidden">
+        <Container>
+          <AudienceSubscribeSection
+            source="TEMPLATE"
+            sourceUrl={`/templates/${slug}`}
+            variant="resource"
+          />
         </Container>
       </Section>
 

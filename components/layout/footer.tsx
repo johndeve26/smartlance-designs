@@ -9,6 +9,7 @@ import {
   primaryCta as defaultPrimaryCta,
 } from "@/data/navigation";
 import { siteConfig } from "@/lib/site";
+import { SubscribeSection } from "@/components/audience/subscribe-section";
 import { TrackedMailto, TrackedTel } from "@/components/forms/tracked-links";
 import type { SocialLink } from "@/types";
 
@@ -24,6 +25,7 @@ type FooterProps = {
     description?: string | null;
   };
   socials?: SocialLink[];
+  audienceEnabled?: boolean;
 };
 
 export function Footer({
@@ -36,6 +38,7 @@ export function Footer({
     description: null,
   },
   socials = getPublishedSocialLinks(),
+  audienceEnabled = true,
 }: FooterProps) {
   const year = new Date().getFullYear();
   const positioning = company.description || siteConfig.tagline;
@@ -84,21 +87,33 @@ export function Footer({
             className="lg:col-span-2"
           />
           <FooterColumn
+            title="AI & Automation"
+            links={footerNavigation.aiAutomation}
+            className="lg:col-span-2"
+          />
+          <FooterColumn
             title="Solutions"
             links={footerNavigation.solutions}
             className="lg:col-span-2"
           />
           <FooterColumn
-            title="Explore"
-            links={footerNavigation.explore}
+            title="Company"
+            links={footerNavigation.company}
             className="lg:col-span-2"
           />
           <FooterColumn
             title="Resources"
             links={footerNavigation.resources}
-            className="lg:col-span-3"
+            className="lg:col-span-4"
           />
         </div>
+
+        <SubscribeSection
+          source="FOOTER"
+          sourceUrl="/"
+          variant="footer"
+          enabled={audienceEnabled}
+        />
 
         <div className="mt-14 flex flex-col gap-4 border-t border-white/10 pt-7 text-[0.9375rem] text-white/60 sm:flex-row sm:items-center sm:justify-between">
           <p>

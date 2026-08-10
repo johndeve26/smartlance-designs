@@ -9,6 +9,8 @@ import {
   EnquiryStatusBadge,
 } from "@/components/admin/enquiries/EnquiryBadges";
 import { EnquiryDetailActions } from "@/components/admin/enquiries/EnquiryDetailActions";
+import { AdminPanel } from "@/components/admin/patterns/AdminPanel";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const dynamic = "force-dynamic";
 
@@ -47,26 +49,26 @@ export default async function AdminReviewEnquiryDetailPage({
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <div>
-        <Link
-          href="/admin/enquiries/reviews"
-          className="text-sm text-neutral-500 hover:underline"
-        >
-          ← Website review requests
-        </Link>
-        <div className="mt-2 flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-semibold">{enquiry.reference}</h1>
-          <EnquiryStatusBadge status={enquiry.status} />
-          <DeliveryBadge status={enquiry.notificationStatus} />
-        </div>
-        <p className="mt-1 text-sm text-neutral-600">
-          Submitted{" "}
-          {enquiry.submittedAt.toISOString().slice(0, 16).replace("T", " ")} UTC
-          {enquiry.isAnonymized ? " · Anonymized" : ""}
-        </p>
-      </div>
+      <PageHeader
+        title={enquiry.reference}
+        breadcrumbs={
+          <Link
+            href="/admin/enquiries/reviews"
+            className="text-accent-text hover:underline"
+          >
+            ← Website review requests
+          </Link>
+        }
+        description={`Submitted ${enquiry.submittedAt.toISOString().slice(0, 16).replace("T", " ")} UTC${enquiry.isAnonymized ? " · Anonymized" : ""}`}
+        action={
+          <>
+            <EnquiryStatusBadge status={enquiry.status} />
+            <DeliveryBadge status={enquiry.notificationStatus} />
+          </>
+        }
+      />
 
-      <section className="space-y-3 rounded-lg border bg-white p-4">
+      <AdminPanel className="space-y-3">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
           Submission
         </h2>
@@ -94,9 +96,9 @@ export default async function AdminReviewEnquiryDetailPage({
             </a>
           ) : null}
         </div>
-      </section>
+      </AdminPanel>
 
-      <section className="space-y-3 rounded-lg border bg-white p-4">
+      <AdminPanel className="space-y-3">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
           Delivery
         </h2>
@@ -106,7 +108,7 @@ export default async function AdminReviewEnquiryDetailPage({
         {enquiry.lastNotificationError ? (
           <p className="text-sm text-red-700">{enquiry.lastNotificationError}</p>
         ) : null}
-      </section>
+      </AdminPanel>
 
       <EnquiryDetailActions
         enquiry={{
@@ -126,7 +128,7 @@ export default async function AdminReviewEnquiryDetailPage({
         }))}
       />
 
-      <section className="rounded-lg border bg-white p-4">
+      <AdminPanel>
         <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
           Activity
         </h2>
@@ -144,7 +146,7 @@ export default async function AdminReviewEnquiryDetailPage({
             <li className="text-neutral-500">No activity events yet.</li>
           ) : null}
         </ul>
-      </section>
+      </AdminPanel>
     </div>
   );
 }

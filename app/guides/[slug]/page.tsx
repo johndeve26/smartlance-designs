@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
+import { AudienceSubscribeSection } from "@/components/audience/subscribe-section-server";
 import { CTASection } from "@/components/ui/cta-section";
 import { StructuredData } from "@/components/ui/structured-data";
 import { BlogCard } from "@/components/ui/blog-card";
@@ -264,6 +265,16 @@ export default async function GuideDetailPage({ params }: PageProps) {
               </aside>
             ) : null}
           </div>
+        </Container>
+      </Section>
+
+      <Section className="!pt-0 !pb-12">
+        <Container>
+          <AudienceSubscribeSection
+            source="GUIDE"
+            sourceUrl={`/guides/${slug}`}
+            variant="resource"
+          />
         </Container>
       </Section>
 

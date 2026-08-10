@@ -9,12 +9,17 @@ import {
 import { getResearchProviderStatus } from "@/lib/ai/research";
 import { listProviderPresentations } from "@/lib/ai/providers/presentation";
 import { canEncryptAiSecrets } from "@/lib/ai/secrets";
+import { AI_ADMIN_LABELS } from "@/lib/admin/ai-settings-labels";
 import { AISettingsNotice } from "@/components/admin/ai-writer/AISettingsNotice";
 import { ProviderConnections } from "@/components/admin/ai-writer/ProviderConnections";
 import { ModelRoutingSection } from "@/components/admin/ai-writer/ModelRoutingSection";
+import { PublicProspectAISection } from "@/components/admin/ai-writer/PublicProspectAISection";
 import { GenerationLimitsSection } from "@/components/admin/ai-writer/GenerationLimitsSection";
 import { AIWriterSubnav } from "@/components/admin/ai-writer/AIWriterSubnav";
 import { getDiscoveryProviderStatus } from "@/lib/ai/topic-intelligence/providers";
+import { PageHeader } from "@/components/ui/page-header";
+import { AdminPanel } from "@/components/admin/patterns/AdminPanel";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +37,7 @@ function buildNotice(sp: Record<string, string | string[] | undefined>): {
 } | null {
   const notice = spString(sp, "notice");
   if (notice === "routing") return { message: "✓ Model routing saved", tone: "success" };
+  if (notice === "prospect-ai-test") return null;
   if (notice === "limits") return { message: "✓ Generation limits saved", tone: "success" };
   if (notice === "provider") {
     const id = spString(sp, "saved");
@@ -84,6 +90,20 @@ export default async function AIWriterSettingsPage({
     !defaultAccount?.configured || defaultAccount.enabled === false;
   const researchAiProviderId = settings.researchProviderId || defaultProviderId;
   const researchAiAccount = ai.accounts.find((a) => a.providerId === researchAiProviderId);
+  const fastProviderId = settings.fastProviderId || defaultProviderId;
+  const fastAccount = ai.accounts.find((a) => a.providerId === fastProviderId);
+  const fastModel =
+    settings.fastModel ||
+    getCatalogDefaultModel(fastProviderId, "FAST", fastAccount?.defaultModel);
+  const prospectAiTestResult =
+    spString(sp, "notice") === "prospect-ai-test" && spString(sp, "result")
+      ? {
+          result: spString(sp, "result")!,
+          reason: spString(sp, "reason")
+            ? decodeURIComponent(spString(sp, "reason")!)
+            : undefined,
+        }
+      : null;
 
   const openId = spString(sp, "open");
   const testResult = spString(sp, "test")
@@ -98,46 +118,45 @@ export default async function AIWriterSettingsPage({
 
   return (
     <div className="mx-auto max-w-4xl space-y-8 pb-10">
-      <header className="space-y-3">
-        <nav className="text-sm text-neutral-500">
-          <Link href="/admin/ai-writer" className="hover:text-neutral-800">
-            AI Writer
-          </Link>
-          <span className="mx-1.5">/</span>
-          <span className="text-neutral-800">Settings</span>
-        </nav>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">
-              AI Writer Settings
-            </h1>
-            <p className="mt-1 text-sm text-neutral-600">
-              Configure AI providers, model routing, research access and generation limits.
-            </p>
-          </div>
-          <Link href="/admin/system" className="admin-btn">
-            View System Status
-          </Link>
-        </div>
-        <AIWriterSubnav current="/admin/ai-writer/settings" />
-        <nav className="flex flex-wrap gap-3 text-sm">
-          <a href="#providers" className="text-neutral-600 hover:text-neutral-900">
-            Providers
-          </a>
-          <a href="#routing" className="text-neutral-600 hover:text-neutral-900">
-            Model routing
-          </a>
-          <a href="#research" className="text-neutral-600 hover:text-neutral-900">
-            Research
-          </a>
-          <a href="#discovery" className="text-neutral-600 hover:text-neutral-900">
-            Discovery sources
-          </a>
-          <a href="#limits" className="text-neutral-600 hover:text-neutral-900">
-            Limits
-          </a>
-        </nav>
-      </header>
+      <PageHeader
+        title={AI_ADMIN_LABELS.settingsTitle}
+        description={AI_ADMIN_LABELS.settingsDescription}
+        action={
+          <Button asChild variant="secondary" size="sm">
+            <Link href="/admin/system">View System Status</Link>
+          </Button>
+        }
+        breadcrumbs={
+          <nav className="text-sm text-muted">
+            <Link href="/admin/ai-writer" className="hover:text-foreground">
+              {AI_ADMIN_LABELS.hub}
+            </Link>
+            <span className="mx-1.5">/</span>
+            <span className="text-foreground">{AI_ADMIN_LABELS.settingsBreadcrumb}</span>
+          </nav>
+        }
+      />
+      <AIWriterSubnav current="/admin/ai-writer/settings" />
+      <nav className="flex flex-wrap gap-3 text-sm">
+        <a href="#providers" className="text-muted hover:text-foreground">
+          Providers
+        </a>
+        <a href="#routing" className="text-muted hover:text-foreground">
+          Model routing
+        </a>
+        <a href="#prospect-ai" className="text-muted hover:text-foreground">
+          {AI_ADMIN_LABELS.websiteAiSection}
+        </a>
+        <a href="#research" className="text-muted hover:text-foreground">
+          Research
+        </a>
+        <a href="#discovery" className="text-muted hover:text-foreground">
+          Discovery sources
+        </a>
+        <a href="#limits" className="text-muted hover:text-foreground">
+          Limits
+        </a>
+      </nav>
 
       {notice ? (
         <AISettingsNotice key={notice.message} message={notice.message} tone={notice.tone} />
@@ -160,11 +179,11 @@ export default async function AIWriterSettingsPage({
         </div>
       ) : null}
 
-      <section className="rounded-lg border border-neutral-200 bg-white p-4">
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+      <AdminPanel>
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">
           System overview
         </h2>
-        <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <div>
             <p className="text-xs uppercase tracking-wide text-neutral-500">AI provider</p>
             <p className="mt-1 text-sm font-semibold text-neutral-900">
@@ -203,8 +222,15 @@ export default async function AIWriterSettingsPage({
               {research.configured ? "Connected" : "No web research provider configured"}
             </p>
           </div>
+          <div>
+            <p className="text-xs uppercase tracking-wide text-neutral-500">Website AI</p>
+            <p className="mt-1 text-sm font-semibold text-neutral-900">
+              {getCatalogEntry(fastProviderId)?.label || fastProviderId}
+            </p>
+            <p className="mt-0.5 break-all font-mono text-xs text-neutral-600">{fastModel}</p>
+          </div>
         </div>
-      </section>
+      </AdminPanel>
 
       <ProviderConnections
         providers={providers}
@@ -223,6 +249,19 @@ export default async function AIWriterSettingsPage({
       />
 
       <ModelRoutingSection settings={settings} accounts={ai.accounts} />
+
+      <PublicProspectAISection
+        settings={settings}
+        accounts={ai.accounts.map((a) => ({
+          providerId: a.providerId,
+          enabled: a.enabled,
+          configured: a.configured,
+          apiKeyLast4: a.apiKeyLast4,
+          baseUrl: a.baseUrl,
+          defaultModel: a.defaultModel,
+        }))}
+        testResult={prospectAiTestResult}
+      />
 
       <section id="research" className="scroll-mt-6 space-y-3">
         <div>
@@ -321,7 +360,7 @@ export default async function AIWriterSettingsPage({
       <GenerationLimitsSection settings={settings} />
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-neutral-900">Editorial configuration</h2>
+        <h2 className="text-lg font-semibold text-neutral-900">{AI_ADMIN_LABELS.editorialStudio}</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <Link
             href="/admin/ai-writer/brand-voice"
@@ -339,7 +378,7 @@ export default async function AIWriterSettingsPage({
                 {brand.approved ? "Approved" : "Needs approval"}
               </span>
             </div>
-            <p className="mt-1 text-sm text-neutral-600">Manage how AI Writer sounds.</p>
+            <p className="mt-1 text-sm text-neutral-600">Tone and voice for the editorial studio.</p>
           </Link>
           <Link
             href="/admin/ai-writer/source-policy"

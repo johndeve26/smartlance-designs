@@ -28,7 +28,9 @@ export function AboutWho() {
           <div className="max-w-xl space-y-5 text-[1.0625rem] leading-[1.75] text-muted sm:text-lg">
             <p>
               Smartlance helps businesses improve their online presence through
-              website design, development, SEO and conversion-focused strategy.
+              website design, development, SEO, conversion-focused strategy, and
+              — where it makes sense — automation and AI that connect the tools
+              they already use.
             </p>
             <p>
               The goal is not simply to make a website look different. The goal
@@ -40,6 +42,26 @@ export function AboutWho() {
               Design, structure, SEO and conversion are planned together, because
               each one affects how effectively visitors find the site, understand
               the offer and take the next step.
+            </p>
+            <p className="text-foreground">
+              Good technology should make a business easier to understand, easier
+              to operate and easier to grow — across{" "}
+              <Link href="/services" className="font-semibold text-accent-text hover:underline">
+                web
+              </Link>
+              ,{" "}
+              <Link href="/services/seo" className="font-semibold text-accent-text hover:underline">
+                growth
+              </Link>
+              ,{" "}
+              <Link href="/ai-automation" className="font-semibold text-accent-text hover:underline">
+                AI
+              </Link>{" "}
+              and{" "}
+              <Link href="/ai-automation/workflow-automation" className="font-semibold text-accent-text hover:underline">
+                automation
+              </Link>{" "}
+              where those systems need to work together.
             </p>
           </div>
         </div>
@@ -280,6 +302,14 @@ export function AboutProcess() {
             </li>
           ))}
         </ol>
+        <div className="mt-12 flex flex-wrap gap-6">
+          <Link href="/how-we-work" className="link-action">
+            See How We Work →
+          </Link>
+          <Link href="/work" className="link-action">
+            See Our Work →
+          </Link>
+        </div>
       </Container>
     </Section>
   );

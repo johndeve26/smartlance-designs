@@ -22,6 +22,8 @@ import {
   getFieldDisplayValue,
   type TemplateValues,
 } from "@/components/templates/brief-plain-text";
+import { BriefAiHelpButton } from "@/components/prospect/BriefAiHelpButton";
+import { buildBriefContextForField } from "@/lib/prospect/ai/brief-field-context";
 
 const STORAGE_PREFIX = "smartlance.template.";
 
@@ -477,6 +479,7 @@ function TemplateSectionBlock({
           <FieldControl
             key={field.id}
             field={field}
+            sectionTitle={section.title}
             values={values}
             onChange={onChange}
           />
@@ -513,10 +516,12 @@ function FieldHelp({ field }: { field: TemplateField }) {
 
 function FieldControl({
   field,
+  sectionTitle,
   values,
   onChange,
 }: {
   field: TemplateField;
+  sectionTitle: string;
   values: TemplateValues;
   onChange: (fieldId: string, value: string | string[]) => void;
 }) {
@@ -639,6 +644,16 @@ function FieldControl({
           rows={field.rows ?? 4}
           maxLength={field.maxLength}
           className={cn(inputClassName, "min-h-[6rem] resize-y")}
+        />
+        <BriefAiHelpButton
+          fieldId={field.id}
+          fieldLabel={field.label}
+          currentValue={stringValue}
+          fieldHelp={field.help}
+          fieldPlaceholder={field.placeholder}
+          sectionTitle={sectionTitle}
+          briefContext={buildBriefContextForField(values, field.id)}
+          onApply={(value) => onChange(field.id, value)}
         />
       </div>
     );

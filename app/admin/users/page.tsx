@@ -9,6 +9,12 @@ import {
   updateUserRoleAction,
 } from "@/lib/admin/user-actions";
 import { CreateUserForm } from "@/components/admin/CreateUserForm";
+import { AdminListPage } from "@/components/admin/patterns/AdminListPage";
+import { AdminPanel } from "@/components/admin/patterns/AdminPanel";
+import { AdminSection } from "@/components/admin/patterns/AdminPanel";
+import { DataTable } from "@/components/ui/data-table";
+import { Alert } from "@/components/ui/alert";
+import { formatDate } from "@/lib/ui/format";
 
 export const metadata: Metadata = {
   title: "Users",
@@ -25,103 +31,98 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="admin-page-title">Users</h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          Manage admin accounts and roles
-        </p>
-      </div>
+      <AdminListPage
+        title="Users"
+        description="Manage admin accounts and roles."
+        isEmpty={users.length === 0}
+        empty={{
+          title: "No admin users yet",
+          description: "Create the first admin account below.",
+        }}
+      >
+        <DataTable
+          rows={users}
+          rowKey={(u) => u.id}
+          columns={[
+            { key: "name", header: "Name", cell: (u) => <span className="font-medium">{u.name}</span> },
+            { key: "email", header: "Email", cell: (u) => u.email },
+            {
+              key: "role",
+              header: "Role",
+              cell: (u) => (
+                <form action={updateUserRoleAction} className="flex flex-wrap items-center gap-2">
+                  <input type="hidden" name="id" value={u.id} />
+                  <select
+                    name="role"
+                    defaultValue={u.role}
+                    className="rounded-md border border-border bg-surface px-2 py-1 text-sm"
+                  >
+                    <option value="SUPER_ADMIN">Super Admin</option>
+                    <option value="EDITOR">Editor</option>
+                    <option value="CONTENT_MANAGER">Content Manager</option>
+                    <option value="REVIEWER">Reviewer</option>
+                  </select>
+                  <button
+                    type="submit"
+                    className="rounded-md border border-border bg-surface px-2 py-1 text-xs font-medium hover:bg-surface-muted"
+                  >
+                    Set
+                  </button>
+                  <span className="sr-only">{roleLabel(u.role)}</span>
+                </form>
+              ),
+            },
+            {
+              key: "status",
+              header: "Status",
+              cell: (u) => <StatusBadge status={u.status} />,
+            },
+            {
+              key: "lastLogin",
+              header: "Last login",
+              className: "whitespace-nowrap text-muted",
+              cell: (u) => (u.lastLoginAt ? formatDate(u.lastLoginAt) : "Never"),
+            },
+            {
+              key: "actions",
+              header: "Actions",
+              cell: (u) => (
+                <form action={setUserStatusAction}>
+                  <input type="hidden" name="id" value={u.id} />
+                  <input
+                    type="hidden"
+                    name="status"
+                    value={u.status === "ACTIVE" ? "DISABLED" : "ACTIVE"}
+                  />
+                  <button
+                    type="submit"
+                    className={
+                      u.status === "ACTIVE"
+                        ? "rounded-md border border-error/30 bg-error-soft px-2 py-1 text-xs font-medium text-error"
+                        : "rounded-md border border-border bg-surface px-2 py-1 text-xs font-medium hover:bg-surface-muted"
+                    }
+                  >
+                    {u.status === "ACTIVE" ? "Disable" : "Enable"}
+                  </button>
+                </form>
+              ),
+            },
+          ]}
+        />
+      </AdminListPage>
 
       {params.created ? (
-        <p className="text-sm text-emerald-700">User created.</p>
+        <Alert tone="success">User created.</Alert>
       ) : null}
       {params.updated ? (
-        <p className="text-sm text-emerald-700">User updated.</p>
+        <Alert tone="success">User updated.</Alert>
       ) : null}
 
-      <section className="admin-card overflow-x-auto">
-        {users.length === 0 ? (
-          <div className="admin-empty">No admin users yet.</div>
-        ) : (
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Last login</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr key={u.id}>
-                  <td className="font-medium">{u.name}</td>
-                  <td>{u.email}</td>
-                  <td>
-                    <form
-                      action={updateUserRoleAction}
-                      className="flex items-center gap-2"
-                    >
-                      <input type="hidden" name="id" value={u.id} />
-                      <select
-                        name="role"
-                        defaultValue={u.role}
-                        className="admin-input py-1 text-sm"
-                      >
-                        <option value="SUPER_ADMIN">Super Admin</option>
-                        <option value="EDITOR">Editor</option>
-                        <option value="CONTENT_MANAGER">Content Manager</option>
-                        <option value="REVIEWER">Reviewer</option>
-                      </select>
-                      <button type="submit" className="admin-btn">
-                        Set
-                      </button>
-                    </form>
-                    <span className="sr-only">{roleLabel(u.role)}</span>
-                  </td>
-                  <td>
-                    <StatusBadge status={u.status} />
-                  </td>
-                  <td className="whitespace-nowrap text-neutral-500">
-                    {u.lastLoginAt
-                      ? u.lastLoginAt.toLocaleString()
-                      : "Never"}
-                  </td>
-                  <td>
-                    <form action={setUserStatusAction}>
-                      <input type="hidden" name="id" value={u.id} />
-                      <input
-                        type="hidden"
-                        name="status"
-                        value={u.status === "ACTIVE" ? "DISABLED" : "ACTIVE"}
-                      />
-                      <button
-                        type="submit"
-                        className={
-                          u.status === "ACTIVE"
-                            ? "admin-btn-danger"
-                            : "admin-btn"
-                        }
-                      >
-                        {u.status === "ACTIVE" ? "Disable" : "Enable"}
-                      </button>
-                    </form>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
-
-      <section className="admin-card max-w-lg">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-neutral-500">
-          Create user
-        </h2>
-        <CreateUserForm action={createUserAction} />
-      </section>
+      <AdminSection title="Create user">
+        <AdminPanel className="max-w-lg">
+          <CreateUserForm action={createUserAction} />
+        </AdminPanel>
+      </AdminSection>
     </div>
   );
 }

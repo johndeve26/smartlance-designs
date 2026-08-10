@@ -6,6 +6,7 @@ import { ProjectCard } from "@/components/ui/project-card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Project } from "@/types";
+import { CAPABILITY_MATCHERS } from "@/lib/public/work-capabilities";
 
 type FilterState = {
   industry: string;
@@ -14,6 +15,12 @@ type FilterState = {
 };
 
 const ALL = "All";
+
+function resolveCapabilityExpertise(capability?: string): string {
+  if (!capability) return ALL;
+  const key = capability.toLowerCase();
+  return CAPABILITY_MATCHERS[key]?.label ?? ALL;
+}
 
 function sortProjects(projects: Project[]) {
   return [...projects].sort((a, b) => {
@@ -27,16 +34,18 @@ function sortProjects(projects: Project[]) {
 export function PortfolioFilters({
   projects: inputProjects,
   initialPlatform,
+  initialCapability,
 }: {
   projects: Project[];
   initialPlatform?: string;
+  initialCapability?: string;
 }) {
   const projects = useMemo(() => sortProjects(inputProjects), [inputProjects]);
-  const [filters, setFilters] = useState<FilterState>({
+  const [filters, setFilters] = useState<FilterState>(() => ({
     industry: ALL,
     platform: initialPlatform || ALL,
-    expertise: ALL,
-  });
+    expertise: resolveCapabilityExpertise(initialCapability),
+  }));
 
   const industries = useMemo(
     () =>
@@ -64,11 +73,15 @@ export function PortfolioFilters({
     [projects],
   );
 
-  const expertiseOptions = useMemo(
-    () =>
-      [ALL, ...Array.from(new Set(projects.flatMap((p) => p.services))).sort()],
-    [projects],
-  );
+  const expertiseOptions = useMemo(() => {
+    const capabilityLabels = Object.values(CAPABILITY_MATCHERS)
+      .filter((entry) => projects.some((project) => entry.match(project.services)))
+      .map((entry) => entry.label);
+    const serviceLabels = Array.from(
+      new Set(projects.flatMap((project) => project.services)),
+    ).sort();
+    return [ALL, ...capabilityLabels, ...serviceLabels.filter((s) => !capabilityLabels.includes(s))];
+  }, [projects]);
 
   const filtered = useMemo(() => {
     return projects.filter((project) => {
@@ -82,13 +95,19 @@ export function PortfolioFilters({
         ].filter(Boolean);
         if (!projectPlatforms.includes(filters.platform)) return false;
       }
-      if (
-        filters.expertise !== ALL &&
-        !project.services.includes(
-          filters.expertise as (typeof project.services)[number],
-        )
-      ) {
-        return false;
+      if (filters.expertise !== ALL) {
+        const capabilityEntry = Object.values(CAPABILITY_MATCHERS).find(
+          (entry) => entry.label === filters.expertise,
+        );
+        if (capabilityEntry) {
+          if (!capabilityEntry.match(project.services)) return false;
+        } else if (
+          !project.services.includes(
+            filters.expertise as (typeof project.services)[number],
+          )
+        ) {
+          return false;
+        }
       }
       return true;
     });
@@ -194,21 +213,21 @@ export function PortfolioFilters({
       {count === 0 ? (
         <div className="mt-10 border border-border bg-surface-muted/50 px-6 py-12 text-center sm:px-10">
           <h2 className="font-display text-2xl font-semibold">
-            No projects match those filters.
+            No published projects match those filters.
           </h2>
           <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-muted">
-            Try a broader combination, or tell us what kind of example would
-            help.
+            Try a broader combination or view all work. We only show capability
+            filters when matching case studies are published.
           </p>
           <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row sm:items-center">
             <Button type="button" onClick={resetFilters}>
-              Reset filters
+              View all work
             </Button>
             <Link
-              href="/contact"
+              href="/work"
               className="text-base font-semibold text-accent-text hover:underline"
             >
-              Tell us what you&apos;re looking for →
+              Back to all projects →
             </Link>
           </div>
         </div>

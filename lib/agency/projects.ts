@@ -134,6 +134,9 @@ export async function getProjectById(projectId: string) {
         take: 30,
       },
       sourceDeal: { select: { id: true, title: true, stage: true } },
+      sourceProposal: {
+        select: { id: true, proposalNumber: true, title: true, status: true },
+      },
     },
   });
 }
@@ -170,59 +173,72 @@ export async function createProject(input: {
   });
 
   const project = await prisma.$transaction(async (tx) => {
-    const projectNumber = await generateAgencyProjectNumber(tx);
+    const maxAttempts = 3;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const projectNumber = await generateAgencyProjectNumber(tx);
 
-    const created = await tx.agencyProject.create({
-      data: {
-        projectNumber,
-        name: input.name.trim(),
-        primaryContactId: input.primaryContactId,
-        clientCompanyId: input.clientCompanyId ?? contact.companyId,
-        serviceType: input.serviceType as never,
-        customServiceName: input.customServiceName?.trim() || null,
-        cmsServiceSlug: input.cmsServiceSlug?.trim() || null,
-        ownerId: input.ownerId,
-        createdById: input.createdById,
-        startDate: input.startDate ?? null,
-        targetDueDate: input.targetDueDate ?? null,
-        budgetSnapshot: input.budgetSnapshot ?? null,
-        currency: input.currency ?? "USD",
-        summary: input.summary?.trim() || null,
-        internalNotes: input.internalNotes?.trim() || null,
-        clientVisibilityEnabled: input.clientVisibilityEnabled ?? true,
-        caseStudyCandidate: input.caseStudyCandidate ?? false,
-        members: {
-          create: {
-            userId: input.ownerId,
-            role: "OWNER",
+      try {
+        const created = await tx.agencyProject.create({
+          data: {
+            projectNumber,
+            name: input.name.trim(),
+            primaryContactId: input.primaryContactId,
+            clientCompanyId: input.clientCompanyId ?? contact.companyId,
+            serviceType: input.serviceType as never,
+            customServiceName: input.customServiceName?.trim() || null,
+            cmsServiceSlug: input.cmsServiceSlug?.trim() || null,
+            ownerId: input.ownerId,
+            createdById: input.createdById,
+            startDate: input.startDate ?? null,
+            targetDueDate: input.targetDueDate ?? null,
+            budgetSnapshot: input.budgetSnapshot ?? null,
+            currency: input.currency ?? "USD",
+            summary: input.summary?.trim() || null,
+            internalNotes: input.internalNotes?.trim() || null,
+            clientVisibilityEnabled: input.clientVisibilityEnabled ?? true,
+            caseStudyCandidate: input.caseStudyCandidate ?? false,
+            members: {
+              create: {
+                userId: input.ownerId,
+                role: "OWNER",
+              },
+            },
           },
-        },
-      },
-    });
+        });
 
-    await recordAgencyProjectActivity(
-      {
-        projectId: created.id,
-        type: "PROJECT_CREATED",
-        summary: `Project ${created.projectNumber} created.`,
-        actorUserId: input.createdById,
-        clientVisible: true,
-      },
-      tx,
-    );
+        await recordAgencyProjectActivity(
+          {
+            projectId: created.id,
+            type: "PROJECT_CREATED",
+            summary: `Project ${created.projectNumber} created.`,
+            actorUserId: input.createdById,
+            clientVisible: true,
+          },
+          tx,
+        );
 
-    if (input.templateId) {
-      await instantiateTemplateIntoProject(
-        {
-          projectId: created.id,
-          templateId: input.templateId,
-          actorUserId: input.createdById,
-        },
-        tx,
-      );
+        if (input.templateId) {
+          await instantiateTemplateIntoProject(
+            {
+              projectId: created.id,
+              templateId: input.templateId,
+              actorUserId: input.createdById,
+            },
+            tx,
+          );
+        }
+
+        return created;
+      } catch (err) {
+        const code = (err as { code?: string }).code;
+        if (code === "P2002" && attempt < maxAttempts - 1) {
+          continue;
+        }
+        throw err;
+      }
     }
 
-    return created;
+    throw new Error("Failed to allocate a unique project number.");
   });
 
   return getProjectById(project.id);
@@ -405,6 +421,9 @@ export async function getProjectAdminDetail(projectId: string) {
       owner: { select: { id: true, name: true, email: true } },
       createdBy: { select: { id: true, name: true } },
       sourceDeal: { select: { id: true, title: true, stage: true } },
+      sourceProposal: {
+        select: { id: true, proposalNumber: true, title: true, status: true },
+      },
       members: {
         include: { user: { select: { id: true, name: true, email: true } } },
         orderBy: { createdAt: "asc" },

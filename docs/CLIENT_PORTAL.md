@@ -52,4 +52,22 @@ Admin revokes via `AgencyProjectClientAccess.revokedAt`. Active sessions should 
 2. Secure token emailed (hashed at rest)
 3. Client clicks link → session created → project access confirmed
 
-Invite statuses: `PENDING`, `ACCEPTED`, `REVOKED`, `EXPIRED`.
+## Portal data visibility
+
+Portal loaders use explicit DTOs — never raw `AgencyProject` with all relations. The following are **never** exposed to clients:
+
+- Internal notes, budget snapshots, project health
+- Internal tasks (`clientVisible = false`)
+- CRM lead/deal data, internal contact properties
+- Full admin user records
+
+Deliverable approvals derive reviewer identity from the authenticated portal session only — never from client-supplied contact IDs.
+
+## Deployment order
+
+1. Configure private S3 storage (`AGENCY_PRIVATE_STORAGE_DRIVER=s3`, bucket + credentials)
+2. Deploy code
+3. Run `npx prisma migrate deploy`
+4. Restart app (env validation runs at startup)
+5. Optionally: Admin → Project Templates → **Install starter templates**
+6. Run portal/file smoke tests

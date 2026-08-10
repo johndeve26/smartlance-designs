@@ -1,21 +1,24 @@
-import { createReadStream } from "node:fs";
-import { mkdir, readFile, stat, unlink, writeFile } from "node:fs/promises";
-import path from "node:path";
-import { randomBytes } from "node:crypto";
 import type { AdminRole } from "@prisma/client";
-import {
-  DeleteObjectCommand,
-  GetObjectCommand,
-  HeadObjectCommand,
-  PutObjectCommand,
-  S3Client,
-} from "@aws-sdk/client-s3";
 import { prisma } from "@/lib/db";
 import { can } from "@/lib/admin/rbac";
-import { AGENCY_PRIVATE_STORAGE_PREFIX } from "@/lib/agency/constants";
+import {
+  AGENCY_FILE_MAX_BYTES,
+  isAllowedAgencyUpload,
+} from "@/lib/agency/constants";
+import {
+  buildAgencyStorageKey,
+  buildContentDisposition,
+  deleteAgencyPrivateObject,
+  getAgencyPrivateSignedDownloadUrl,
+  getAgencyPrivateStorageDriver,
+  isInlineSafeMime,
+  putAgencyPrivateObject,
+  readAgencyPrivateObject,
+  statAgencyPrivateObject,
+  streamLocalAgencyFile,
+  validateAgencyPrivateStorageConfig,
+} from "@/lib/agency/private-storage";
 import { hasProjectAccess } from "@/lib/portal/access";
-
-const LOCAL_ROOT = path.join(process.cwd(), "storage", "agency", "private");
 
 export type AgencyFileUploadInput = {
   projectId: string;
@@ -35,129 +38,35 @@ export type AgencyStoredFile = {
   byteSize: number;
 };
 
-function isProductionLike() {
-  return (
-    process.env.VERCEL_ENV === "production" ||
-    process.env.NODE_ENV === "production"
-  );
-}
-
-function getConfiguredProviderName(): "local" | "s3" {
-  const raw = (process.env.AGENCY_STORAGE_PROVIDER || process.env.MEDIA_STORAGE_PROVIDER || "local").toLowerCase();
-  if (raw === "s3" || raw === "r2" || raw === "s3-compatible") return "s3";
-  return "local";
-}
-
-function sanitizeFilename(filename: string) {
-  return filename.replace(/[^a-zA-Z0-9._-]+/g, "-").replace(/^-+|-+$/g, "") || "file";
-}
-
-function buildStorageKey(projectId: string, filename: string) {
-  const safeName = sanitizeFilename(filename);
-  const unique = randomBytes(8).toString("hex");
-  return `${AGENCY_PRIVATE_STORAGE_PREFIX}/${projectId}/${unique}-${safeName}`;
-}
-
-let s3Client: S3Client | null = null;
-
-function getS3Client() {
-  if (s3Client) return s3Client;
-  const endpoint = process.env.AGENCY_S3_ENDPOINT || process.env.MEDIA_S3_ENDPOINT;
-  const region = process.env.AGENCY_S3_REGION || process.env.MEDIA_S3_REGION || "auto";
-  const accessKeyId = process.env.AGENCY_S3_ACCESS_KEY_ID || process.env.MEDIA_S3_ACCESS_KEY_ID;
-  const secretAccessKey =
-    process.env.AGENCY_S3_SECRET_ACCESS_KEY || process.env.MEDIA_S3_SECRET_ACCESS_KEY;
-
-  if (!accessKeyId || !secretAccessKey) {
-    throw new Error("S3 agency storage requires access key credentials.");
+export function assertAgencyUploadAllowed(input: {
+  filename: string;
+  mimeType: string;
+  byteSize: number;
+}) {
+  if (input.byteSize > AGENCY_FILE_MAX_BYTES) {
+    throw new Error(`File exceeds maximum size of ${AGENCY_FILE_MAX_BYTES / (1024 * 1024)} MB.`);
   }
-
-  s3Client = new S3Client({
-    region,
-    endpoint: endpoint || undefined,
-    forcePathStyle:
-      process.env.AGENCY_S3_FORCE_PATH_STYLE === "1" ||
-      process.env.MEDIA_S3_FORCE_PATH_STYLE === "1",
-    credentials: { accessKeyId, secretAccessKey },
-  });
-  return s3Client;
-}
-
-function getS3Bucket() {
-  const bucket = process.env.AGENCY_S3_BUCKET || process.env.MEDIA_S3_BUCKET;
-  if (!bucket) throw new Error("S3 agency storage requires AGENCY_S3_BUCKET or MEDIA_S3_BUCKET.");
-  return bucket;
-}
-
-async function uploadToLocal(storageKey: string, buffer: Buffer) {
-  if (isProductionLike() && process.env.AGENCY_ALLOW_LOCAL_IN_PRODUCTION !== "1") {
-    throw new Error(
-      "Local agency file storage is development-only. Configure S3-compatible storage.",
-    );
+  if (!isAllowedAgencyUpload(input.filename, input.mimeType)) {
+    throw new Error("File type is not permitted for project uploads.");
   }
-  const full = path.join(LOCAL_ROOT, storageKey.replace(`${AGENCY_PRIVATE_STORAGE_PREFIX}/`, ""));
-  await mkdir(path.dirname(full), { recursive: true });
-  await writeFile(full, buffer);
-}
-
-async function readFromLocal(storageKey: string) {
-  const full = path.join(LOCAL_ROOT, storageKey.replace(`${AGENCY_PRIVATE_STORAGE_PREFIX}/`, ""));
-  return readFile(full);
-}
-
-async function deleteFromLocal(storageKey: string) {
-  const full = path.join(LOCAL_ROOT, storageKey.replace(`${AGENCY_PRIVATE_STORAGE_PREFIX}/`, ""));
-  try {
-    await unlink(full);
-  } catch (err) {
-    const code = (err as NodeJS.ErrnoException).code;
-    if (code !== "ENOENT") throw err;
-  }
-}
-
-async function uploadToS3(storageKey: string, buffer: Buffer, mimeType: string) {
-  await getS3Client().send(
-    new PutObjectCommand({
-      Bucket: getS3Bucket(),
-      Key: storageKey,
-      Body: buffer,
-      ContentType: mimeType,
-    }),
-  );
-}
-
-async function readFromS3(storageKey: string) {
-  const response = await getS3Client().send(
-    new GetObjectCommand({
-      Bucket: getS3Bucket(),
-      Key: storageKey,
-    }),
-  );
-  const body = response.Body;
-  if (!body) throw new Error("Empty S3 object body.");
-  return Buffer.from(await body.transformToByteArray());
-}
-
-async function deleteFromS3(storageKey: string) {
-  await getS3Client().send(
-    new DeleteObjectCommand({
-      Bucket: getS3Bucket(),
-      Key: storageKey,
-    }),
-  );
 }
 
 export async function uploadAgencyFile(input: AgencyFileUploadInput): Promise<AgencyStoredFile> {
+  validateAgencyPrivateStorageConfig({ throwOnError: true });
+  assertAgencyUploadAllowed({
+    filename: input.filename,
+    mimeType: input.mimeType,
+    byteSize: input.buffer.byteLength,
+  });
+
   await prisma.agencyProject.findUniqueOrThrow({ where: { id: input.projectId } });
 
-  const storageProvider = getConfiguredProviderName();
-  const storageKey = buildStorageKey(input.projectId, input.filename);
-
-  if (storageProvider === "s3") {
-    await uploadToS3(storageKey, input.buffer, input.mimeType);
-  } else {
-    await uploadToLocal(storageKey, input.buffer);
-  }
+  const storageKey = buildAgencyStorageKey(input.projectId, input.filename);
+  const stored = await putAgencyPrivateObject({
+    storageKey,
+    buffer: input.buffer,
+    mimeType: input.mimeType,
+  });
 
   const file = await prisma.agencyProjectFile.create({
     data: {
@@ -165,8 +74,8 @@ export async function uploadAgencyFile(input: AgencyFileUploadInput): Promise<Ag
       versionId: input.versionId ?? null,
       filename: input.filename,
       mimeType: input.mimeType,
-      byteSize: input.buffer.byteLength,
-      storageProvider,
+      byteSize: stored.byteSize,
+      storageProvider: stored.storageProvider,
       storageKey,
       createdById: input.createdById,
     },
@@ -190,10 +99,7 @@ export async function readAgencyFile(fileId: string): Promise<{
     where: { id: fileId },
   });
 
-  const buffer =
-    file.storageProvider === "s3"
-      ? await readFromS3(file.storageKey)
-      : await readFromLocal(file.storageKey);
+  const { buffer } = await readAgencyPrivateObject(file.storageKey, file.storageProvider);
 
   return {
     file: {
@@ -213,10 +119,10 @@ export async function deleteAgencyFile(fileId: string) {
     where: { id: fileId },
   });
 
-  if (file.storageProvider === "s3") {
-    await deleteFromS3(file.storageKey);
-  } else {
-    await deleteFromLocal(file.storageKey);
+  try {
+    await deleteAgencyPrivateObject(file.storageKey, file.storageProvider);
+  } catch {
+    // DB row removed even if object cleanup fails; operator can reconcile orphans.
   }
 
   await prisma.agencyProjectFile.delete({ where: { id: fileId } });
@@ -238,32 +144,8 @@ export async function getAgencyFileMetadata(fileId: string) {
   });
   if (!file) return null;
 
-  if (file.storageProvider === "local") {
-    try {
-      const info = await stat(
-        path.join(LOCAL_ROOT, file.storageKey.replace(`${AGENCY_PRIVATE_STORAGE_PREFIX}/`, "")),
-      );
-      return { ...file, lastModified: info.mtime };
-    } catch {
-      return file;
-    }
-  }
-
-  try {
-    const head = await getS3Client().send(
-      new HeadObjectCommand({
-        Bucket: getS3Bucket(),
-        Key: file.storageKey,
-      }),
-    );
-    return { ...file, lastModified: head.LastModified ?? null };
-  } catch {
-    return file;
-  }
-}
-
-function localFilePath(storageKey: string) {
-  return path.join(LOCAL_ROOT, storageKey.replace(`${AGENCY_PRIVATE_STORAGE_PREFIX}/`, ""));
+  const meta = await statAgencyPrivateObject(file.storageKey, file.storageProvider);
+  return meta ? { ...file, lastModified: meta.lastModified ?? null } : file;
 }
 
 export async function canAccessAgencyFile(input: {
@@ -290,9 +172,79 @@ export async function canAccessAgencyFile(input: {
     if (allowed) {
       return { ok: true as const, file };
     }
+
+    const supportFile = await prisma.agencySupportRequestFile.findFirst({
+      where: {
+        projectFileId: file.id,
+        clientVisible: true,
+        supportRequest: {
+          submittedByPortalUserId: input.portalUserId,
+        },
+      },
+      select: { id: true },
+    });
+    if (supportFile) {
+      return { ok: true as const, file };
+    }
+
+    const supportFileViaWebsite = await prisma.agencySupportRequestFile.findFirst({
+      where: {
+        projectFileId: file.id,
+        clientVisible: true,
+        supportRequest: {
+          website: {
+            clientAccess: {
+              some: {
+                portalUserId: input.portalUserId,
+                revokedAt: null,
+              },
+            },
+          },
+        },
+      },
+      select: { id: true },
+    });
+    if (supportFileViaWebsite) {
+      return { ok: true as const, file };
+    }
   }
 
   return { ok: false as const, file: null };
+}
+
+export async function resolveAgencyFileDownload(input: {
+  fileId: string;
+  adminRole?: AdminRole | null;
+  portalUserId?: string | null;
+}) {
+  const access = await canAccessAgencyFile(input);
+  if (!access.ok || !access.file) {
+    return { ok: false as const, reason: "forbidden" as const };
+  }
+
+  const file = access.file;
+
+  if (file.storageProvider === "s3" && getAgencyPrivateStorageDriver() === "s3") {
+    const signedUrl = await getAgencyPrivateSignedDownloadUrl({
+      storageKey: file.storageKey,
+      filename: file.filename,
+      mimeType: file.mimeType,
+    });
+    if (signedUrl) {
+      return { ok: true as const, kind: "redirect" as const, url: signedUrl };
+    }
+  }
+
+  const { buffer } = await readAgencyPrivateObject(file.storageKey, file.storageProvider);
+  return {
+    ok: true as const,
+    kind: "buffer" as const,
+    buffer,
+    mimeType: file.mimeType,
+    filename: file.filename,
+    byteSize: file.byteSize,
+    inline: isInlineSafeMime(file.mimeType),
+  };
 }
 
 export async function resolveAgencyFilePath(storageKey: string) {
@@ -303,20 +255,17 @@ export async function resolveAgencyFilePath(storageKey: string) {
     throw new Error("File not found.");
   }
 
-  if (file.storageProvider === "s3") {
-    const buffer = await readFromS3(storageKey);
-    const tempRoot = path.join(LOCAL_ROOT, ".stream-cache");
-    await mkdir(tempRoot, { recursive: true });
-    const full = path.join(tempRoot, `${file.id}-${path.basename(storageKey)}`);
-    await writeFile(full, buffer);
-    return { full, byteSize: buffer.byteLength };
+  if (file.storageProvider === "local") {
+    const { buffer } = await readAgencyPrivateObject(file.storageKey, file.storageProvider);
+    return { full: null as string | null, byteSize: buffer.byteLength, buffer };
   }
 
-  const full = localFilePath(storageKey);
-  const info = await stat(full);
-  return { full, byteSize: info.size };
+  const { buffer } = await readAgencyPrivateObject(file.storageKey, file.storageProvider);
+  return { full: null as string | null, byteSize: buffer.byteLength, buffer };
 }
 
 export function streamAgencyFile(fullPath: string) {
-  return createReadStream(fullPath);
+  return streamLocalAgencyFile(fullPath);
 }
+
+export { buildContentDisposition, validateAgencyPrivateStorageConfig };

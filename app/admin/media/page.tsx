@@ -9,6 +9,12 @@ import {
   getAdminSiteSettingsExtras,
   getSiteSettingsAdmin,
 } from "@/lib/repositories/siteSettingsRepository";
+import { AdminListPage } from "@/components/admin/patterns/AdminListPage";
+import { AdminPanel } from "@/components/admin/patterns/AdminPanel";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Pagination } from "@/components/ui/pagination";
 
 export const dynamic = "force-dynamic";
 
@@ -45,76 +51,89 @@ export default async function AdminMediaPage({
   const maxMb = getAdminSiteSettingsExtras(settingsRow).mediaMaxUploadMb;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold text-neutral-900">Media</h1>
-          <p className="mt-1 text-sm text-neutral-600">
-            {counts.total} assets · {counts.ACTIVE} active · {counts.ARCHIVED} archived
-          </p>
-        </div>
-        <p className="text-xs text-neutral-500">
-          Storage:{" "}
-          {storageOk
-            ? `Configured (${getConfiguredStorageProviderName()})`
-            : "Not configured — uploads disabled"}
-        </p>
-      </div>
-
+    <AdminListPage
+      title="Media"
+      description={
+        <>
+          {counts.total} assets · {counts.ACTIVE} active · {counts.ARCHIVED} archived
+          <span className="mt-1 block text-xs text-muted">
+            Storage:{" "}
+            {storageOk
+              ? `Configured (${getConfiguredStorageProviderName()})`
+              : "Not configured — uploads disabled"}
+          </span>
+        </>
+      }
+      filters={
+        <form className="flex flex-wrap items-end gap-3" method="get">
+          <Input
+            name="q"
+            label="Search"
+            defaultValue={sp.q || ""}
+            placeholder="Filename, title, alt…"
+            className="min-w-[16rem] flex-1"
+          />
+          <Select name="source" label="Source" defaultValue={sp.source || ""}>
+            <option value="">All sources</option>
+            <option value="STATIC_EXISTING">Static existing</option>
+            <option value="UPLOADED">Uploaded</option>
+          </Select>
+          <Select name="status" label="Status" defaultValue={status}>
+            <option value="ACTIVE">Active</option>
+            <option value="ARCHIVED">Archived</option>
+          </Select>
+          <Button type="submit" size="sm">
+            Filter
+          </Button>
+        </form>
+      }
+      isEmpty={items.length === 0}
+      empty={{
+        title: "No media assets match these filters",
+        description: storageOk
+          ? "Upload an asset or adjust your filters."
+          : "Configure persistent object storage before uploading.",
+      }}
+      pagination={
+        total > pageSize ? (
+          <Pagination
+            page={page}
+            pageSize={pageSize}
+            total={total}
+            hrefForPage={(p) => {
+              const params = new URLSearchParams();
+              if (sp.q) params.set("q", sp.q);
+              if (sp.source) params.set("source", sp.source);
+              params.set("status", status);
+              params.set("page", String(p));
+              return `/admin/media?${params.toString()}`;
+            }}
+          />
+        ) : undefined
+      }
+    >
       {storageOk ? (
         <MediaUploadForm maxMb={maxMb} />
       ) : (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <AdminPanel className="border-warning bg-warning-soft/40 text-sm text-warning-text">
           Configure persistent object storage before uploading. Local disk is
           development-only and rejected in production.
-        </div>
+        </AdminPanel>
       )}
 
       <StaticMediaSyncPanel
         lastRunAt={latestSync?.createdAt?.toISOString() ?? null}
       />
 
-      <form className="flex flex-wrap gap-2" method="get">
-        <input
-          name="q"
-          defaultValue={sp.q || ""}
-          placeholder="Search filename, title, alt…"
-          className="min-w-[16rem] flex-1 rounded border border-neutral-300 px-3 py-2 text-sm"
-        />
-        <select
-          name="source"
-          defaultValue={sp.source || ""}
-          className="rounded border border-neutral-300 px-3 py-2 text-sm"
-        >
-          <option value="">All sources</option>
-          <option value="STATIC_EXISTING">Static existing</option>
-          <option value="UPLOADED">Uploaded</option>
-        </select>
-        <select
-          name="status"
-          defaultValue={status}
-          className="rounded border border-neutral-300 px-3 py-2 text-sm"
-        >
-          <option value="ACTIVE">Active</option>
-          <option value="ARCHIVED">Archived</option>
-        </select>
-        <button
-          type="submit"
-          className="rounded bg-neutral-900 px-4 py-2 text-sm font-medium text-white"
-        >
-          Filter
-        </button>
-      </form>
-
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {items.map((item) => (
           <Link
             key={item.id}
             href={`/admin/media/${item.id}`}
-            className="group overflow-hidden rounded-lg border border-neutral-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#F47A48]"
+            className="group overflow-hidden rounded-lg border border-border bg-surface focus:outline-none focus:ring-2 focus:ring-accent"
             aria-label={`${item.title || item.filename}, ${item.width || "?"}×${item.height || "?"} ${item.mimeType}`}
           >
-            <div className="aspect-[4/3] bg-neutral-100">
+            <div className="aspect-[4/3] bg-surface-muted">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={item.publicUrl}
@@ -123,10 +142,10 @@ export default async function AdminMediaPage({
               />
             </div>
             <div className="space-y-1 p-3">
-              <div className="truncate text-sm font-medium text-neutral-900">
+              <div className="truncate text-sm font-medium text-foreground">
                 {item.title || item.filename}
               </div>
-              <div className="text-xs text-neutral-500">
+              <div className="text-xs text-muted">
                 {item.sourceType.replace("_", " ")} ·{" "}
                 {item.width && item.height
                   ? `${item.width}×${item.height}`
@@ -136,30 +155,6 @@ export default async function AdminMediaPage({
           </Link>
         ))}
       </div>
-
-      {total > pageSize ? (
-        <div className="flex gap-2 text-sm">
-          {page > 1 ? (
-            <Link
-              href={`/admin/media?page=${page - 1}&q=${encodeURIComponent(sp.q || "")}&source=${sp.source || ""}&status=${status}`}
-              className="rounded border px-3 py-1"
-            >
-              Previous
-            </Link>
-          ) : null}
-          <span className="px-2 py-1 text-neutral-500">
-            Page {page} of {Math.ceil(total / pageSize)}
-          </span>
-          {page * pageSize < total ? (
-            <Link
-              href={`/admin/media?page=${page + 1}&q=${encodeURIComponent(sp.q || "")}&source=${sp.source || ""}&status=${status}`}
-              className="rounded border px-3 py-1"
-            >
-              Next
-            </Link>
-          ) : null}
-        </div>
-      ) : null}
-    </div>
+    </AdminListPage>
   );
 }

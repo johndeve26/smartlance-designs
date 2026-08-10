@@ -12,6 +12,10 @@ const variants = {
     "border border-border-strong bg-surface text-foreground hover:border-accent hover:text-accent-text hover:bg-brand-soft",
   ghost:
     "bg-transparent text-foreground hover:bg-surface-muted hover:text-accent-text",
+  tertiary:
+    "bg-transparent text-accent-text hover:underline px-0 h-auto font-semibold shadow-none",
+  destructive:
+    "bg-error text-white hover:bg-error/90 shadow-sm",
   dark: "bg-surface-dark text-white hover:bg-neutral-800",
 } as const;
 

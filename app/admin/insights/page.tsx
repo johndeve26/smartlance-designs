@@ -1,8 +1,12 @@
-import Link from "next/link";
 import { requireAdminUser, userCan } from "@/lib/admin/session";
 import { listInsightsAdmin } from "@/lib/repositories/insightsRepository";
 import { ContentBulkTable } from "@/components/admin/ContentBulkTable";
 import { createInsightDraftAction } from "@/lib/admin/bulk-content-actions";
+import { AdminListPage } from "@/components/admin/patterns/AdminListPage";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Pagination } from "@/components/ui/pagination";
 
 export const dynamic = "force-dynamic";
 
@@ -27,52 +31,70 @@ export default async function AdminInsightsPage({ searchParams }: PageProps) {
   const totalPages = Math.max(1, Math.ceil(total / take));
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold">Insights</h1>
-          <p className="mt-1 text-sm text-neutral-600">
-            Blog posts at /blog/[slug]. Original publish dates are preserved.
-          </p>
-        </div>
-        {canEdit ? (
+    <AdminListPage
+      title="Blog posts"
+      description="Create, review and publish Smartlance articles at /blog/[slug]."
+      action={
+        canEdit ? (
           <form action={createInsightDraftAction}>
-            <button type="submit" className="admin-btn-primary">
-              New insight
-            </button>
+            <Button type="submit" size="sm">
+              New post
+            </Button>
           </form>
-        ) : null}
-      </div>
-
-      <form className="flex flex-wrap gap-2">
-        <input
-          name="q"
-          defaultValue={params.q ?? ""}
-          placeholder="Search title or slug"
-          className="rounded border border-neutral-300 px-3 py-2 text-sm"
-        />
-        <select
-          name="status"
-          defaultValue={params.status ?? ""}
-          className="rounded border border-neutral-300 px-3 py-2 text-sm"
-        >
-          <option value="">All statuses</option>
-          <option value="DRAFT">Draft</option>
-          <option value="PUBLISHED">Published</option>
-          <option value="ARCHIVED">Archived</option>
-        </select>
-        <button
-          type="submit"
-          className="rounded bg-neutral-900 px-3 py-2 text-sm font-medium text-white"
-        >
-          Filter
-        </button>
-      </form>
-
+        ) : undefined
+      }
+      filters={
+        <form className="flex flex-wrap items-end gap-3">
+          <Input
+            name="q"
+            label="Search"
+            defaultValue={params.q ?? ""}
+            placeholder="Title or slug"
+            className="min-w-[200px]"
+          />
+          <Select name="status" label="Status" defaultValue={params.status ?? ""}>
+            <option value="">All statuses</option>
+            <option value="DRAFT">Draft</option>
+            <option value="PUBLISHED">Published</option>
+            <option value="ARCHIVED">Archived</option>
+          </Select>
+          <Button type="submit" size="sm">
+            Filter
+          </Button>
+        </form>
+      }
+      isEmpty={items.length === 0}
+      empty={{
+        title: "No blog posts yet",
+        description: "Create your first article.",
+        action: canEdit ? (
+          <form action={createInsightDraftAction}>
+            <Button type="submit">Create first post</Button>
+          </form>
+        ) : undefined,
+      }}
+      pagination={
+        totalPages > 1 ? (
+          <Pagination
+            page={page}
+            pageSize={take}
+            total={total}
+            hrefForPage={(p) => {
+              const q = new URLSearchParams();
+              if (params.q) q.set("q", params.q);
+              if (params.status) q.set("status", params.status);
+              if (params.category) q.set("category", params.category);
+              if (p > 1) q.set("page", String(p));
+              const qs = q.toString();
+              return qs ? `/admin/insights?${qs}` : "/admin/insights";
+            }}
+          />
+        ) : undefined
+      }
+    >
       <ContentBulkTable
         family="insight"
         canPublish={canPublish}
-        emptyMessage="No insights yet. Create one or run the Phase 3 import."
         columns={[
           { key: "title", header: "Title", isTitle: true },
           { key: "topic", header: "Topic" },
@@ -92,18 +114,6 @@ export default async function AdminInsightsPage({ searchParams }: PageProps) {
           },
         }))}
       />
-
-      <div className="flex items-center gap-3 text-sm text-neutral-600">
-        <span>
-          {total} insights · page {page} / {totalPages}
-        </span>
-        {page > 1 ? (
-          <Link href={`/admin/insights?page=${page - 1}`}>Previous</Link>
-        ) : null}
-        {page < totalPages ? (
-          <Link href={`/admin/insights?page=${page + 1}`}>Next</Link>
-        ) : null}
-      </div>
-    </div>
+    </AdminListPage>
   );
 }

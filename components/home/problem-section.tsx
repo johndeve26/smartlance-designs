@@ -24,7 +24,7 @@ export function ProblemSection({ points }: { points: ProblemPoint[] }) {
             </p>
             <div className="mt-8 flex flex-col gap-3 border-t border-border pt-6">
               <Link href="/solutions" className="link-action">
-                Explore Website Solutions →
+                Explore Solutions →
               </Link>
               <Link href="/project-planner" className="link-action">
                 Plan Your Project →

@@ -107,7 +107,8 @@ export function ProviderConnections({
         <div>
           <h2 className="text-lg font-semibold text-neutral-900">Provider connections</h2>
           <p className="mt-1 text-sm text-neutral-600">
-            Connect the AI providers available to the Editorial Studio.
+            Connect providers once for the whole platform — editorial studio, content
+            assistants, and public website tools.
           </p>
         </div>
         <p className="text-xs text-neutral-500">

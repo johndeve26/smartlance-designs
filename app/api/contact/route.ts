@@ -43,12 +43,13 @@ export async function POST(request: Request) {
     );
   }
 
-  const { _gotcha, ...payload } = parsed.data;
+  const { _gotcha, subscribeToUpdates, ...payload } = parsed.data;
   void _gotcha;
 
   const result = await submitContactEnquiry({
     data: payload,
     sourcePath: "/contact",
+    subscribeToUpdates: Boolean(subscribeToUpdates),
   });
 
   if (!result.ok) {
