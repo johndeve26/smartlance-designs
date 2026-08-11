@@ -1,6 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { hasDatabaseUrl, prisma } from "@/lib/db";
-import { siteConfig } from "@/lib/site";
+import { sanitizeSiteOrigin, siteConfig } from "@/lib/site";
 import { writeAuditLog } from "@/lib/repositories/auditRepository";
 import {
   CACHE_TAGS,
@@ -139,6 +139,13 @@ function mapRow(row: {
     ? (row.socialLinks as SocialLinkSetting[])
     : fallback.socialLinks;
   const host = row.canonicalHost || fallback.canonicalHost;
+  const siteUrl = host
+    ? sanitizeSiteOrigin(
+        /^https?:\/\//i.test(host)
+          ? host
+          : `https://${host.replace(/^https?:\/\//, "")}`,
+      )
+    : fallback.url;
   return {
     siteName: row.siteName || fallback.siteName,
     businessName: row.businessName || fallback.businessName,
@@ -146,7 +153,7 @@ function mapRow(row: {
       row.defaultSiteDescription ||
       row.defaultMetaDescription ||
       fallback.description,
-    url: host ? `https://${host.replace(/^https?:\/\//, "")}` : fallback.url,
+    url: siteUrl,
     email: row.contactEmail || fallback.email,
     phone: row.contactPhone || fallback.phone,
     whatsapp: row.whatsapp || fallback.whatsapp,
@@ -169,7 +176,7 @@ function mapRow(row: {
     footerDescription: row.footerDescription,
     publisherName: row.publisherName || fallback.publisherName,
     defaultTitleTemplate: row.defaultTitleTemplate || fallback.defaultTitleTemplate,
-    canonicalHost: host,
+    canonicalHost: hostFromUrl(siteUrl),
     presentation: resolveSitePresentation(parseSiteSettingsExtras(row.extras)),
   };
 }

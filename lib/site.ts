@@ -3,6 +3,33 @@
  * Prefer editing values here (or env vars) rather than scattering them in components.
  */
 
+export const DEFAULT_SITE_ORIGIN = "https://smartlancedesigns.com";
+
+/** Strip accidental env concatenation and return a valid HTTPS origin. */
+export function sanitizeSiteOrigin(raw?: string | null): string {
+  const candidate = raw?.trim().split(/DATABASE_URL=/i)[0]?.trim() ?? "";
+  if (!candidate) return DEFAULT_SITE_ORIGIN;
+
+  try {
+    const normalized = /^https?:\/\//i.test(candidate)
+      ? candidate
+      : `https://${candidate.replace(/^https?:\/\//, "")}`;
+
+    if (/postgresql|DATABASE_URL/i.test(normalized)) {
+      return DEFAULT_SITE_ORIGIN;
+    }
+
+    const url = new URL(normalized);
+    if (!url.hostname || /\s/.test(url.hostname)) {
+      return DEFAULT_SITE_ORIGIN;
+    }
+
+    return `${url.protocol}//${url.host}`;
+  } catch {
+    return DEFAULT_SITE_ORIGIN;
+  }
+}
+
 export const siteConfig = {
   name: "Smartlance Designs",
   legalName: "Smartlance Designs",
@@ -10,7 +37,7 @@ export const siteConfig = {
   description:
     "Smartlance Designs builds websites and SEO strategies that help businesses get found, earn trust and turn visitors into customers.",
   /** Production origin — set NEXT_PUBLIC_SITE_URL (no trailing slash) */
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://smartlancedesigns.com",
+  url: sanitizeSiteOrigin(process.env.NEXT_PUBLIC_SITE_URL),
   locale: "en_US",
   email:
     process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "Contact@smartlancedesigns.com",

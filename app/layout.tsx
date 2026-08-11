@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Figtree, Syne } from "next/font/google";
-import { siteConfig } from "@/lib/site";
+import { siteConfig, sanitizeSiteOrigin } from "@/lib/site";
 import { getPublicSettings } from "@/lib/repositories/siteSettingsRepository";
 import "./globals.css";
 
@@ -23,8 +23,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const googleVerification = process.env.GOOGLE_SITE_VERIFICATION?.trim();
   const bingVerification = process.env.BING_SITE_VERIFICATION?.trim();
 
+  const siteUrl = sanitizeSiteOrigin(settings.url);
+
   return {
-    metadataBase: new URL(settings.url),
+    metadataBase: new URL(siteUrl),
     title: {
       default: `${settings.siteName} | ${siteConfig.tagline}`,
       template: settings.defaultTitleTemplate || `%s | ${settings.siteName}`,
@@ -52,7 +54,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       type: "website",
       locale: settings.locale,
-      url: settings.url,
+      url: siteUrl,
       siteName: settings.siteName,
       title: settings.siteName,
       description: settings.description,

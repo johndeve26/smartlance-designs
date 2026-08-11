@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { sanitizeSiteOrigin } from "@/lib/site";
 import {
   resolveCanonicalUrl,
   siteOriginFromConfig,
@@ -17,6 +18,27 @@ import {
   getOperationsSolution,
   operationsSolutionSlugs,
 } from "@/lib/public/operations-solutions-content";
+
+describe("sanitizeSiteOrigin", () => {
+  it("returns default for empty or malformed values", () => {
+    expect(sanitizeSiteOrigin("")).toBe("https://smartlancedesigns.com");
+    expect(sanitizeSiteOrigin("   ")).toBe("https://smartlancedesigns.com");
+    expect(
+      sanitizeSiteOrigin(
+        "http://localhost:3000DATABASE_URL=postgresql://user:pass@host/db",
+      ),
+    ).toBe("http://localhost:3000");
+  });
+
+  it("normalizes bare hosts and strips trailing slashes via URL parsing", () => {
+    expect(sanitizeSiteOrigin("smartlancedesigns.com")).toBe(
+      "https://smartlancedesigns.com",
+    );
+    expect(sanitizeSiteOrigin("https://smartlancedesigns.com/")).toBe(
+      "https://smartlancedesigns.com",
+    );
+  });
+});
 
 describe("canonical resolution", () => {
   const origin = "https://smartlancedesigns.com";
