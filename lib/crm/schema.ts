@@ -260,6 +260,7 @@ export const sendCrmEmailSchema = z.object({
   body: z.string().trim().min(1).max(50000),
   createFollowUpDays: z.coerce.number().int().min(1).max(90).optional(),
   sendingProfileId: z.string().cuid().optional().or(z.literal("")),
+  clientRequestId: z.string().uuid().optional().or(z.literal("")),
 });
 
 export const emailTemplateSchema = z.object({

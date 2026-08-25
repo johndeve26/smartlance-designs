@@ -5,6 +5,7 @@ export type CrmSenderProfileOption = {
   id: string;
   name: string;
   fromEmail: string;
+  fromName: string;
 };
 
 export async function listCrmSenderProfileOptions(): Promise<{
@@ -18,6 +19,7 @@ export async function listCrmSenderProfileOptions(): Promise<{
       id: p.id,
       name: p.name,
       fromEmail: p.fromEmail,
+      fromName: p.fromName,
     })),
     defaultProfileId: resolved.profileId,
   };

@@ -36,6 +36,7 @@ import { ContactProspectPanel } from "@/components/admin/prospect/ContactProspec
 import { AdminDetailHeader } from "@/components/admin/patterns/AdminDetailHeader";
 import { AdminPanel, AdminSection } from "@/components/admin/patterns/AdminPanel";
 import { Button } from "@/components/ui/button";
+import { listEmailTemplates } from "@/lib/crm/email";
 import { listCrmSenderProfileOptions } from "@/lib/email/routing/crm-sender-options";
 
 export const dynamic = "force-dynamic";
@@ -70,6 +71,9 @@ export default async function CrmContactDetailPage({
   const senderOptions = can(user.role, "send_crm_email")
     ? await listCrmSenderProfileOptions()
     : { profiles: [], defaultProfileId: null };
+  const emailTemplates = can(user.role, "send_crm_email")
+    ? (await listEmailTemplates(true)).map((t) => ({ id: t.id, name: t.name }))
+    : [];
 
   return (
     <div className="space-y-6">
@@ -97,25 +101,27 @@ export default async function CrmContactDetailPage({
         }
         primaryAction={
           can(user.role, "manage_crm") ? (
-            <div className="flex gap-2">
-              <Button asChild variant="outline" size="sm">
-                <Link href={`/admin/crm/contacts/${id}/edit`}>Edit contact</Link>
-              </Button>
-              <ContactDetailActions
-                contact={contact}
-                activeLead={activeLead ?? null}
-                canSendEmail={can(user.role, "send_crm_email")}
-                canChooseSender={can(user.role, "choose_email_sender")}
-                canManageOutreach={can(user.role, "manage_crm")}
-                activeSequences={activeSequences}
-                enrollments={enrollments.items}
-                sendingProfiles={senderOptions.profiles}
-                defaultSendingProfileId={senderOptions.defaultProfileId}
-              />
-            </div>
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/admin/crm/contacts/${id}/edit`}>Edit contact</Link>
+            </Button>
           ) : undefined
         }
       />
+
+      {can(user.role, "manage_crm") || can(user.role, "send_crm_email") ? (
+        <ContactDetailActions
+          contact={contact}
+          activeLead={activeLead ?? null}
+          canSendEmail={can(user.role, "send_crm_email")}
+          canChooseSender={can(user.role, "choose_email_sender")}
+          canManageOutreach={can(user.role, "manage_crm")}
+          activeSequences={activeSequences}
+          enrollments={enrollments.items}
+          sendingProfiles={senderOptions.profiles}
+          defaultSendingProfileId={senderOptions.defaultProfileId}
+          emailTemplates={emailTemplates}
+        />
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <AdminSection title="Contact information" className="lg:col-span-1">
@@ -299,12 +305,25 @@ export default async function CrmContactDetailPage({
             <AdminPanel flush>
               <ul className="divide-y divide-border text-sm">
                 {emailHistory.items.map((em) => (
-                  <li key={em.id} className="px-4 py-2">
-                    <p className="font-medium">{em.subject}</p>
+                  <li key={em.id} id={`email-${em.id}`} className="px-4 py-2 scroll-mt-24">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-medium">{em.subject}</p>
+                      <span className="text-xs uppercase tracking-wide text-subtle">
+                        {em.deliveryStatus}
+                      </span>
+                    </div>
                     <p className="text-muted">
-                      {em.origin} · {em.deliveryStatus}
-                      {em.sentAt ? ` · ${formatDateTime(em.sentAt)}` : ""}
+                      {em.origin === "MANUAL" ? "Manual" : em.origin}
+                      {em.sentAt ? ` · ${formatDateTime(em.sentAt)}` : ` · ${formatDateTime(em.createdAt)}`}
                     </p>
+                    {em.direction === "OUTBOUND" && (em.fromEmailSnapshot || em.fromNameSnapshot) ? (
+                      <p className="text-xs text-subtle">
+                        From:{" "}
+                        {em.fromNameSnapshot && em.fromEmailSnapshot
+                          ? `${em.fromNameSnapshot} <${em.fromEmailSnapshot}>`
+                          : em.fromEmailSnapshot || em.fromNameSnapshot}
+                      </p>
+                    ) : null}
                     {em.direction === "OUTBOUND" &&
                     (em.openDetectedCount > 0 || em.clickDetectedCount > 0) ? (
                       <p className="text-xs text-subtle">

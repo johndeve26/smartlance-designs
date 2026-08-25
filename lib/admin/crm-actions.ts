@@ -46,6 +46,7 @@ import {
   sendCrmEmail,
   updateEmailTemplate,
 } from "@/lib/crm/email";
+import { prisma } from "@/lib/db";
 
 /** FormData.get returns null for missing keys; Zod string unions treat that as "Invalid input". */
 function fdStr(formData: FormData, key: string): string {
@@ -582,6 +583,7 @@ export async function sendCrmEmailAction(formData: FormData) {
     body: fdStr(formData, "body"),
     createFollowUpDays: fdStr(formData, "createFollowUpDays") || undefined,
     sendingProfileId: fdStr(formData, "sendingProfileId") || undefined,
+    clientRequestId: fdStr(formData, "clientRequestId") || undefined,
   });
 
   if (!parsed.success) {
@@ -593,22 +595,154 @@ export async function sendCrmEmailAction(formData: FormData) {
   }
 
   try {
-    await sendCrmEmail({
+    const email = await sendCrmEmail({
       ...parsed.data,
       dealId: parsed.data.dealId || null,
       actorId: user.id,
       actorName: user.name,
       createFollowUpDays: parsed.data.createFollowUpDays,
       sendingProfileId: parsed.data.sendingProfileId || null,
+      clientRequestId: parsed.data.clientRequestId || null,
     });
     revalidateCrm();
-    return { ok: true as const };
+    revalidatePath(`/admin/crm/contacts/${parsed.data.contactId}`);
+    return {
+      ok: true as const,
+      emailId: email.id,
+      subject: email.subject,
+      sentAt: email.sentAt?.toISOString() ?? new Date().toISOString(),
+      fromName: email.fromNameSnapshot,
+      fromEmail: email.fromEmailSnapshot,
+      deliveryStatus: email.deliveryStatus,
+      ambiguous: false as const,
+    };
   } catch (err) {
+    const message = err instanceof Error ? err.message : "Email send failed.";
+    const ambiguous = /timeout|network|ECONNRESET|fetch failed|uncertain/i.test(message);
     return {
       ok: false as const,
-      error: err instanceof Error ? err.message : "Email send failed.",
+      error: ambiguous
+        ? "Email status is uncertain. Check Email History before retrying."
+        : message,
+      ambiguous,
     };
   }
+}
+
+export async function sendContactEmailAction(input: {
+  contactId: string;
+  subject: string;
+  body: string;
+  createFollowUpDays?: number | null;
+  sendingProfileId?: string | null;
+  clientRequestId: string;
+}) {
+  await assertSameOrigin();
+  const user = await requireAdminUser("send_crm_email");
+
+  if (isFormRateLimited(`crm-email:${user.id}`, 10, 15 * 60 * 1000)) {
+    return { ok: false as const, error: "Email rate limit reached. Try again later.", ambiguous: false as const };
+  }
+
+  const parsed = sendCrmEmailSchema.safeParse({
+    contactId: input.contactId,
+    subject: input.subject,
+    body: input.body,
+    createFollowUpDays: input.createFollowUpDays ?? undefined,
+    sendingProfileId: input.sendingProfileId ?? "",
+    clientRequestId: input.clientRequestId,
+  });
+
+  if (!parsed.success) {
+    return {
+      ok: false as const,
+      error: parsed.error.issues[0]?.message ?? "Invalid email.",
+      ambiguous: false as const,
+    };
+  }
+
+  if (parsed.data.sendingProfileId) {
+    assertCan(user.role, "choose_email_sender");
+  }
+
+  try {
+    const email = await sendCrmEmail({
+      contactId: parsed.data.contactId,
+      subject: parsed.data.subject,
+      body: parsed.data.body,
+      actorId: user.id,
+      actorName: user.name,
+      createFollowUpDays: parsed.data.createFollowUpDays,
+      sendingProfileId: parsed.data.sendingProfileId || null,
+      clientRequestId: parsed.data.clientRequestId || null,
+    });
+    revalidateCrm();
+    revalidatePath(`/admin/crm/contacts/${parsed.data.contactId}`);
+    return {
+      ok: true as const,
+      emailId: email.id,
+      subject: email.subject,
+      sentAt: email.sentAt?.toISOString() ?? new Date().toISOString(),
+      fromName: email.fromNameSnapshot,
+      fromEmail: email.fromEmailSnapshot,
+      deliveryStatus: email.deliveryStatus,
+      ambiguous: false as const,
+    };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Email send failed.";
+    const ambiguous = /timeout|network|ECONNRESET|fetch failed|uncertain/i.test(message);
+    return {
+      ok: false as const,
+      error: ambiguous
+        ? "Email status is uncertain. Check Email History before retrying."
+        : message,
+      ambiguous,
+    };
+  }
+}
+
+export async function renderContactEmailTemplateAction(input: {
+  contactId: string;
+  templateId: string;
+}) {
+  await assertSameOrigin();
+  const user = await requireAdminUser("send_crm_email");
+
+  const template = await prisma.crmEmailTemplate.findFirst({
+    where: { id: input.templateId, isActive: true },
+  });
+  if (!template) {
+    return { ok: false as const, error: "Template not found." };
+  }
+
+  const contact = await prisma.crmContact.findUnique({
+    where: { id: input.contactId },
+    include: {
+      company: true,
+      leads: {
+        where: { status: { notIn: ["UNQUALIFIED", "CLOSED"] } },
+        take: 1,
+      },
+    },
+  });
+  if (!contact) {
+    return { ok: false as const, error: "Contact not found." };
+  }
+
+  const { renderOutreachEmail } = await import("@/lib/crm/outreach/personalization");
+  const rendered = renderOutreachEmail({
+    subject: template.subject,
+    body: template.body,
+    contact,
+    senderName: user.name,
+  });
+
+  return {
+    ok: true as const,
+    subject: rendered.subject,
+    body: rendered.body,
+    hasUnresolved: rendered.hasUnresolved,
+  };
 }
 
 export async function saveEmailTemplateAction(formData: FormData) {

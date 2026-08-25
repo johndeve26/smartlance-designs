@@ -134,6 +134,8 @@ export async function listContactEmailHistory(contactId: string, page = 1) {
         clickDetectedCount: true,
         firstOpenDetectedAt: true,
         firstClickDetectedAt: true,
+        fromNameSnapshot: true,
+        fromEmailSnapshot: true,
       },
     }),
     prisma.crmEmail.count({ where: { contactId } }),

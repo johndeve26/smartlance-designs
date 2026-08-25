@@ -38,7 +38,15 @@ export async function sendCrmEmail(input: {
   actorName: string;
   createFollowUpDays?: number;
   sendingProfileId?: string | null;
+  clientRequestId?: string | null;
 }) {
+  if (input.clientRequestId) {
+    const existing = await prisma.crmEmail.findUnique({
+      where: { clientRequestId: input.clientRequestId },
+    });
+    if (existing) return existing;
+  }
+
   const transport = await resolveActiveEmailTransport();
   if (transport.kind === "none") {
     throw new Error("Email delivery is not configured.");
@@ -80,6 +88,7 @@ export async function sendCrmEmail(input: {
       bodyText: renderedBody,
       deliveryStatus: "PENDING",
       createdById: input.actorId,
+      clientRequestId: input.clientRequestId || null,
     },
   });
 
@@ -111,7 +120,7 @@ export async function sendCrmEmail(input: {
     throw new Error(result.errorMessage ?? "Email delivery failed.");
   }
 
-  await prisma.crmEmail.update({
+  const sent = await prisma.crmEmail.update({
     where: { id: emailRecord.id },
     data: {
       deliveryStatus: "SENT",
@@ -148,7 +157,7 @@ export async function sendCrmEmail(input: {
     });
   }
 
-  return emailRecord;
+  return sent;
 }
 
 export async function listEmailTemplates(activeOnly = true) {
