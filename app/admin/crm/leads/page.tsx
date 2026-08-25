@@ -8,9 +8,10 @@ import {
   CRM_LEAD_TEMPERATURE_LABELS,
   CRM_SOURCE_LABELS,
   formatDate,
+  temperatureTone,
 } from "@/lib/crm/display";
 import { CrmPagination } from "@/components/admin/crm/CrmPagination";
-import { CrmBadge, temperatureTone } from "@/components/admin/crm/CrmShared";
+import { CrmBadge } from "@/components/admin/crm/CrmShared";
 import { CrmExportButton } from "@/components/admin/crm/CrmExportButton";
 import type { CrmLeadStatus, CrmLeadTemperature, CrmContactSource } from "@prisma/client";
 import { AdminListPage } from "@/components/admin/patterns/AdminListPage";

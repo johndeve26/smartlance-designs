@@ -8,9 +8,10 @@ import {
   CRM_LEAD_STATUS_LABELS,
   CRM_LEAD_TEMPERATURE_LABELS,
   formatDate,
+  temperatureTone,
 } from "@/lib/crm/display";
 import { CrmPagination } from "@/components/admin/crm/CrmPagination";
-import { CrmBadge, temperatureTone } from "@/components/admin/crm/CrmShared";
+import { CrmBadge } from "@/components/admin/crm/CrmShared";
 import { CrmExportButton } from "@/components/admin/crm/CrmExportButton";
 import { ContactListFilters } from "@/components/admin/crm/ContactListFilters";
 import { listContactViewsAction, getContactViewAction } from "@/lib/admin/crm-view-actions";

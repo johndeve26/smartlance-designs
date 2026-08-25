@@ -47,6 +47,12 @@ import {
   updateEmailTemplate,
 } from "@/lib/crm/email";
 
+/** FormData.get returns null for missing keys; Zod string unions treat that as "Invalid input". */
+function fdStr(formData: FormData, key: string): string {
+  const v = formData.get(key);
+  return v == null ? "" : String(v);
+}
+
 function revalidateCrm() {
   revalidatePath("/admin/crm");
   revalidatePath("/admin/crm/contacts");
@@ -61,18 +67,18 @@ export async function createContactAction(formData: FormData) {
   const user = await requireAdminUser("manage_crm");
 
   const parsed = createContactSchema.safeParse({
-    firstName: formData.get("firstName"),
-    lastName: formData.get("lastName"),
-    displayName: formData.get("displayName"),
-    email: formData.get("email"),
-    phone: formData.get("phone"),
-    jobTitle: formData.get("jobTitle"),
-    companyId: formData.get("companyId"),
-    lifecycleStage: formData.get("lifecycleStage") || "PROSPECT",
-    source: formData.get("source") || "MANUAL",
-    sourceDetail: formData.get("sourceDetail"),
-    sourceUrl: formData.get("sourceUrl"),
-    ownerId: formData.get("ownerId"),
+    firstName: fdStr(formData, "firstName"),
+    lastName: fdStr(formData, "lastName"),
+    displayName: fdStr(formData, "displayName"),
+    email: fdStr(formData, "email"),
+    phone: fdStr(formData, "phone"),
+    jobTitle: fdStr(formData, "jobTitle"),
+    companyId: fdStr(formData, "companyId"),
+    lifecycleStage: fdStr(formData, "lifecycleStage") || "PROSPECT",
+    source: fdStr(formData, "source") || "MANUAL",
+    sourceDetail: fdStr(formData, "sourceDetail"),
+    sourceUrl: fdStr(formData, "sourceUrl"),
+    ownerId: fdStr(formData, "ownerId"),
   });
 
   if (!parsed.success) {
@@ -101,23 +107,23 @@ export async function updateContactAction(formData: FormData) {
   const user = await requireAdminUser("manage_crm");
 
   const parsed = updateContactSchema.safeParse({
-    contactId: formData.get("contactId"),
-    firstName: formData.get("firstName"),
-    lastName: formData.get("lastName"),
-    displayName: formData.get("displayName"),
-    email: formData.get("email"),
-    phone: formData.get("phone"),
-    jobTitle: formData.get("jobTitle"),
-    companyId: formData.get("companyId"),
-    source: formData.get("source"),
-    sourceDetail: formData.get("sourceDetail"),
-    ownerId: formData.get("ownerId"),
-    countryCode: formData.get("countryCode"),
-    countryName: formData.get("countryName"),
-    stateRegion: formData.get("stateRegion"),
-    city: formData.get("city"),
-    postalCode: formData.get("postalCode"),
-    timezone: formData.get("timezone"),
+    contactId: fdStr(formData, "contactId"),
+    firstName: fdStr(formData, "firstName"),
+    lastName: fdStr(formData, "lastName"),
+    displayName: fdStr(formData, "displayName"),
+    email: fdStr(formData, "email"),
+    phone: fdStr(formData, "phone"),
+    jobTitle: fdStr(formData, "jobTitle"),
+    companyId: fdStr(formData, "companyId"),
+    source: fdStr(formData, "source") || undefined,
+    sourceDetail: fdStr(formData, "sourceDetail"),
+    ownerId: fdStr(formData, "ownerId"),
+    countryCode: fdStr(formData, "countryCode"),
+    countryName: fdStr(formData, "countryName"),
+    stateRegion: fdStr(formData, "stateRegion"),
+    city: fdStr(formData, "city"),
+    postalCode: fdStr(formData, "postalCode"),
+    timezone: fdStr(formData, "timezone"),
   });
 
   if (!parsed.success) {
@@ -184,15 +190,15 @@ export async function createCompanyAction(formData: FormData) {
   await requireAdminUser("manage_crm");
 
   const parsed = createCompanySchema.safeParse({
-    name: formData.get("name"),
-    website: formData.get("website"),
-    industry: formData.get("industry"),
-    phone: formData.get("phone"),
-    location: formData.get("location"),
-    address: formData.get("address"),
-    sizeLabel: formData.get("sizeLabel"),
-    description: formData.get("description"),
-    ownerId: formData.get("ownerId"),
+    name: fdStr(formData, "name"),
+    website: fdStr(formData, "website"),
+    industry: fdStr(formData, "industry"),
+    phone: fdStr(formData, "phone"),
+    location: fdStr(formData, "location"),
+    address: fdStr(formData, "address"),
+    sizeLabel: fdStr(formData, "sizeLabel"),
+    description: fdStr(formData, "description"),
+    ownerId: fdStr(formData, "ownerId"),
   });
 
   if (!parsed.success) {
@@ -219,16 +225,16 @@ export async function createLeadAction(formData: FormData) {
   const user = await requireAdminUser("manage_crm");
 
   const parsed = createLeadSchema.safeParse({
-    contactId: formData.get("contactId"),
-    companyId: formData.get("companyId"),
-    status: formData.get("status") || "NEW",
-    temperature: formData.get("temperature") || "COLD",
-    source: formData.get("source") || "MANUAL",
-    ownerId: formData.get("ownerId"),
-    interestSummary: formData.get("interestSummary"),
-    servicesInterested: formData.getAll("servicesInterested"),
-    estimatedValue: formData.get("estimatedValue") || undefined,
-    currency: formData.get("currency") || "USD",
+    contactId: fdStr(formData, "contactId"),
+    companyId: fdStr(formData, "companyId"),
+    status: fdStr(formData, "status") || "NEW",
+    temperature: fdStr(formData, "temperature") || "COLD",
+    source: fdStr(formData, "source") || "MANUAL",
+    ownerId: fdStr(formData, "ownerId"),
+    interestSummary: fdStr(formData, "interestSummary"),
+    servicesInterested: formData.getAll("servicesInterested").map(String),
+    estimatedValue: fdStr(formData, "estimatedValue") || undefined,
+    currency: fdStr(formData, "currency") || "USD",
   });
 
   if (!parsed.success) {
@@ -257,10 +263,10 @@ export async function updateLeadStatusAction(formData: FormData) {
   const user = await requireAdminUser("manage_crm");
 
   const parsed = updateLeadStatusSchema.safeParse({
-    leadId: formData.get("leadId"),
-    status: formData.get("status"),
-    disqualificationReason: formData.get("disqualificationReason") || undefined,
-    disqualificationNote: formData.get("disqualificationNote"),
+    leadId: fdStr(formData, "leadId"),
+    status: fdStr(formData, "status"),
+    disqualificationReason: fdStr(formData, "disqualificationReason") || undefined,
+    disqualificationNote: fdStr(formData, "disqualificationNote"),
   });
 
   if (!parsed.success) {
@@ -284,8 +290,8 @@ export async function updateLeadTemperatureAction(formData: FormData) {
   const user = await requireAdminUser("manage_crm");
 
   const parsed = updateLeadTemperatureSchema.safeParse({
-    leadId: formData.get("leadId"),
-    temperature: formData.get("temperature"),
+    leadId: fdStr(formData, "leadId"),
+    temperature: fdStr(formData, "temperature"),
   });
 
   if (!parsed.success) {
@@ -309,16 +315,16 @@ export async function createDealAction(formData: FormData) {
   const user = await requireAdminUser("manage_crm");
 
   const parsed = createDealSchema.safeParse({
-    title: formData.get("title"),
-    contactId: formData.get("contactId"),
-    companyId: formData.get("companyId"),
-    leadId: formData.get("leadId"),
-    ownerId: formData.get("ownerId"),
-    stage: formData.get("stage") || "NEW_OPPORTUNITY",
-    amount: formData.get("amount") || undefined,
-    currency: formData.get("currency") || "USD",
-    expectedCloseAt: formData.get("expectedCloseAt") || undefined,
-    servicesInterested: formData.getAll("servicesInterested"),
+    title: fdStr(formData, "title"),
+    contactId: fdStr(formData, "contactId"),
+    companyId: fdStr(formData, "companyId"),
+    leadId: fdStr(formData, "leadId"),
+    ownerId: fdStr(formData, "ownerId"),
+    stage: fdStr(formData, "stage") || "NEW_OPPORTUNITY",
+    amount: fdStr(formData, "amount") || undefined,
+    currency: fdStr(formData, "currency") || "USD",
+    expectedCloseAt: fdStr(formData, "expectedCloseAt") || undefined,
+    servicesInterested: formData.getAll("servicesInterested").map(String),
   });
 
   if (!parsed.success) {
@@ -370,10 +376,10 @@ export async function updateDealStageAction(formData: FormData) {
   const user = await requireAdminUser("manage_crm");
 
   const parsed = updateDealStageSchema.safeParse({
-    dealId: formData.get("dealId"),
-    stage: formData.get("stage"),
-    lostReason: formData.get("lostReason") || undefined,
-    lostNote: formData.get("lostNote"),
+    dealId: fdStr(formData, "dealId"),
+    stage: fdStr(formData, "stage"),
+    lostReason: fdStr(formData, "lostReason") || undefined,
+    lostNote: fdStr(formData, "lostNote"),
   });
 
   if (!parsed.success) {
@@ -397,15 +403,15 @@ export async function createTaskAction(formData: FormData) {
   const user = await requireAdminUser("manage_crm");
 
   const parsed = createTaskSchema.safeParse({
-    title: formData.get("title"),
-    description: formData.get("description"),
-    contactId: formData.get("contactId"),
-    companyId: formData.get("companyId"),
-    leadId: formData.get("leadId"),
-    dealId: formData.get("dealId"),
-    assignedToId: formData.get("assignedToId") || user.id,
-    priority: formData.get("priority") || "NORMAL",
-    dueAt: formData.get("dueAt") || undefined,
+    title: fdStr(formData, "title"),
+    description: fdStr(formData, "description"),
+    contactId: fdStr(formData, "contactId"),
+    companyId: fdStr(formData, "companyId"),
+    leadId: fdStr(formData, "leadId"),
+    dealId: fdStr(formData, "dealId"),
+    assignedToId: fdStr(formData, "assignedToId") || user.id,
+    priority: fdStr(formData, "priority") || "NORMAL",
+    dueAt: fdStr(formData, "dueAt") || undefined,
   });
 
   if (!parsed.success) {
@@ -473,11 +479,11 @@ export async function addNoteAction(formData: FormData) {
   const user = await requireAdminUser("manage_crm");
 
   const parsed = addNoteSchema.safeParse({
-    contactId: formData.get("contactId"),
-    subject: formData.get("subject"),
-    body: formData.get("body"),
-    leadId: formData.get("leadId"),
-    dealId: formData.get("dealId"),
+    contactId: fdStr(formData, "contactId"),
+    subject: fdStr(formData, "subject"),
+    body: fdStr(formData, "body"),
+    leadId: fdStr(formData, "leadId"),
+    dealId: fdStr(formData, "dealId"),
   });
 
   if (!parsed.success) {
@@ -506,8 +512,8 @@ export async function updateEmailStatusAction(formData: FormData) {
   const user = await requireAdminUser("manage_crm");
 
   const parsed = updateEmailStatusSchema.safeParse({
-    contactId: formData.get("contactId"),
-    emailStatus: formData.get("emailStatus"),
+    contactId: fdStr(formData, "contactId"),
+    emailStatus: fdStr(formData, "emailStatus"),
   });
 
   if (!parsed.success) {
@@ -570,12 +576,12 @@ export async function sendCrmEmailAction(formData: FormData) {
   }
 
   const parsed = sendCrmEmailSchema.safeParse({
-    contactId: formData.get("contactId"),
-    dealId: formData.get("dealId"),
-    subject: formData.get("subject"),
-    body: formData.get("body"),
-    createFollowUpDays: formData.get("createFollowUpDays") || undefined,
-    sendingProfileId: formData.get("sendingProfileId") || undefined,
+    contactId: fdStr(formData, "contactId"),
+    dealId: fdStr(formData, "dealId"),
+    subject: fdStr(formData, "subject"),
+    body: fdStr(formData, "body"),
+    createFollowUpDays: fdStr(formData, "createFollowUpDays") || undefined,
+    sendingProfileId: fdStr(formData, "sendingProfileId") || undefined,
   });
 
   if (!parsed.success) {
@@ -611,11 +617,11 @@ export async function saveEmailTemplateAction(formData: FormData) {
   const id = String(formData.get("id") || "");
 
   const parsed = emailTemplateSchema.safeParse({
-    name: formData.get("name"),
-    subject: formData.get("subject"),
-    body: formData.get("body"),
-    category: formData.get("category"),
-    isActive: formData.get("isActive") === "on" || formData.get("isActive") === "true",
+    name: fdStr(formData, "name"),
+    subject: fdStr(formData, "subject"),
+    body: fdStr(formData, "body"),
+    category: fdStr(formData, "category"),
+    isActive: fdStr(formData, "isActive") === "on" || fdStr(formData, "isActive") === "true",
   });
 
   if (!parsed.success) {

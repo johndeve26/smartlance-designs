@@ -10,8 +10,9 @@ import {
   CRM_SOURCE_LABELS,
   CRM_DEAL_STAGE_LABELS,
   formatCurrency,
+  temperatureTone,
 } from "@/lib/crm/display";
-import { CrmBadge, temperatureTone } from "@/components/admin/crm/CrmShared";
+import { CrmBadge } from "@/components/admin/crm/CrmShared";
 import { AdminDetailHeader } from "@/components/admin/patterns/AdminDetailHeader";
 import { AdminPanel, AdminSection } from "@/components/admin/patterns/AdminPanel";
 

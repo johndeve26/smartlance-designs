@@ -81,10 +81,3 @@ export function CrmBadge({
     </span>
   );
 }
-
-export function temperatureTone(t: string): "cold" | "warm" | "hot" | "neutral" {
-  if (t === "COLD") return "cold";
-  if (t === "WARM") return "warm";
-  if (t === "HOT") return "hot";
-  return "neutral";
-}

@@ -19,8 +19,9 @@ import {
   CRM_SOURCE_LABELS,
   formatCurrency,
   formatDateTime,
+  temperatureTone,
 } from "@/lib/crm/display";
-import { CrmBadge, temperatureTone } from "@/components/admin/crm/CrmShared";
+import { CrmBadge } from "@/components/admin/crm/CrmShared";
 import { ContactDetailActions } from "@/components/admin/crm/ContactDetailActions";
 import { listProjectsForContact } from "@/lib/agency/projects";
 import {

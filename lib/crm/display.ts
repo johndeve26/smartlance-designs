@@ -75,3 +75,13 @@ export function formatDateTime(d: Date | string | null | undefined) {
   if (!d) return "—";
   return new Date(d).toLocaleString();
 }
+
+/** Shared by server + client — keep out of `"use client"` modules. */
+export function temperatureTone(
+  t: string,
+): "cold" | "warm" | "hot" | "neutral" {
+  if (t === "COLD") return "cold";
+  if (t === "WARM") return "warm";
+  if (t === "HOT") return "hot";
+  return "neutral";
+}
