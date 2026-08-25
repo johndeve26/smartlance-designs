@@ -188,6 +188,89 @@ export async function updateLeadTemperature(input: {
   return lead;
 }
 
+export async function deleteLead(input: { id: string; actorId: string }) {
+  const lead = await prisma.crmLead.findUniqueOrThrow({ where: { id: input.id } });
+  const { onLeadInactive } = await import("@/lib/crm/outreach/suppression");
+  await onLeadInactive(lead.contactId, "CLOSED");
+  return prisma.crmLead.delete({ where: { id: input.id } });
+}
+
+export async function bulkUpdateLeadStatus(input: {
+  ids: string[];
+  status: Prisma.CrmLeadUpdateInput["status"];
+  actorId: string;
+}) {
+  const { clampBulkIds, emptyBulkResult, friendlyDeleteError } = await import(
+    "@/lib/crm/bulk"
+  );
+  const ids = clampBulkIds(input.ids);
+  const result = emptyBulkResult();
+
+  for (const id of ids) {
+    try {
+      await updateLeadStatus({
+        leadId: id,
+        status: input.status,
+        actorId: input.actorId,
+      });
+      result.updated += 1;
+    } catch (err) {
+      result.failed.push({ id, reason: friendlyDeleteError(err) });
+    }
+  }
+
+  return result;
+}
+
+export async function bulkUpdateLeadTemperature(input: {
+  ids: string[];
+  temperature: Prisma.CrmLeadUpdateInput["temperature"];
+  actorId: string;
+}) {
+  const { clampBulkIds, emptyBulkResult, friendlyDeleteError } = await import(
+    "@/lib/crm/bulk"
+  );
+  const ids = clampBulkIds(input.ids);
+  const result = emptyBulkResult();
+
+  for (const id of ids) {
+    try {
+      await updateLeadTemperature({
+        leadId: id,
+        temperature: input.temperature,
+        actorId: input.actorId,
+      });
+      result.updated += 1;
+    } catch (err) {
+      result.failed.push({ id, reason: friendlyDeleteError(err) });
+    }
+  }
+
+  return result;
+}
+
+export async function bulkDeleteLeads(input: {
+  ids: string[];
+  actorId: string;
+}) {
+  const { clampBulkIds, emptyBulkResult, friendlyDeleteError } = await import(
+    "@/lib/crm/bulk"
+  );
+  const ids = clampBulkIds(input.ids);
+  const result = emptyBulkResult();
+
+  for (const id of ids) {
+    try {
+      await deleteLead({ id, actorId: input.actorId });
+      result.deleted += 1;
+    } catch (err) {
+      result.failed.push({ id, reason: friendlyDeleteError(err) });
+    }
+  }
+
+  return result;
+}
+
 export async function getLeadById(id: string) {
   return prisma.crmLead.findUnique({
     where: { id },

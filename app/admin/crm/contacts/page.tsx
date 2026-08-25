@@ -8,12 +8,14 @@ import {
   CRM_LEAD_STATUS_LABELS,
   CRM_LEAD_TEMPERATURE_LABELS,
   formatDate,
-  temperatureTone,
 } from "@/lib/crm/display";
 import { CrmPagination } from "@/components/admin/crm/CrmPagination";
-import { CrmBadge } from "@/components/admin/crm/CrmShared";
 import { CrmExportButton } from "@/components/admin/crm/CrmExportButton";
 import { ContactListFilters } from "@/components/admin/crm/ContactListFilters";
+import {
+  ContactsBulkTable,
+  type ContactBulkRow,
+} from "@/components/admin/crm/ContactsBulkTable";
 import { listContactViewsAction, getContactViewAction } from "@/lib/admin/crm-view-actions";
 import {
   CONTACT_FILTER_VERSION,
@@ -32,7 +34,6 @@ import type {
   CrmLeadTemperature,
 } from "@prisma/client";
 import { AdminListPage } from "@/components/admin/patterns/AdminListPage";
-import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
@@ -76,6 +77,7 @@ export default async function CrmContactsPage({
   const user = await requireAdminUser("view_crm");
   const sp = await searchParams;
   const page = Math.max(1, Number(sp.page || "1") || 1);
+  const canManage = can(user.role, "manage_crm");
 
   const views = await listContactViewsAction();
   const view = sp.view ? await getContactViewAction(sp.view) : null;
@@ -103,6 +105,23 @@ export default async function CrmContactsPage({
 
   const totalPages = Math.max(1, Math.ceil(list.total / list.pageSize));
 
+  const rows: ContactBulkRow[] = list.items.map((c) => {
+    const lead = c.leads[0];
+    return {
+      id: c.id,
+      name: contactDisplayName(c),
+      company: c.company?.name ?? "—",
+      country: c.countryName ?? c.countryCode ?? "—",
+      email: c.email ?? "—",
+      lifecycle: c.lifecycleStage,
+      lifecycleLabel: CRM_LIFECYCLE_LABELS[c.lifecycleStage],
+      leadStatus: lead ? CRM_LEAD_STATUS_LABELS[lead.status] : "—",
+      temperature: lead?.temperature ?? null,
+      temperatureLabel: lead ? CRM_LEAD_TEMPERATURE_LABELS[lead.temperature] : null,
+      nextAction: formatDate(c.nextActivityAt) ?? "—",
+    };
+  });
+
   return (
     <AdminListPage
       title="Contacts"
@@ -119,7 +138,7 @@ export default async function CrmContactsPage({
           {can(user.role, "export_crm") ? (
             <CrmExportButton type="contacts" label="Export CSV" />
           ) : null}
-          {can(user.role, "manage_crm") ? (
+          {canManage ? (
             <>
               <Button asChild variant="outline" size="sm">
                 <Link href="/admin/crm/contacts/import">Import CSV</Link>
@@ -149,59 +168,7 @@ export default async function CrmContactsPage({
         />
       }
     >
-      <DataTable
-        rows={list.items}
-        rowKey={(c) => c.id}
-        columns={[
-          {
-            key: "name",
-            header: "Contact",
-            cell: (c) => (
-              <Link href={`/admin/crm/contacts/${c.id}`} className="font-medium text-accent-text hover:underline">
-                {contactDisplayName(c)}
-              </Link>
-            ),
-          },
-          { key: "company", header: "Company", cell: (c) => c.company?.name ?? "—" },
-          {
-            key: "country",
-            header: "Country",
-            hideOnMobile: true,
-            cell: (c) => c.countryName ?? c.countryCode ?? "—",
-          },
-          { key: "email", header: "Email", hideOnMobile: true, cell: (c) => c.email ?? "—" },
-          { key: "lifecycle", header: "Lifecycle", cell: (c) => CRM_LIFECYCLE_LABELS[c.lifecycleStage] },
-          {
-            key: "lead",
-            header: "Lead",
-            hideOnMobile: true,
-            cell: (c) => {
-              const lead = c.leads[0];
-              return lead ? CRM_LEAD_STATUS_LABELS[lead.status] : "—";
-            },
-          },
-          {
-            key: "temp",
-            header: "Temp",
-            hideOnMobile: true,
-            cell: (c) => {
-              const lead = c.leads[0];
-              return lead ? (
-                <CrmBadge tone={temperatureTone(lead.temperature)}>
-                  {CRM_LEAD_TEMPERATURE_LABELS[lead.temperature]}
-                </CrmBadge>
-              ) : (
-                "—"
-              );
-            },
-          },
-          {
-            key: "next",
-            header: "Next action",
-            cell: (c) => formatDate(c.nextActivityAt) ?? "—",
-          },
-        ]}
-      />
+      <ContactsBulkTable rows={rows} canManage={canManage} />
     </AdminListPage>
   );
 }

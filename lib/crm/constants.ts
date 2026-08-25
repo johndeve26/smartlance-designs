@@ -13,6 +13,7 @@ import type {
 
 export const CRM_PAGE_SIZE_DEFAULT = 25;
 export const CRM_PAGE_SIZE_MAX = 100;
+export const CRM_BULK_MAX_IDS = 100;
 export const CRM_EXPORT_MAX_ROWS = 5000;
 export const CRM_ACTIVITY_TIMELINE_DEFAULT = 20;
 export const CRM_RECENT_ACTIVITY_LIMIT = 20;

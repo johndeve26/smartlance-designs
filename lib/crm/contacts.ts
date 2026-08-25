@@ -443,6 +443,61 @@ export async function archiveContact(input: {
   return contact;
 }
 
+export async function deleteContact(input: { id: string; actorId: string }) {
+  const { onContactArchived } = await import("@/lib/crm/outreach/suppression");
+  await onContactArchived(input.id);
+  return prisma.crmContact.delete({ where: { id: input.id } });
+}
+
+export async function bulkUpdateContactLifecycle(input: {
+  ids: string[];
+  lifecycleStage: Prisma.CrmContactUpdateInput["lifecycleStage"];
+  actorId: string;
+}) {
+  const { clampBulkIds, emptyBulkResult, friendlyDeleteError } = await import(
+    "@/lib/crm/bulk"
+  );
+  const ids = clampBulkIds(input.ids);
+  const result = emptyBulkResult();
+
+  for (const id of ids) {
+    try {
+      await updateContactLifecycle({
+        contactId: id,
+        lifecycleStage: input.lifecycleStage,
+        actorId: input.actorId,
+      });
+      result.updated += 1;
+    } catch (err) {
+      result.failed.push({ id, reason: friendlyDeleteError(err) });
+    }
+  }
+
+  return result;
+}
+
+export async function bulkDeleteContacts(input: {
+  ids: string[];
+  actorId: string;
+}) {
+  const { clampBulkIds, emptyBulkResult, friendlyDeleteError } = await import(
+    "@/lib/crm/bulk"
+  );
+  const ids = clampBulkIds(input.ids);
+  const result = emptyBulkResult();
+
+  for (const id of ids) {
+    try {
+      await deleteContact({ id, actorId: input.actorId });
+      result.deleted += 1;
+    } catch (err) {
+      result.failed.push({ id, reason: friendlyDeleteError(err) });
+    }
+  }
+
+  return result;
+}
+
 export async function updateContactLifecycle(input: {
   contactId: string;
   lifecycleStage: Prisma.CrmContactUpdateInput["lifecycleStage"];
