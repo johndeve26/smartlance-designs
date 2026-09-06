@@ -160,6 +160,39 @@ export function hasDatabaseUrl(): boolean {
   return Boolean(process.env.DATABASE_URL?.trim());
 }
 
+/** Neon/pooler idle disconnects and wake failures surface as these codes/messages. */
+export function isDatabaseConnectivityError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const e = error as { code?: string; message?: string; name?: string };
+  const message = `${e.message ?? ""} ${e.name ?? ""}`;
+  return (
+    e.code === "P1017" ||
+    e.code === "P1001" ||
+    e.code === "ECONNRESET" ||
+    e.code === "ETIMEDOUT" ||
+    e.code === "ENOTFOUND" ||
+    /Can't reach database|DatabaseNotReachable|ConnectionClosed|ECONNRESET|connection timeout|Server has closed the connection/i.test(
+      message,
+    )
+  );
+}
+
+/** Drop cached pool/client so the next query opens a fresh Neon connection. */
+export function resetDatabaseConnection(reason = "connectivity error") {
+  if (process.env.NODE_ENV !== "production") {
+    console.warn(`[db] Resetting Prisma/pg pool (${reason}).`);
+  }
+  if (globalForPrisma.prisma) {
+    void globalForPrisma.prisma.$disconnect().catch(() => undefined);
+  }
+  if (globalForPrisma.pgPool) {
+    void globalForPrisma.pgPool.end().catch(() => undefined);
+  }
+  globalForPrisma.prisma = undefined;
+  globalForPrisma.pgPool = undefined;
+  globalForPrisma.prismaSchemaFingerprint = undefined;
+}
+
 function clientHasRequiredDelegates(client: PrismaClient): boolean {
   return getMissingDelegates(client).length === 0;
 }
@@ -203,12 +236,21 @@ function createPrismaClient() {
     new Pool({
       connectionString,
       max: 10,
-      idleTimeoutMillis: 20_000,
+      // Neon pooled endpoints can idle-close; keep idle short.
+      idleTimeoutMillis: 10_000,
+      // Fail fast on serverless — long hangs burn duration and amplify CPU under load.
+      connectionTimeoutMillis: 3_000,
+      allowExitOnIdle: true,
     });
 
-  if (process.env.NODE_ENV !== "production") {
-    globalForPrisma.pgPool = pool;
+  if (!globalForPrisma.pgPool) {
+    pool.on("error", (err) => {
+      console.warn("[db] Idle pool client error:", err.message);
+    });
   }
+
+  // Always reuse the pool across invocations in the same isolate (incl. production).
+  globalForPrisma.pgPool = pool;
 
   const adapter = new PrismaPg(pool);
   return new PrismaClient({
@@ -259,10 +301,9 @@ function getPrismaClient(): PrismaClient {
     }
   }
 
-  if (process.env.NODE_ENV !== "production") {
-    globalForPrisma.prisma = client;
-    globalForPrisma.prismaSchemaFingerprint = PRISMA_CLIENT_GENERATION;
-  }
+  // Reuse client on the serverless isolate in production too (avoids re-init CPU).
+  globalForPrisma.prisma = client;
+  globalForPrisma.prismaSchemaFingerprint = PRISMA_CLIENT_GENERATION;
   return client;
 }
 

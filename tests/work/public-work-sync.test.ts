@@ -4,31 +4,36 @@ import { homepageHeroProjectSlug } from "@/data/home";
 import { getVisibleProjects } from "@/data/portfolio";
 import { getLegacyCaseStudyNarrative } from "@/lib/case-study";
 
-vi.mock("@/lib/content/work-source", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/lib/content/work-source")>();
+vi.mock("@/lib/public/cache", () => ({
+  resolveCmsContentRuntime: vi.fn(),
+  resolveWorkContentRuntime: vi.fn(),
+  listPublishedIndustries: vi.fn(),
+  getPublishedIndustryBySlug: vi.fn(),
+  listPublishedWork: vi.fn(),
+  getPublishedWorkBySlug: vi.fn(),
+  listPublishedInsights: vi.fn(),
+  getPublishedInsightBySlug: vi.fn(),
+  getPublishedResourceBySlug: vi.fn(),
+  listAllPublishedResourceListingRows: vi.fn(),
+}));
+
+vi.mock("@/lib/repositories/workRepository", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/repositories/workRepository")>();
   return {
     ...actual,
-    resolveWorkContentRuntime: vi.fn(),
+    getAdjacentPublicWork: vi.fn(),
+    listRelatedPublicWork: vi.fn(),
   };
 });
 
-vi.mock("@/lib/repositories/workRepository", () => ({
-  listPublishedWork: vi.fn(),
-  getPublishedWorkBySlug: vi.fn(),
-  getAdjacentPublicWork: vi.fn(),
-  listRelatedPublicWork: vi.fn(),
-  sortPublicWorkProjects: (projects: Project[]) =>
-    [...projects].sort((a, b) => a.name.localeCompare(b.name)),
-}));
-
+import { WorkDatabaseUnavailableError } from "@/lib/content/work-source";
 import {
   resolveWorkContentRuntime,
-  WorkDatabaseUnavailableError,
-} from "@/lib/content/work-source";
-import {
   getPublishedWorkBySlug,
-  getAdjacentPublicWork,
   listPublishedWork,
+} from "@/lib/public/cache";
+import {
+  getAdjacentPublicWork,
   listRelatedPublicWork,
 } from "@/lib/repositories/workRepository";
 import {

@@ -1,17 +1,34 @@
+import { unstable_cache } from "next/cache";
 import { hasDatabaseUrl, prisma } from "@/lib/db";
 import type { RedirectOrigin, RedirectStatus, RedirectType } from "@prisma/client";
 import { writeAuditLog } from "@/lib/repositories/auditRepository";
-import { revalidateRedirects } from "@/lib/admin/publishing";
+import { CACHE_TAGS, revalidateRedirects } from "@/lib/admin/publishing";
 import { isSafePublicUrl, normalizeInternalPath } from "@/lib/ops/url-safety";
+import { PUBLIC_CACHE_REVALIDATE_SECONDS } from "@/lib/public/cache/config";
 
-export async function findActiveRedirect(sourcePath: string) {
-  if (!hasDatabaseUrl()) return null;
+async function findActiveRedirectUncached(sourcePath: string) {
   return prisma.redirect.findFirst({
     where: {
       sourcePath,
       status: "ACTIVE",
     },
   });
+}
+
+/** Cached for public proxy/page lookups. Mutations call `revalidateRedirects()`. */
+export async function findActiveRedirect(sourcePath: string) {
+  if (!hasDatabaseUrl()) return null;
+  if (process.env.NODE_ENV === "test") {
+    return findActiveRedirectUncached(sourcePath);
+  }
+  return unstable_cache(
+    () => findActiveRedirectUncached(sourcePath),
+    ["active-redirect", sourcePath],
+    {
+      tags: [CACHE_TAGS.redirects],
+      revalidate: PUBLIC_CACHE_REVALIDATE_SECONDS,
+    },
+  )();
 }
 
 /**

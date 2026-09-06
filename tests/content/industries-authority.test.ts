@@ -1,27 +1,25 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { industriesCatalog } from "@/data/industries";
 
-vi.mock("@/lib/content/content-source", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/lib/content/content-source")>();
-  return {
-    ...actual,
-    resolveCmsContentRuntime: vi.fn(),
-  };
-});
-
-vi.mock("@/lib/repositories/industriesRepository", () => ({
+vi.mock("@/lib/public/cache", () => ({
+  resolveCmsContentRuntime: vi.fn(),
+  resolveWorkContentRuntime: vi.fn(),
   listPublishedIndustries: vi.fn(),
   getPublishedIndustryBySlug: vi.fn(),
+  listPublishedWork: vi.fn(),
+  getPublishedWorkBySlug: vi.fn(),
+  listPublishedInsights: vi.fn(),
+  getPublishedInsightBySlug: vi.fn(),
+  getPublishedResourceBySlug: vi.fn(),
+  listAllPublishedResourceListingRows: vi.fn(),
 }));
 
+import { CmsDatabaseUnavailableError } from "@/lib/content/content-source";
 import {
   resolveCmsContentRuntime,
-  CmsDatabaseUnavailableError,
-} from "@/lib/content/content-source";
-import {
   getPublishedIndustryBySlug,
   listPublishedIndustries,
-} from "@/lib/repositories/industriesRepository";
+} from "@/lib/public/cache";
 import {
   loadIndustryBySlug,
   loadPublishedIndustries,

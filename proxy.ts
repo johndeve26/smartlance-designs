@@ -119,7 +119,9 @@ async function applyDbSlugRedirect(request: NextRequest, pathname: string) {
     lookup.searchParams.set("path", pathname);
     const res = await fetch(lookup, {
       headers: { "x-internal-redirect": "1" },
-      cache: "no-store",
+      // Cache redirect lookups — slug redirects rarely change; admin mutations
+      // revalidate CACHE_TAGS.redirects. Avoids a Neon hit on every CMS request.
+      next: { revalidate: 3600, tags: ["redirects"] },
     });
     if (!res.ok) return null;
     const data = (await res.json()) as {
@@ -167,12 +169,10 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
-    if (isLogin && hasCookie) {
-      const dash = request.nextUrl.clone();
-      dash.pathname = "/admin";
-      dash.search = "";
-      return NextResponse.redirect(dash);
-    }
+    // Do NOT redirect /admin/login → /admin merely because a cookie exists.
+    // Stale cookies (e.g. after switching Neon → local DB) are not valid sessions
+    // and caused ERR_TOO_MANY_REDIRECTS (login↔admin). The login page verifies
+    // the session in the DB and only then redirects to /admin.
 
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set("x-smartlance-admin", "1");

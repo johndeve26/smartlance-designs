@@ -1,6 +1,7 @@
 /**
  * Phase 3 public content loaders — DB first, typed/markdown fallback when empty.
  * Work listing/detail uses `resolveWorkContentRuntime()` (Phase 2) — no typed merge.
+ * Hot public reads go through `@/lib/public/cache` to cut Neon hits on Vercel.
  */
 import { hasDatabaseUrl } from "@/lib/db";
 import {
@@ -10,35 +11,29 @@ import {
 import {
   listPublishedInsights,
   getPublishedInsightBySlug,
-} from "@/lib/repositories/insightsRepository";
-import {
-  resolveCmsContentRuntime,
-  CmsDatabaseUnavailableError,
-} from "@/lib/content/content-source";
-import {
-  resolveWorkContentRuntime,
-  WorkDatabaseUnavailableError,
-} from "@/lib/content/work-source";
-import {
   listPublishedWork,
   getPublishedWorkBySlug,
+  listPublishedIndustries,
+  getPublishedIndustryBySlug,
+  getPublishedResourceBySlug,
+  listAllPublishedResourceListingRows,
+  resolveWorkContentRuntime,
+  resolveCmsContentRuntime,
+} from "@/lib/public/cache";
+import { CmsDatabaseUnavailableError } from "@/lib/content/content-source";
+import { WorkDatabaseUnavailableError } from "@/lib/content/work-source";
+import {
   getAdjacentPublicWork,
   listRelatedPublicWork,
 } from "@/lib/repositories/workRepository";
 import { getAdjacentProjects } from "@/lib/case-study";
-import {
-  catalogToDetail,
-  getPublishedIndustryBySlug,
-  listPublishedIndustries,
-} from "@/lib/repositories/industriesRepository";
+import { catalogToDetail } from "@/lib/repositories/industriesRepository";
 import {
   listPublishedTestimonials,
   getTestimonialForWorkSlug,
   getPublishedTestimonialByLegacyId,
 } from "@/lib/repositories/testimonialsRepository";
 import {
-  getPublishedResourceBySlug,
-  listAllPublishedResourceListingRows,
   listPublishedResourceListingRows,
   resourcePayload,
 } from "@/lib/repositories/resourcesRepository";

@@ -15,16 +15,21 @@ vi.mock("@/lib/db", () => ({
   },
 }));
 
-vi.mock("@/lib/content/content-source", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/lib/content/content-source")>();
-  return {
-    ...actual,
-    resolveCmsContentRuntime: vi.fn(),
-  };
-});
+vi.mock("@/lib/public/cache", () => ({
+  resolveCmsContentRuntime: vi.fn(),
+  resolveWorkContentRuntime: vi.fn(),
+  listPublishedIndustries: vi.fn(),
+  getPublishedIndustryBySlug: vi.fn(),
+  listPublishedWork: vi.fn(),
+  getPublishedWorkBySlug: vi.fn(),
+  listPublishedInsights: vi.fn(),
+  getPublishedInsightBySlug: vi.fn(),
+  getPublishedResourceBySlug: vi.fn(),
+  listAllPublishedResourceListingRows: vi.fn(),
+}));
 
 import { hasDatabaseUrl, prisma } from "@/lib/db";
-import { resolveCmsContentRuntime } from "@/lib/content/content-source";
+import { resolveCmsContentRuntime } from "@/lib/public/cache";
 import { loadIndustryBySlug } from "@/lib/content/phase3-public";
 
 const mockHasDatabaseUrl = vi.mocked(hasDatabaseUrl);

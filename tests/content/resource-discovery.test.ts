@@ -2,28 +2,33 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getPublishedComparisons } from "@/data/comparisons";
 import { getPublishedTools } from "@/data/tools";
 
-vi.mock("@/lib/content/content-source", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/lib/content/content-source")>();
+vi.mock("@/lib/public/cache", () => ({
+  resolveCmsContentRuntime: vi.fn(),
+  resolveWorkContentRuntime: vi.fn(),
+  listPublishedIndustries: vi.fn(),
+  getPublishedIndustryBySlug: vi.fn(),
+  listPublishedWork: vi.fn(),
+  getPublishedWorkBySlug: vi.fn(),
+  listPublishedInsights: vi.fn(),
+  getPublishedInsightBySlug: vi.fn(),
+  getPublishedResourceBySlug: vi.fn(),
+  listAllPublishedResourceListingRows: vi.fn(),
+}));
+
+vi.mock("@/lib/repositories/resourcesRepository", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/repositories/resourcesRepository")>();
   return {
     ...actual,
-    resolveCmsContentRuntime: vi.fn(),
+    listPublishedResourceListingRows: vi.fn(),
   };
 });
 
-vi.mock("@/lib/repositories/resourcesRepository", () => ({
-  listPublishedResourceListingRows: vi.fn(),
-  listAllPublishedResourceListingRows: vi.fn(),
-  getPublishedResourceBySlug: vi.fn(),
-}));
-
+import { CmsDatabaseUnavailableError } from "@/lib/content/content-source";
 import {
   resolveCmsContentRuntime,
-  CmsDatabaseUnavailableError,
-} from "@/lib/content/content-source";
-import {
   listAllPublishedResourceListingRows,
-  listPublishedResourceListingRows,
-} from "@/lib/repositories/resourcesRepository";
+} from "@/lib/public/cache";
+import { listPublishedResourceListingRows } from "@/lib/repositories/resourcesRepository";
 import {
   loadPublishedComparisons,
   loadPublishedResourceCards,
