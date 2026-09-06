@@ -90,6 +90,7 @@ export async function sendViaSmtp(
   if (input.messageId) headers["Message-ID"] = input.messageId;
 
   try {
+    const envelopeTo = Array.isArray(input.to) ? input.to : [input.to];
     const info = await transport.sendMail({
       from: formatFromAddress(config.fromEmail, config.fromName),
       to: input.to,
@@ -100,7 +101,7 @@ export async function sendViaSmtp(
       headers: Object.keys(headers).length ? headers : undefined,
       messageId: input.messageId,
       envelope: config.envelopeFrom
-        ? { from: config.envelopeFrom, to: input.to }
+        ? { from: config.envelopeFrom, to: envelopeTo }
         : undefined,
     });
     return { ok: true as const, messageId: info.messageId };

@@ -87,6 +87,7 @@ export async function sendViaCachedSmtp(
       ? `"${config.fromName.replace(/[\r\n"]/g, " ")}" <${config.fromEmail}>`
       : config.fromEmail;
 
+  const envelopeTo = Array.isArray(input.to) ? input.to : [input.to];
   const info = await transport.sendMail({
     from,
     to: input.to,
@@ -97,7 +98,7 @@ export async function sendViaCachedSmtp(
     headers: Object.keys(headers).length ? headers : undefined,
     messageId: input.messageId,
     envelope: config.envelopeFrom
-      ? { from: config.envelopeFrom, to: input.to }
+      ? { from: config.envelopeFrom, to: envelopeTo }
       : undefined,
   });
 
