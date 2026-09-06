@@ -70,7 +70,16 @@ export default async function CrmContactDetailPage({
   );
   const senderOptions = can(user.role, "send_crm_email")
     ? await listCrmSenderProfileOptions()
-    : { profiles: [], defaultProfileId: null };
+    : {
+        profiles: [],
+        defaultProfileId: null,
+        routedDefault: {
+          profileId: null,
+          fromName: "",
+          fromEmail: "",
+          source: "legacy",
+        },
+      };
   const emailTemplates = can(user.role, "send_crm_email")
     ? (await listEmailTemplates(true)).map((t) => ({ id: t.id, name: t.name }))
     : [];
@@ -119,6 +128,8 @@ export default async function CrmContactDetailPage({
           enrollments={enrollments.items}
           sendingProfiles={senderOptions.profiles}
           defaultSendingProfileId={senderOptions.defaultProfileId}
+          routedDefaultFromName={senderOptions.routedDefault.fromName}
+          routedDefaultFromEmail={senderOptions.routedDefault.fromEmail}
           emailTemplates={emailTemplates}
         />
       ) : null}

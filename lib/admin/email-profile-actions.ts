@@ -96,6 +96,7 @@ export async function saveEmailSendingProfileAction(
     smtpPasswordLast4?: string | null;
   } = {};
 
+  try {
   const existing = data.id
     ? await prisma.emailSendingProfile.findUnique({ where: { id: data.id } })
     : null;
@@ -210,6 +211,16 @@ export async function saveEmailSendingProfileAction(
 
   revalidatePath("/admin/email");
   return { ok: true, message: "Sending profile saved.", id: savedId };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Could not save profile.";
+    if (/Can't reach database|DatabaseNotReachable|P1001/i.test(message)) {
+      return {
+        ok: false,
+        error: "Database temporarily unreachable. Wait a moment and try Save again.",
+      };
+    }
+    return { ok: false, error: message };
+  }
 }
 
 export async function deactivateEmailSendingProfileAction(
@@ -327,7 +338,13 @@ export async function sendProfileTestEmailAction(
     metadata: { recipientDomain: recipient.split("@")[1] ?? "unknown" },
   });
 
-  return { ok: true, message: `Test email sent to ${recipient}.` };
+  const expectedFrom = profile.fromEmail;
+  const tip =
+    profile.transportType === "SYSTEM_SMTP"
+      ? ` Expected From: ${expectedFrom}. If your inbox shows a different address, your host rewrote it — switch this profile to Custom SMTP with that mailbox’s credentials, or authorize ${expectedFrom} as an alias on the System SMTP account.`
+      : ` Expected From: ${expectedFrom}.`;
+
+  return { ok: true, message: `Test email sent to ${recipient}.${tip}` };
 }
 
 export async function saveEmailRoutingAction(

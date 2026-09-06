@@ -8,9 +8,18 @@ export type CrmSenderProfileOption = {
   fromName: string;
 };
 
+export type CrmRoutedSenderDefault = {
+  profileId: string | null;
+  fromName: string;
+  fromEmail: string;
+  /** How the CRM_MANUAL route resolved when no explicit profile is chosen. */
+  source: string;
+};
+
 export async function listCrmSenderProfileOptions(): Promise<{
   profiles: CrmSenderProfileOption[];
   defaultProfileId: string | null;
+  routedDefault: CrmRoutedSenderDefault;
 }> {
   const profiles = await listActiveEmailSendingProfiles();
   const resolved = await resolveEmailSendingProfile({ category: "CRM_MANUAL" });
@@ -22,5 +31,11 @@ export async function listCrmSenderProfileOptions(): Promise<{
       fromName: p.fromName,
     })),
     defaultProfileId: resolved.profileId,
+    routedDefault: {
+      profileId: resolved.profileId,
+      fromName: resolved.fromName,
+      fromEmail: resolved.fromEmail,
+      source: resolved.source,
+    },
   };
 }

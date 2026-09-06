@@ -1,6 +1,6 @@
 import type { NavigationMenuKey, PublishStatus } from "@prisma/client";
 import type { Prisma } from "@prisma/client";
-import { hasDatabaseUrl, prisma } from "@/lib/db";
+import { hasDatabaseUrl, isDatabaseConnectivityError, prisma, resetDatabaseConnection } from "@/lib/db";
 import { writeAuditLog } from "@/lib/repositories/auditRepository";
 import {
   CACHE_TAGS,
@@ -331,54 +331,53 @@ function itemsToNavTree(items: NavDraftItem[]): typeof mainNavigation {
 }
 
 async function loadPublicNavigationUncached(): Promise<PublicNavigationBundle> {
-  if (!hasDatabaseUrl()) {
-    return {
-      mainNavigation,
-      footerNavigation,
-      primaryCta,
-      fromDb: false,
-    };
-  }
-  const menus = await prisma.navigationMenu.findMany({
-    where: { status: "PUBLISHED" },
-  });
-  if (!menus.length) {
-    return {
-      mainNavigation,
-      footerNavigation,
-      primaryCta,
-      fromDb: false,
-    };
-  }
-  const byKey = Object.fromEntries(menus.map((m) => [m.menuKey, m]));
-  const header = byKey.HEADER_PRIMARY
-    ? itemsToNavTree((byKey.HEADER_PRIMARY.publishedItems as NavDraftItem[]) || [])
-    : mainNavigation;
-  const ctaItems = (byKey.HEADER_CTA?.publishedItems as NavDraftItem[]) || [];
-  const cta = ctaItems[0]
-    ? { label: ctaItems[0].label, href: ctaItems[0].href }
-    : primaryCta;
-
-  const footer = {
-    services:
-      mapFooter(byKey.FOOTER_SERVICES) || footerNavigation.services,
-    aiAutomation: footerNavigation.aiAutomation,
-    solutions: footerNavigation.solutions,
-    work: footerNavigation.work,
-    platforms: footerNavigation.platforms,
-    company:
-      mapFooter(byKey.FOOTER_COMPANY) || footerNavigation.company,
-    resources:
-      mapFooter(byKey.FOOTER_RESOURCES) || footerNavigation.resources,
-    legal: mapFooter(byKey.FOOTER_LEGAL) || footerNavigation.legal,
+  const fallback: PublicNavigationBundle = {
+    mainNavigation,
+    footerNavigation,
+    primaryCta,
+    fromDb: false,
   };
+  if (!hasDatabaseUrl()) return fallback;
 
-  return {
-    mainNavigation: header,
-    footerNavigation: footer,
-    primaryCta: cta,
-    fromDb: true,
-  };
+  try {
+    const menus = await prisma.navigationMenu.findMany({
+      where: { status: "PUBLISHED" },
+    });
+    if (!menus.length) return fallback;
+
+    const byKey = Object.fromEntries(menus.map((m) => [m.menuKey, m]));
+    const header = byKey.HEADER_PRIMARY
+      ? itemsToNavTree((byKey.HEADER_PRIMARY.publishedItems as NavDraftItem[]) || [])
+      : mainNavigation;
+    const ctaItems = (byKey.HEADER_CTA?.publishedItems as NavDraftItem[]) || [];
+    const cta = ctaItems[0]
+      ? { label: ctaItems[0].label, href: ctaItems[0].href }
+      : primaryCta;
+
+    const footer = {
+      services: mapFooter(byKey.FOOTER_SERVICES) || footerNavigation.services,
+      aiAutomation: footerNavigation.aiAutomation,
+      solutions: footerNavigation.solutions,
+      work: footerNavigation.work,
+      platforms: footerNavigation.platforms,
+      company: mapFooter(byKey.FOOTER_COMPANY) || footerNavigation.company,
+      resources: mapFooter(byKey.FOOTER_RESOURCES) || footerNavigation.resources,
+      legal: mapFooter(byKey.FOOTER_LEGAL) || footerNavigation.legal,
+    };
+
+    return {
+      mainNavigation: header,
+      footerNavigation: footer,
+      primaryCta: cta,
+      fromDb: true,
+    };
+  } catch (error) {
+    if (isDatabaseConnectivityError(error)) {
+      resetDatabaseConnection("navigation");
+      return fallback;
+    }
+    throw error;
+  }
 }
 
 function mapFooter(menu?: { publishedItems: Prisma.JsonValue }) {

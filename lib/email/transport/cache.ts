@@ -87,6 +87,26 @@ export async function sendViaCachedSmtp(
       ? `"${config.fromName.replace(/[\r\n"]/g, " ")}" <${config.fromEmail}>`
       : config.fromEmail;
 
+  // #region agent log
+  {
+    const { agentDebugLog } = await import("@/lib/debug/agent-log");
+    agentDebugLog({
+      hypothesisId: "E",
+      location: "transport/cache.ts:sendViaCachedSmtp",
+      message: "smtp from header about to send",
+      data: {
+        cacheKey,
+        fromHeader: from,
+        configFromEmail: config.fromEmail,
+        configFromName: config.fromName ?? null,
+        envelopeFrom: config.envelopeFrom ?? null,
+        smtpUser: config.username ?? null,
+      },
+      runId: "post-fix",
+    });
+  }
+  // #endregion
+
   const info = await transport.sendMail({
     from,
     to: input.to,
@@ -96,6 +116,31 @@ export async function sendViaCachedSmtp(
     html: input.html,
     headers: Object.keys(headers).length ? headers : undefined,
     messageId: input.messageId,
+    envelope: config.envelopeFrom
+      ? { from: config.envelopeFrom, to: input.to }
+      : undefined,
   });
+
+  // #region agent log
+  {
+    const { agentDebugLog } = await import("@/lib/debug/agent-log");
+    agentDebugLog({
+      hypothesisId: "E",
+      location: "transport/cache.ts:sendViaCachedSmtp:after",
+      message: "smtp sendMail completed",
+      data: {
+        cacheKey,
+        fromHeader: from,
+        messageId: info.messageId ?? null,
+        response: typeof info.response === "string" ? info.response.slice(0, 200) : null,
+        envelopeFrom:
+          info.envelope && typeof info.envelope === "object" && "from" in info.envelope
+            ? String((info.envelope as { from?: string }).from ?? "")
+            : null,
+      },
+    });
+  }
+  // #endregion
+
   return { ok: true as const, messageId: info.messageId };
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import type { AdminEmailSettingsDto } from "@/lib/repositories/emailSettingsRepository";
 import type { AdminSendingProfileDto } from "@/lib/repositories/emailSendingProfileRepository";
 import type { AdminEmailRoutingRow } from "@/lib/repositories/emailRoutingRepository";
@@ -82,6 +83,7 @@ export function EmailAdminShell({
         <ProfilesPanel
           profiles={profiles}
           adminEmail={adminEmail}
+          systemFromEmail={emailSettings?.fromEmail ?? null}
           canManageProfiles={canManageProfiles}
         />
       ) : null}
@@ -169,10 +171,12 @@ function Stat({ label, value }: { label: string; value: string }) {
 function ProfilesPanel({
   profiles,
   adminEmail,
+  systemFromEmail,
   canManageProfiles,
 }: {
   profiles: AdminSendingProfileDto[];
   adminEmail?: string | null;
+  systemFromEmail?: string | null;
   canManageProfiles: boolean;
 }) {
   const [editing, setEditing] = useState<AdminSendingProfileDto | "new" | null>(null);
@@ -242,6 +246,7 @@ function ProfilesPanel({
         <ProfileEditor
           profile={editing === "new" ? null : editing}
           adminEmail={adminEmail}
+          systemFromEmail={systemFromEmail}
           onClose={() => setEditing(null)}
         />
       ) : null}
@@ -252,15 +257,28 @@ function ProfilesPanel({
 function ProfileEditor({
   profile,
   adminEmail,
+  systemFromEmail,
   onClose,
 }: {
   profile: AdminSendingProfileDto | null;
   adminEmail?: string | null;
+  systemFromEmail?: string | null;
   onClose: () => void;
 }) {
+  const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  const [transportType, setTransportType] = useState(
+    profile?.transportType ?? "SYSTEM_SMTP",
+  );
+  const [fromEmail, setFromEmail] = useState(profile?.fromEmail ?? "");
+
+  const systemMismatch =
+    transportType === "SYSTEM_SMTP" &&
+    Boolean(systemFromEmail?.trim()) &&
+    Boolean(fromEmail.trim()) &&
+    systemFromEmail!.trim().toLowerCase() !== fromEmail.trim().toLowerCase();
 
   return (
     <form
@@ -271,11 +289,22 @@ function ProfileEditor({
         setError(null);
         const fd = new FormData(e.currentTarget);
         start(async () => {
-          const r = await saveEmailSendingProfileAction(fd);
-          if (r.ok) {
-            setMessage(r.message ?? "Saved.");
-            onClose();
-          } else setError(r.error);
+          try {
+            const r = await saveEmailSendingProfileAction(fd);
+            if (r.ok) {
+              setMessage(r.message ?? "Saved.");
+              router.refresh();
+              onClose();
+            } else {
+              setError(r.error);
+            }
+          } catch (err) {
+            setError(
+              err instanceof Error
+                ? err.message
+                : "Save failed. Check your connection and try again.",
+            );
+          }
         });
       }}
     >
@@ -302,7 +331,14 @@ function ProfileEditor({
         </label>
         <label className="block text-sm">
           From email
-          <input name="fromEmail" type="email" className="admin-input mt-1 w-full" defaultValue={profile?.fromEmail ?? ""} required />
+          <input
+            name="fromEmail"
+            type="email"
+            className="admin-input mt-1 w-full"
+            value={fromEmail}
+            onChange={(e) => setFromEmail(e.target.value)}
+            required
+          />
         </label>
         <label className="block text-sm">
           Reply-To name
@@ -314,7 +350,14 @@ function ProfileEditor({
         </label>
         <label className="block text-sm">
           Transport
-          <select name="transportType" className="admin-input mt-1 w-full" defaultValue={profile?.transportType ?? "SYSTEM_SMTP"}>
+          <select
+            name="transportType"
+            className="admin-input mt-1 w-full"
+            value={transportType}
+            onChange={(e) =>
+              setTransportType(e.target.value as "SYSTEM_SMTP" | "CUSTOM_SMTP")
+            }
+          >
             <option value="SYSTEM_SMTP">System SMTP</option>
             <option value="CUSTOM_SMTP">Custom SMTP</option>
           </select>
@@ -324,6 +367,15 @@ function ProfileEditor({
           <input name="sortOrder" type="number" className="admin-input mt-1 w-full" defaultValue={profile?.sortOrder ?? 0} />
         </label>
       </div>
+      {systemMismatch ? (
+        <p className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-950" role="status">
+          System SMTP authenticates as <strong>{systemFromEmail}</strong>. Many hosts rewrite
+          From to that mailbox even when this profile says <strong>{fromEmail}</strong>.
+          To deliver as {fromEmail}, switch transport to <strong>Custom SMTP</strong> and use
+          that mailbox’s host/username/password (or authorize the address as an alias on the
+          System SMTP account).
+        </p>
+      ) : null}
       <fieldset className="grid gap-3 sm:grid-cols-2">
         <legend className="text-sm font-semibold">Custom SMTP (Super Admin)</legend>
         <label className="block text-sm">
@@ -362,32 +414,32 @@ function ProfileEditor({
           Default profile
         </label>
       </div>
-      <div className="flex flex-wrap gap-2">
-        <button type="submit" className="admin-btn admin-btn-primary text-sm" disabled={pending}>
-          Save profile
-        </button>
-        <button type="button" className="admin-btn admin-btn-secondary text-sm" onClick={onClose}>
-          Cancel
-        </button>
+      <div className="space-y-3">
+        <div className="flex flex-wrap gap-2">
+          <button type="submit" className="admin-btn admin-btn-primary text-sm" disabled={pending}>
+            Save profile
+          </button>
+          <button type="button" className="admin-btn admin-btn-secondary text-sm" onClick={onClose}>
+            Cancel
+          </button>
+          {profile && !profile.isDefault ? (
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary text-sm"
+              onClick={() =>
+                start(async () => {
+                  const r = await deactivateEmailSendingProfileAction(profile.id);
+                  if (r.ok) onClose();
+                  else setError(r.error);
+                })
+              }
+            >
+              Deactivate
+            </button>
+          ) : null}
+        </div>
         {profile ? (
-          <>
-            <ProfileTestButtons profileId={profile.id} adminEmail={adminEmail} />
-            {!profile.isDefault ? (
-              <button
-                type="button"
-                className="admin-btn admin-btn-secondary text-sm"
-                onClick={() =>
-                  start(async () => {
-                    const r = await deactivateEmailSendingProfileAction(profile.id);
-                    if (r.ok) onClose();
-                    else setError(r.error);
-                  })
-                }
-              >
-                Deactivate
-              </button>
-            ) : null}
-          </>
+          <ProfileTestButtons profileId={profile.id} adminEmail={adminEmail} />
         ) : null}
       </div>
     </form>
@@ -403,40 +455,67 @@ function ProfileTestButtons({
 }) {
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState<string | null>(null);
+  const [recipient, setRecipient] = useState(adminEmail ?? "");
 
   return (
-    <>
-      {msg ? <span className="text-sm text-green-700">{msg}</span> : null}
-      <button
-        type="button"
-        className="admin-btn admin-btn-secondary text-sm"
-        disabled={pending}
-        onClick={() =>
-          start(async () => {
-            const r = await testProfileConnectionAction(profileId);
-            setMsg(r.ok ? r.message ?? "OK" : r.error);
-          })
-        }
-      >
-        Test connection
-      </button>
-      <button
-        type="button"
-        className="admin-btn admin-btn-secondary text-sm"
-        disabled={pending}
-        onClick={() =>
-          start(async () => {
-            const fd = new FormData();
-            fd.set("profileId", profileId);
-            if (adminEmail) fd.set("recipient", adminEmail);
-            const r = await sendProfileTestEmailAction(fd);
-            setMsg(r.ok ? r.message ?? "Sent" : r.error);
-          })
-        }
-      >
-        Send test email
-      </button>
-    </>
+    <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
+      <label className="flex min-w-[240px] flex-1 flex-col gap-1 text-sm">
+        <span className="admin-field-label">Send test email to</span>
+        <input
+          type="email"
+          className="admin-input"
+          value={recipient}
+          onChange={(e) => setRecipient(e.target.value)}
+          placeholder="you@example.com"
+          disabled={pending}
+          autoComplete="email"
+        />
+      </label>
+      <div className="flex flex-wrap items-center gap-2">
+        {msg ? (
+          <span
+            className={`text-sm ${msg.toLowerCase().includes("fail") || msg.toLowerCase().includes("error") || msg.toLowerCase().includes("required") || msg.toLowerCase().includes("valid") ? "text-red-700" : "text-green-700"}`}
+            role="status"
+          >
+            {msg}
+          </span>
+        ) : null}
+        <button
+          type="button"
+          className="admin-btn admin-btn-secondary text-sm"
+          disabled={pending}
+          onClick={() =>
+            start(async () => {
+              const r = await testProfileConnectionAction(profileId);
+              setMsg(r.ok ? r.message ?? "OK" : r.error);
+            })
+          }
+        >
+          Test connection
+        </button>
+        <button
+          type="button"
+          className="admin-btn admin-btn-secondary text-sm"
+          disabled={pending}
+          onClick={() =>
+            start(async () => {
+              const to = recipient.trim();
+              if (!to) {
+                setMsg("Enter a recipient email address.");
+                return;
+              }
+              const fd = new FormData();
+              fd.set("profileId", profileId);
+              fd.set("recipient", to);
+              const r = await sendProfileTestEmailAction(fd);
+              setMsg(r.ok ? r.message ?? "Sent" : r.error);
+            })
+          }
+        >
+          Send test email
+        </button>
+      </div>
+    </div>
   );
 }
 

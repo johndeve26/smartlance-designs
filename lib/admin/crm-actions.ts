@@ -665,6 +665,20 @@ export async function sendContactEmailAction(input: {
     assertCan(user.role, "choose_email_sender");
   }
 
+  // #region agent log
+  const { agentDebugLog } = await import("@/lib/debug/agent-log");
+  agentDebugLog({
+    hypothesisId: "B",
+    location: "crm-actions.ts:sendContactEmailAction",
+    message: "action parsed sender",
+    data: {
+      inputSendingProfileId: input.sendingProfileId ?? null,
+      parsedSendingProfileId: parsed.data.sendingProfileId || null,
+      clientRequestIdPrefix: parsed.data.clientRequestId?.slice(0, 8) ?? null,
+    },
+  });
+  // #endregion
+
   try {
     const email = await sendCrmEmail({
       contactId: parsed.data.contactId,
@@ -676,6 +690,21 @@ export async function sendContactEmailAction(input: {
       sendingProfileId: parsed.data.sendingProfileId || null,
       clientRequestId: parsed.data.clientRequestId || null,
     });
+    // #region agent log
+    agentDebugLog({
+      hypothesisId: "D",
+      location: "crm-actions.ts:sendContactEmailAction:ok",
+      message: "action send result snapshots",
+      data: {
+        emailId: email.id,
+        fromNameSnapshot: email.fromNameSnapshot,
+        fromEmailSnapshot: email.fromEmailSnapshot,
+        sendingProfileId: email.sendingProfileId,
+        deliveryStatus: email.deliveryStatus,
+        sentAt: email.sentAt?.toISOString() ?? null,
+      },
+    });
+    // #endregion
     revalidateCrm();
     revalidatePath(`/admin/crm/contacts/${parsed.data.contactId}`);
     return {

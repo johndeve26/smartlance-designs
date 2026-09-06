@@ -13,7 +13,7 @@ import { legacyBlogRedirects } from "@/data/legacy-blog-redirects";
 
 describe("Phase 3 inventory parity (source)", () => {
   it("preserves verified content counts", () => {
-    expect(getPostSlugs()).toHaveLength(59);
+    expect(getPostSlugs()).toHaveLength(60);
     expect(projects.filter((p) => p.published)).toHaveLength(10);
     expect(testimonials.filter((t) => t.published)).toHaveLength(7);
     expect(industriesCatalog).toHaveLength(20);

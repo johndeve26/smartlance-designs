@@ -399,7 +399,7 @@ async function main() {
         insightCount += 1;
       }
       report.insights = insightCount;
-      report.insightsExpected = 59;
+      report.insightsExpected = 60;
       report.insightsMissingHero = missingHero;
       report.insightsSlugs = importedSlugs.length;
 
@@ -691,7 +691,7 @@ async function main() {
 
     // Validation summary
     const mismatches: string[] = [];
-    if (report.insights !== 59) mismatches.push(`insights ${report.insights} != 59`);
+    if (report.insights !== 60) mismatches.push(`insights ${report.insights} != 60`);
     if (report.work !== 10) mismatches.push(`work ${report.work} != 10`);
     if (report.testimonials !== 7) mismatches.push(`testimonials ${report.testimonials} != 7`);
     if (report.guides !== 1) mismatches.push(`guides ${report.guides} != 1`);

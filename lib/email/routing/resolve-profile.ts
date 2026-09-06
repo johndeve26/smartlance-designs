@@ -74,6 +74,8 @@ async function profileToResolved(
 
   const transport = await resolveActiveEmailTransport();
   if (transport.kind === "smtp") {
+    const systemFrom = transport.config.fromEmail.trim().toLowerCase();
+    const profileFrom = row.fromEmail.trim().toLowerCase();
     return {
       profileId: row.id,
       profileName: row.name,
@@ -88,6 +90,11 @@ async function profileToResolved(
         fromName: row.fromName,
         fromEmail: row.fromEmail,
         replyToEmail: row.replyToEmail ?? transport.config.replyToEmail,
+        // Auth as system mailbox; keep visible From as the profile identity.
+        envelopeFrom:
+          systemFrom && profileFrom && systemFrom !== profileFrom
+            ? transport.config.fromEmail
+            : transport.config.envelopeFrom ?? null,
       },
       resendApiKey: null,
       provider: "smtp",

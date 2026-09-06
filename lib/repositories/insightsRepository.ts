@@ -8,6 +8,7 @@ import {
 import { writeAuditLog } from "@/lib/repositories/auditRepository";
 import { upsertSlugRedirect } from "@/lib/repositories/redirectsRepository";
 import { contentRoutes } from "@/lib/content-routes";
+import { resolveMediaUrl } from "@/lib/media/urls";
 import readingTime from "reading-time";
 
 const published: PublishStatus = "PUBLISHED";
@@ -78,7 +79,9 @@ export function toPublicInsight(row: Insight): InsightPublic {
     updatedAt: row.materialUpdatedAt?.toISOString(),
     readingTime:
       row.readingTime || readingTime(row.bodyMarkdown).text,
-    heroImage: row.heroImagePath ?? undefined,
+    heroImage: row.heroImagePath
+      ? resolveMediaUrl(row.heroImagePath)
+      : undefined,
     heroImageAlt: row.heroImageAlt ?? undefined,
     relatedServiceHrefs: Array.isArray(row.relatedServiceHrefs)
       ? (row.relatedServiceHrefs as string[])

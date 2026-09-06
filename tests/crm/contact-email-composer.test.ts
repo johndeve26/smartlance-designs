@@ -90,3 +90,34 @@ describe("Contact email composer state machine", () => {
     expect(nextState("sent", "send")).toBe("sent");
   });
 });
+
+describe("Contact email composer From selection", () => {
+  it("does not treat first profile as routed default when defaultProfileId is null", () => {
+    const profiles = [
+      { id: "john", name: "John", fromEmail: "john@example.com", fromName: "John" },
+    ];
+    const defaultSendingProfileId: string | null = null;
+    const defaultProfile = defaultSendingProfileId
+      ? profiles.find((p) => p.id === defaultSendingProfileId) ?? null
+      : null;
+    expect(defaultProfile).toBeNull();
+
+    const sendingProfileId = "";
+    const profileIdForSend = sendingProfileId || null;
+    expect(profileIdForSend).toBeNull();
+  });
+
+  it("sends explicit profile id when John is selected", () => {
+    const sendingProfileId = "cmt82dmff000004kv2jeiv6zz";
+    const profileIdForSend = sendingProfileId || null;
+    expect(profileIdForSend).toBe("cmt82dmff000004kv2jeiv6zz");
+  });
+
+  it("send another restores last sending profile id instead of platform empty", () => {
+    const lastSendingProfileId = "cmt82dmff000004kv2jeiv6zz";
+    const defaultSendingProfileId: string | null = null;
+    const nextFrom = lastSendingProfileId ?? defaultSendingProfileId ?? "";
+    expect(nextFrom).toBe("cmt82dmff000004kv2jeiv6zz");
+    expect(nextFrom || null).not.toBeNull();
+  });
+});

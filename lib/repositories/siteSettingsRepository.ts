@@ -1,5 +1,5 @@
 import { unstable_cache } from "next/cache";
-import { hasDatabaseUrl, prisma } from "@/lib/db";
+import { hasDatabaseUrl, isDatabaseConnectivityError, prisma, resetDatabaseConnection } from "@/lib/db";
 import { sanitizeSiteOrigin, siteConfig } from "@/lib/site";
 import { writeAuditLog } from "@/lib/repositories/auditRepository";
 import {
@@ -183,9 +183,17 @@ function mapRow(row: {
 
 async function loadPublicSettingsUncached(): Promise<PublicSiteSettings> {
   if (!hasDatabaseUrl()) return fallbackPublicSiteSettings();
-  const row = await prisma.siteSettings.findUnique({ where: { id: "site" } });
-  if (!row || !row.contactEmail) return fallbackPublicSiteSettings();
-  return mapRow(row);
+  try {
+    const row = await prisma.siteSettings.findUnique({ where: { id: "site" } });
+    if (!row || !row.contactEmail) return fallbackPublicSiteSettings();
+    return mapRow(row);
+  } catch (error) {
+    if (isDatabaseConnectivityError(error)) {
+      resetDatabaseConnection("siteSettings");
+      return fallbackPublicSiteSettings();
+    }
+    throw error;
+  }
 }
 
 export async function getPublicSettings(): Promise<PublicSiteSettings> {

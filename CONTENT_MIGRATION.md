@@ -42,7 +42,7 @@ Pricing, Planner/Selector engine CMS, Media upload library, Nav/Footer managers,
 | Industries | 20 | `data/industries.ts` | `industriesRepository` |
 | Work | 8 | `data/portfolio.ts` | `workRepository` |
 | Testimonials | 7 verified | `data/testimonials.ts` | `testimonialsRepository` |
-| Insights | 59 | `content/blog/*.md` | `insightsRepository` |
+| Insights | 60 | `content/blog/*.md` | `insightsRepository` |
 | Guides | 1 | `data/guides/` | `CmsResource` (`guide`) |
 | Comparisons | 1 | `data/comparisons/` | `CmsResource` (`comparison`) |
 | Checklists | 1 / 127 items | `data/checklists/` | `CmsResource` (`checklist`) |

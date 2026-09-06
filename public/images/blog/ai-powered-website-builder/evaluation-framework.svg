@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640" viewBox="0 0 1200 640" role="img" aria-labelledby="title desc">
+  <title id="title">Smartlance editorial evaluation weights for AI website builders</title>
+  <desc id="desc">Bar chart of editorial methodology weights: design, conversion, SEO, performance, customization, integrations, ownership, maintenance</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#faf9f7"/>
+      <stop offset="100%" stop-color="#ffeadf"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="640" fill="url(#bg)"/>
+  <text x="600" y="48" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="26" fill="#2c2c2c">How we evaluate an AI website builder</text>
+  <text x="600" y="78" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#535353">Editorial methodology  not an industry standard</text>
+
+  <!-- Bars: max width 700 for 20% -->
+  <g font-family="system-ui, sans-serif" font-size="15" fill="#2c2c2c">
+    <text x="48" y="130" text-anchor="start">Design quality  20%</text>
+    <rect x="320" y="110" width="700" height="28" rx="6" fill="#f47a48"/>
+
+    <text x="48" y="180" text-anchor="start">Conversion / usability  20%</text>
+    <rect x="320" y="160" width="700" height="28" rx="6" fill="#e06330"/>
+
+    <text x="48" y="230" text-anchor="start">SEO control  15%</text>
+    <rect x="320" y="210" width="525" height="28" rx="6" fill="#c04e22"/>
+
+    <text x="48" y="280" text-anchor="start">Performance  15%</text>
+    <rect x="320" y="260" width="525" height="28" rx="6" fill="#c04e22"/>
+
+    <text x="48" y="330" text-anchor="start">Customization  10%</text>
+    <rect x="320" y="310" width="350" height="28" rx="6" fill="#9a3e1c"/>
+
+    <text x="48" y="380" text-anchor="start">Integrations  10%</text>
+    <rect x="320" y="360" width="350" height="28" rx="6" fill="#9a3e1c"/>
+
+    <text x="48" y="430" text-anchor="start">Ownership / portability  5%</text>
+    <rect x="320" y="410" width="175" height="28" rx="6" fill="#7a3218"/>
+
+    <text x="48" y="480" text-anchor="start">Maintenance  5%</text>
+    <rect x="320" y="460" width="175" height="28" rx="6" fill="#7a3218"/>
+  </g>
+
+  <rect x="48" y="530" width="1104" height="70" rx="12" fill="#ffffff" stroke="#e6e3df"/>
+  <text x="600" y="562" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" fill="#2c2c2c">Weights reflect how Smartlance judges business fitness  not a universal ranking score.</text>
+  <text x="600" y="588" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#535353">Use them to pressure-test any AI-powered website builder before you commit.</text>
+</svg>

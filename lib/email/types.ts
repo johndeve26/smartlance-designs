@@ -33,6 +33,12 @@ export type ResolvedSmtpConfig = {
   fromName: string | null;
   fromEmail: string;
   replyToEmail: string | null;
+  /**
+   * When set, used as the SMTP envelope MAIL FROM while `fromEmail` is the
+   * visible From header. Needed for System SMTP aliases (auth as platform mailbox,
+   * send as profile address) on hosts that rewrite unauthorized From headers.
+   */
+  envelopeFrom?: string | null;
 };
 
 export type ActiveEmailTransport =

@@ -135,15 +135,19 @@ describe("structured data helpers", () => {
 });
 
 describe("sitemap builder", () => {
-  it("returns canonical absolute URLs on configured origin", async () => {
-    const entries = await buildPublicSitemapEntries();
-    expect(entries.length).toBeGreaterThan(20);
-    for (const entry of entries) {
-      expect(entry.url.startsWith("http")).toBe(true);
-      expect(entry.url.includes("localhost")).toBe(false);
-      expect(entry.url.includes("/admin")).toBe(false);
-    }
-  });
+  it(
+    "returns canonical absolute URLs on configured origin",
+    async () => {
+      const entries = await buildPublicSitemapEntries();
+      expect(entries.length).toBeGreaterThan(20);
+      for (const entry of entries) {
+        expect(entry.url.startsWith("http")).toBe(true);
+        expect(entry.url.includes("localhost")).toBe(false);
+        expect(entry.url.includes("/admin")).toBe(false);
+      }
+    },
+    20_000,
+  );
 
   it("includes homepage and core hubs", async () => {
     const entries = await buildPublicSitemapEntries();

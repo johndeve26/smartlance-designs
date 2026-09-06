@@ -63,6 +63,30 @@ export async function sendSmartlanceEmail(
     };
   }
 
+  // #region agent log
+  {
+    const { agentDebugLog } = await import("@/lib/debug/agent-log");
+    agentDebugLog({
+      hypothesisId: "C",
+      location: "send-smartlance.ts:resolved",
+      message: "resolved sending profile",
+      data: {
+        requestedSendingProfileId: input.sendingProfileId ?? null,
+        category: input.category,
+        resolvedProfileId: profile.profileId,
+        resolvedName: profile.profileName,
+        resolvedFromEmail: profile.fromEmail,
+        resolvedFromName: profile.fromName,
+        source: profile.source,
+        provider: profile.provider,
+        transportType: profile.transportType,
+        smtpFromEmail: profile.smtpConfig?.fromEmail ?? null,
+        smtpUsername: profile.smtpConfig?.username ?? null,
+      },
+    });
+  }
+  // #endregion
+
   if (profile.provider === "none") {
     return {
       success: false,
@@ -127,6 +151,22 @@ export async function sendSmartlanceEmail(
 
   if (profile.provider === "resend" && profile.resendApiKey) {
     try {
+      const resendFrom = formatResendFrom(profile);
+      // #region agent log
+      {
+        const { agentDebugLog } = await import("@/lib/debug/agent-log");
+        agentDebugLog({
+          hypothesisId: "E",
+          location: "send-smartlance.ts:resend",
+          message: "resend from header about to send",
+          data: {
+            fromHeader: resendFrom,
+            profileId: profile.profileId,
+            fromEmail: profile.fromEmail,
+          },
+        });
+      }
+      // #endregion
       const response = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
@@ -134,7 +174,7 @@ export async function sendSmartlanceEmail(
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: formatResendFrom(profile),
+          from: resendFrom,
           to,
           reply_to: replyTo || undefined,
           subject,

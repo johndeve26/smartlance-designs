@@ -99,6 +99,9 @@ export async function sendViaSmtp(
       html: input.html,
       headers: Object.keys(headers).length ? headers : undefined,
       messageId: input.messageId,
+      envelope: config.envelopeFrom
+        ? { from: config.envelopeFrom, to: input.to }
+        : undefined,
     });
     return { ok: true as const, messageId: info.messageId };
   } finally {

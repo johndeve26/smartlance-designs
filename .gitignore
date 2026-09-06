@@ -43,3 +43,6 @@ next-env.d.ts
 # local media storage (dev adapter)
 /storage/media/**
 !/storage/media/.gitkeep
+
+# local DB migration dumps / temp secrets
+/tmp/db-migrate/

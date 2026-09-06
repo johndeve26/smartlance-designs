@@ -52,7 +52,16 @@ export default async function CrmInboxThreadPage({
     : { title: "Follow up", assigneeId: null };
   const senderOptions = can(user.role, "send_crm_email")
     ? await listCrmSenderProfileOptions()
-    : { profiles: [], defaultProfileId: null };
+    : {
+        profiles: [],
+        defaultProfileId: null,
+        routedDefault: {
+          profileId: null,
+          fromName: "",
+          fromEmail: "",
+          source: "legacy",
+        },
+      };
 
   return (
     <div className="space-y-6">

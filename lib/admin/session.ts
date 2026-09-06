@@ -1,7 +1,11 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { AdminRole, AdminUser } from "@prisma/client";
-import { prisma } from "@/lib/db";
+import {
+  isDatabaseConnectivityError,
+  prisma,
+  resetDatabaseConnection,
+} from "@/lib/db";
 import {
   ADMIN_SESSION_COOKIE,
   createSessionToken,
@@ -80,26 +84,34 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   if (!token) return null;
 
   const tokenHash = hashToken(token);
-  const session = await prisma.adminSession.findUnique({
-    where: { tokenHash },
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-          status: true,
+  try {
+    const session = await prisma.adminSession.findUnique({
+      where: { tokenHash },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            status: true,
+          },
         },
       },
-    },
-  });
+    });
 
-  if (!session || session.revokedAt) return null;
-  if (session.expiresAt.getTime() < Date.now()) return null;
-  if (session.user.status !== "ACTIVE") return null;
+    if (!session || session.revokedAt) return null;
+    if (session.expiresAt.getTime() < Date.now()) return null;
+    if (session.user.status !== "ACTIVE") return null;
 
-  return session.user;
+    return session.user;
+  } catch (error) {
+    if (isDatabaseConnectivityError(error)) {
+      resetDatabaseConnection("adminSession");
+      return null;
+    }
+    throw error;
+  }
 }
 
 export async function requireAdminUser(

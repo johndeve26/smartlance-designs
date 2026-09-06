@@ -48,6 +48,8 @@ export function ContactDetailActions({
   enrollments,
   sendingProfiles = [],
   defaultSendingProfileId = null,
+  routedDefaultFromName = null,
+  routedDefaultFromEmail = null,
   emailTemplates = [],
 }: {
   contact: ContactWithRelations;
@@ -59,6 +61,8 @@ export function ContactDetailActions({
   enrollments: ActiveEnrollment[];
   sendingProfiles?: ContactEmailComposerProfile[];
   defaultSendingProfileId?: string | null;
+  routedDefaultFromName?: string | null;
+  routedDefaultFromEmail?: string | null;
   emailTemplates?: ContactEmailComposerTemplate[];
 }) {
   const router = useRouter();
@@ -348,6 +352,8 @@ export function ContactDetailActions({
           canChooseSender={canChooseSender}
           sendingProfiles={sendingProfiles}
           defaultSendingProfileId={defaultSendingProfileId}
+          routedDefaultFromName={routedDefaultFromName}
+          routedDefaultFromEmail={routedDefaultFromEmail}
           templates={emailTemplates}
           initiallyOpen
           onRequestClose={() => setComposerOpen(false)}

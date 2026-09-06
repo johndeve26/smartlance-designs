@@ -31,6 +31,7 @@ type SentSnapshot = {
   fromName: string | null;
   fromEmail: string | null;
   toEmail: string;
+  sendingProfileId: string | null;
 };
 
 const FOLLOW_UP_PRESETS = [
@@ -59,6 +60,8 @@ export function ContactEmailComposer({
   canChooseSender,
   sendingProfiles,
   defaultSendingProfileId,
+  routedDefaultFromName,
+  routedDefaultFromEmail,
   templates = [],
   initiallyOpen = false,
   onRequestClose,
@@ -69,6 +72,9 @@ export function ContactEmailComposer({
   canChooseSender: boolean;
   sendingProfiles: ContactEmailComposerProfile[];
   defaultSendingProfileId?: string | null;
+  /** Platform/route From when no sending profile is explicitly chosen. */
+  routedDefaultFromName?: string | null;
+  routedDefaultFromEmail?: string | null;
   templates?: ContactEmailComposerTemplate[];
   initiallyOpen?: boolean;
   onRequestClose?: () => void;
@@ -81,14 +87,22 @@ export function ContactEmailComposer({
   const [followUpPreset, setFollowUpPreset] = useState("");
   const [followUpCustom, setFollowUpCustom] = useState("");
   const [sendingProfileId, setSendingProfileId] = useState(defaultSendingProfileId ?? "");
+  const [lastSendingProfileId, setLastSendingProfileId] = useState<string | null>(
+    defaultSendingProfileId ?? null,
+  );
   const [error, setError] = useState<string | null>(null);
   const [ambiguous, setAmbiguous] = useState(false);
   const [sent, setSent] = useState<SentSnapshot | null>(null);
   const [clientRequestId, setClientRequestId] = useState(newClientRequestId);
   const [pending, start] = useTransition();
 
+  // Only treat as "default profile" when CRM routing actually resolves to a profile id.
+  // Never fall back to sendingProfiles[0] — that falsely labels the platform/legacy From as John.
   const defaultProfile = useMemo(
-    () => sendingProfiles.find((p) => p.id === defaultSendingProfileId) ?? sendingProfiles[0] ?? null,
+    () =>
+      defaultSendingProfileId
+        ? sendingProfiles.find((p) => p.id === defaultSendingProfileId) ?? null
+        : null,
     [sendingProfiles, defaultSendingProfileId],
   );
 
@@ -99,16 +113,38 @@ export function ContactEmailComposer({
     return defaultProfile;
   }, [sendingProfileId, sendingProfiles, defaultProfile]);
 
-  const resetComposerFields = useCallback(() => {
-    setSubject("");
-    setBody("");
-    setFollowUpPreset("");
-    setFollowUpCustom("");
-    setSendingProfileId(defaultSendingProfileId ?? "");
-    setError(null);
-    setAmbiguous(false);
-    setClientRequestId(newClientRequestId());
-  }, [defaultSendingProfileId]);
+  const effectiveFromEmail =
+    selectedProfile?.fromEmail ||
+    routedDefaultFromEmail ||
+    null;
+  const effectiveFromName =
+    selectedProfile?.fromName ||
+    routedDefaultFromName ||
+    null;
+  const isPlatformFallback = !sendingProfileId && !defaultSendingProfileId;
+
+  const routedFromLabel = formatFrom(
+    routedDefaultFromName || defaultProfile?.fromName,
+    routedDefaultFromEmail || defaultProfile?.fromEmail,
+  );
+
+  const resetComposerFields = useCallback(
+    (keepFromProfileId?: string | null) => {
+      setSubject("");
+      setBody("");
+      setFollowUpPreset("");
+      setFollowUpCustom("");
+      const nextFrom =
+        keepFromProfileId !== undefined
+          ? keepFromProfileId ?? ""
+          : lastSendingProfileId ?? defaultSendingProfileId ?? "";
+      setSendingProfileId(nextFrom);
+      setError(null);
+      setAmbiguous(false);
+      setClientRequestId(newClientRequestId());
+    },
+    [defaultSendingProfileId, lastSendingProfileId],
+  );
 
   const openComposer = () => {
     setState("composing");
@@ -118,14 +154,15 @@ export function ContactEmailComposer({
   };
 
   const cancelComposer = () => {
-    resetComposerFields();
+    resetComposerFields(defaultSendingProfileId ?? "");
     setSent(null);
     setState("idle");
     onRequestClose?.();
   };
 
   const sendAnother = () => {
-    resetComposerFields();
+    // Keep the From that was just used — do not silently fall back to platform contact@.
+    resetComposerFields(lastSendingProfileId ?? sent?.sendingProfileId ?? "");
     setSent(null);
     setState("composing");
   };
@@ -161,22 +198,33 @@ export function ContactEmailComposer({
     setState("sending");
 
     start(async () => {
+      const profileIdForSend = canChooseSender ? sendingProfileId || null : null;
+      // #region agent log
+      fetch('http://127.0.0.1:7865/ingest/6a47cb52-3efc-4de2-8a82-c4e8f9bb5986',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'e4098e'},body:JSON.stringify({sessionId:'e4098e',runId:'post-fix',hypothesisId:'A',location:'ContactEmailComposer.tsx:onSend',message:'client send payload',data:{canChooseSender,sendingProfileIdState:sendingProfileId||null,profileIdForSend,selectedProfileId:selectedProfile?.id??null,selectedFromEmail:selectedProfile?.fromEmail??null,effectiveFromEmail,isPlatformFallback,routedDefaultFromEmail:routedDefaultFromEmail??null,defaultSendingProfileId:defaultSendingProfileId??null},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
       const result = await sendContactEmailAction({
         contactId,
         subject: subject.trim(),
         body: body.trim(),
         createFollowUpDays: followUpDays() ?? null,
-        sendingProfileId: canChooseSender ? sendingProfileId || null : null,
+        sendingProfileId: profileIdForSend,
         clientRequestId,
       });
 
       if (!result.ok) {
+        // #region agent log
+        fetch('http://127.0.0.1:7865/ingest/6a47cb52-3efc-4de2-8a82-c4e8f9bb5986',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'e4098e'},body:JSON.stringify({sessionId:'e4098e',runId:'post-fix',hypothesisId:'A',location:'ContactEmailComposer.tsx:onSend:fail',message:'client send failed',data:{error:result.error,ambiguous:result.ambiguous},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
         setError(result.error);
         setAmbiguous(Boolean(result.ambiguous));
         setState("error");
         return;
       }
 
+      setLastSendingProfileId(profileIdForSend);
+      // #region agent log
+      fetch('http://127.0.0.1:7865/ingest/6a47cb52-3efc-4de2-8a82-c4e8f9bb5986',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'e4098e'},body:JSON.stringify({sessionId:'e4098e',runId:'post-fix',hypothesisId:'E',location:'ContactEmailComposer.tsx:onSend:ok',message:'client received snapshots',data:{emailId:result.emailId,fromName:result.fromName,fromEmail:result.fromEmail,deliveryStatus:result.deliveryStatus,profileIdForSend},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
       setSent({
         emailId: result.emailId,
         subject: result.subject,
@@ -184,6 +232,7 @@ export function ContactEmailComposer({
         fromName: result.fromName,
         fromEmail: result.fromEmail,
         toEmail: contactEmail,
+        sendingProfileId: profileIdForSend,
       });
       setState("sent");
       router.refresh();
@@ -240,7 +289,9 @@ export function ContactEmailComposer({
   const sending = state === "sending" || pending;
   const fromLabel = selectedProfile
     ? formatFrom(selectedProfile.fromName, selectedProfile.fromEmail)
-    : "Routed CRM default";
+    : routedFromLabel !== "—"
+      ? routedFromLabel
+      : "Platform email (routed default)";
 
   return (
     <AdminPanel className="mx-auto w-full max-w-[760px]">
@@ -275,24 +326,38 @@ export function ContactEmailComposer({
             From
           </label>
           {canChooseSender && sendingProfiles.length ? (
-            <select
-              id={`${formId}-from`}
-              className="admin-input w-full"
-              value={sendingProfileId}
-              disabled={sending}
-              onChange={(e) => setSendingProfileId(e.target.value)}
-            >
-              <option value="">
-                {defaultProfile
-                  ? `${defaultProfile.name} (${defaultProfile.fromEmail}) — default`
-                  : "Routed CRM default"}
-              </option>
-              {sendingProfiles.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} — {p.fromEmail}
+            <>
+              <select
+                id={`${formId}-from`}
+                className="admin-input w-full"
+                value={sendingProfileId}
+                disabled={sending}
+                onChange={(e) => setSendingProfileId(e.target.value)}
+              >
+                <option value="">
+                  {defaultProfile
+                    ? `${defaultProfile.name} (${defaultProfile.fromEmail}) — routed default`
+                    : routedDefaultFromEmail
+                      ? `Platform / system email (${routedDefaultFromEmail})`
+                      : "Platform / system email"}
                 </option>
-              ))}
-            </select>
+                {sendingProfiles.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} — {p.fromEmail}
+                  </option>
+                ))}
+              </select>
+              <p
+                className={`mt-2 text-sm ${isPlatformFallback ? "font-medium text-amber-800" : "text-muted"}`}
+                aria-live="polite"
+              >
+                Will send as:{" "}
+                <span className="text-foreground">
+                  {formatFrom(effectiveFromName, effectiveFromEmail)}
+                </span>
+                {isPlatformFallback ? " (system SMTP — not a sending profile)" : null}
+              </p>
+            </>
           ) : (
             <p
               id={`${formId}-from`}

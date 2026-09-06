@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Link from "next/link";
+import { resolveMediaUrl } from "@/lib/media/urls";
 
 function slugify(text: string) {
   return text
@@ -116,11 +117,12 @@ export function BlogMarkdown({ content }: { content: string }) {
           if (!src || typeof src !== "string" || !isSafeContentImageSrc(src)) {
             return null;
           }
+          const resolved = resolveMediaUrl(src);
           const breakout = shouldBreakoutImage(src);
           return (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={src}
+              src={resolved}
               alt={alt || ""}
               className={
                 breakout

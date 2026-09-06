@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" role="img" aria-labelledby="title desc">
+  <title id="title">When to use an AI website builder versus a professional build</title>
+  <desc id="desc">Decision tree from simple website needs to customization, CRM automation, and competitive SEO</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#faf9f7"/>
+      <stop offset="100%" stop-color="#fff7f3"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="700" fill="url(#bg)"/>
+  <text x="600" y="48" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="26" fill="#2c2c2c">Choosing the right website approach</text>
+  <text x="600" y="78" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#535353">Conceptual decision guide — not a vendor comparison</text>
+
+  <rect x="380" y="110" width="440" height="60" rx="12" fill="#2c2c2c"/>
+  <text x="600" y="146" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" fill="#ffffff">Do you need a simple website?</text>
+
+  <path d="M600 170 V210 M280 210 H920" stroke="#d0ccc7" stroke-width="2" fill="none"/>
+  <path d="M280 210 V240 M920 210 V240" stroke="#d0ccc7" stroke-width="2" fill="none"/>
+
+  <rect x="120" y="240" width="320" height="88" rx="12" fill="#ffffff" stroke="#c04e22" stroke-width="2"/>
+  <text x="280" y="276" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#c04e22" font-weight="600">YES</text>
+  <text x="280" y="300" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" fill="#2c2c2c">Brochure, portfolio, MVP</text>
+  <text x="280" y="322" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#535353">AI builder may be enough</text>
+
+  <rect x="760" y="240" width="320" height="88" rx="12" fill="#ffffff" stroke="#535353" stroke-width="2"/>
+  <text x="920" y="276" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#535353" font-weight="600">MORE COMPLEX</text>
+  <text x="920" y="300" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" fill="#2c2c2c">Evaluate growth needs</text>
+  <text x="920" y="322" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#535353">Ask the questions below</text>
+
+  <path d="M920 328 V370 M420 370 H1120" stroke="#d0ccc7" stroke-width="2" fill="none"/>
+  <path d="M420 370 V400 M760 370 V400 M1120 370 V400" stroke="#d0ccc7" stroke-width="2" fill="none"/>
+
+  <rect x="260" y="400" width="320" height="110" rx="12" fill="#ffffff" stroke="#e6e3df"/>
+  <text x="420" y="440" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#535353" font-weight="600">Significant customization?</text>
+  <text x="420" y="470" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" fill="#2c2c2c">Professional build often</text>
+  <text x="420" y="492" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" fill="#2c2c2c">makes more sense</text>
+
+  <rect x="600" y="400" width="320" height="110" rx="12" fill="#ffffff" stroke="#e6e3df"/>
+  <text x="760" y="440" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#535353" font-weight="600">CRM, automation, APIs?</text>
+  <text x="760" y="470" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" fill="#2c2c2c">Custom development +</text>
+  <text x="760" y="492" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" fill="#2c2c2c">workflow automation</text>
+
+  <rect x="940" y="400" width="220" height="110" rx="12" fill="#ffffff" stroke="#e6e3df"/>
+  <text x="1050" y="440" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#535353" font-weight="600">Competitive SEO?</text>
+  <text x="1050" y="470" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" fill="#2c2c2c">Professional strategy</text>
+  <text x="1050" y="492" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" fill="#2c2c2c">becomes valuable</text>
+
+  <rect x="120" y="560" width="960" height="80" rx="12" fill="#fff7f3" stroke="#ffd0bc"/>
+  <text x="600" y="596" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" fill="#2c2c2c">You do not always need an agency — match the tool to the job.</text>
+  <text x="600" y="622" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#535353">If an AI builder solves the real problem well, it can be the right choice.</text>
+</svg>

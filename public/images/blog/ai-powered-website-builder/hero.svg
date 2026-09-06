@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">AI website generation from business brief to site structure</title>
+  <desc id="desc">Three-step diagram: business brief, AI-generated structure, resulting website hierarchy</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#faf9f7"/>
+      <stop offset="55%" stop-color="#fff7f3"/>
+      <stop offset="100%" stop-color="#ffeadf"/>
+    </linearGradient>
+    <filter id="soft" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#1a1a1a" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="1040" cy="80" r="160" fill="#ffd0bc" opacity="0.35"/>
+  <circle cx="120" cy="560" r="140" fill="#ffeadf" opacity="0.5"/>
+
+  <!-- Step 1: Brief -->
+  <g filter="url(#soft)">
+    <rect x="64" y="150" width="280" height="330" rx="16" fill="#ffffff" stroke="#e6e3df"/>
+  </g>
+  <text x="204" y="198" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="22" fill="#2c2c2c">Business brief</text>
+  <rect x="96" y="230" width="216" height="14" rx="4" fill="#e6e3df"/>
+  <rect x="96" y="258" width="180" height="14" rx="4" fill="#e6e3df"/>
+  <rect x="96" y="286" width="200" height="14" rx="4" fill="#e6e3df"/>
+  <rect x="96" y="330" width="216" height="56" rx="8" fill="#fff7f3" stroke="#ffd0bc"/>
+  <text x="204" y="364" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#9a3e1c">Local roofing company</text>
+  <text x="204" y="420" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#535353">Goals � audience � offer</text>
+  <text x="204" y="444" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#535353">Services � locations</text>
+
+  <!-- Arrow 1 -->
+  <path d="M360 315 H430" stroke="#f47a48" stroke-width="3" fill="none"/>
+  <polygon points="430,308 448,315 430,322" fill="#f47a48"/>
+
+  <!-- Step 2: AI structure -->
+  <g filter="url(#soft)">
+    <rect x="460" y="150" width="280" height="330" rx="16" fill="#ffffff" stroke="#e6e3df"/>
+  </g>
+  <text x="600" y="198" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="22" fill="#2c2c2c">AI-generated structure</text>
+  <rect x="492" y="230" width="216" height="40" rx="8" fill="#f47a48"/>
+  <text x="600" y="255" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" fill="#ffffff" font-weight="600">Page outline</text>
+  <rect x="492" y="286" width="216" height="28" rx="6" fill="#f3f1ee"/>
+  <rect x="492" y="324" width="216" height="28" rx="6" fill="#f3f1ee"/>
+  <rect x="492" y="362" width="216" height="28" rx="6" fill="#f3f1ee"/>
+  <rect x="492" y="400" width="216" height="28" rx="6" fill="#f3f1ee"/>
+  <text x="600" y="456" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#535353">Layouts � draft copy � SEO fields</text>
+
+  <!-- Arrow 2 -->
+  <path d="M756 315 H826" stroke="#f47a48" stroke-width="3" fill="none"/>
+  <polygon points="826,308 844,315 826,322" fill="#f47a48"/>
+
+  <!-- Step 3: Hierarchy -->
+  <g filter="url(#soft)">
+    <rect x="856" y="150" width="280" height="330" rx="16" fill="#ffffff" stroke="#e6e3df"/>
+  </g>
+  <text x="996" y="198" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="22" fill="#2c2c2c">Website hierarchy</text>
+  <g font-family="system-ui, sans-serif" font-size="15" fill="#2c2c2c">
+    <circle cx="892" cy="248" r="5" fill="#f47a48"/><text x="910" y="253">Home</text>
+    <circle cx="892" cy="282" r="5" fill="#f47a48"/><text x="910" y="287">About</text>
+    <circle cx="892" cy="316" r="5" fill="#f47a48"/><text x="910" y="321">Services</text>
+    <circle cx="892" cy="350" r="5" fill="#f47a48"/><text x="910" y="355">Reviews</text>
+    <circle cx="892" cy="384" r="5" fill="#f47a48"/><text x="910" y="389">Service Areas</text>
+    <circle cx="892" cy="418" r="5" fill="#f47a48"/><text x="910" y="423">Contact</text>
+  </g>
+  <text x="996" y="456" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#535353">Structure ` finished strategy</text>
+
+  <text x="600" y="72" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="28" fill="#2c2c2c">From brief to generated site</text>
+  <text x="600" y="108" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" fill="#535353">Conceptual illustration  not a vendor screenshot</text>
+</svg>
