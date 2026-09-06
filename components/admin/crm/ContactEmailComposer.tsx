@@ -199,9 +199,6 @@ export function ContactEmailComposer({
 
     start(async () => {
       const profileIdForSend = canChooseSender ? sendingProfileId || null : null;
-      // #region agent log
-      fetch('http://127.0.0.1:7865/ingest/6a47cb52-3efc-4de2-8a82-c4e8f9bb5986',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'e4098e'},body:JSON.stringify({sessionId:'e4098e',runId:'post-fix',hypothesisId:'A',location:'ContactEmailComposer.tsx:onSend',message:'client send payload',data:{canChooseSender,sendingProfileIdState:sendingProfileId||null,profileIdForSend,selectedProfileId:selectedProfile?.id??null,selectedFromEmail:selectedProfile?.fromEmail??null,effectiveFromEmail,isPlatformFallback,routedDefaultFromEmail:routedDefaultFromEmail??null,defaultSendingProfileId:defaultSendingProfileId??null},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       const result = await sendContactEmailAction({
         contactId,
         subject: subject.trim(),
@@ -212,9 +209,6 @@ export function ContactEmailComposer({
       });
 
       if (!result.ok) {
-        // #region agent log
-        fetch('http://127.0.0.1:7865/ingest/6a47cb52-3efc-4de2-8a82-c4e8f9bb5986',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'e4098e'},body:JSON.stringify({sessionId:'e4098e',runId:'post-fix',hypothesisId:'A',location:'ContactEmailComposer.tsx:onSend:fail',message:'client send failed',data:{error:result.error,ambiguous:result.ambiguous},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
         setError(result.error);
         setAmbiguous(Boolean(result.ambiguous));
         setState("error");
@@ -222,9 +216,6 @@ export function ContactEmailComposer({
       }
 
       setLastSendingProfileId(profileIdForSend);
-      // #region agent log
-      fetch('http://127.0.0.1:7865/ingest/6a47cb52-3efc-4de2-8a82-c4e8f9bb5986',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'e4098e'},body:JSON.stringify({sessionId:'e4098e',runId:'post-fix',hypothesisId:'E',location:'ContactEmailComposer.tsx:onSend:ok',message:'client received snapshots',data:{emailId:result.emailId,fromName:result.fromName,fromEmail:result.fromEmail,deliveryStatus:result.deliveryStatus,profileIdForSend},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       setSent({
         emailId: result.emailId,
         subject: result.subject,

@@ -45,20 +45,6 @@ export async function sendCrmEmail(input: {
       where: { clientRequestId: input.clientRequestId },
     });
     if (existing) {
-      // #region agent log
-      const { agentDebugLog } = await import("@/lib/debug/agent-log");
-      agentDebugLog({
-        hypothesisId: "D",
-        location: "crm/email.ts:sendCrmEmail:idempotent",
-        message: "returning existing email for clientRequestId",
-        data: {
-          emailId: existing.id,
-          fromEmailSnapshot: existing.fromEmailSnapshot,
-          sendingProfileId: existing.sendingProfileId,
-          deliveryStatus: existing.deliveryStatus,
-        },
-      });
-      // #endregion
       return existing;
     }
   }
@@ -114,20 +100,6 @@ export async function sendCrmEmail(input: {
     bodyText: renderedBody,
   });
 
-  // #region agent log
-  {
-    const { agentDebugLog } = await import("@/lib/debug/agent-log");
-    agentDebugLog({
-      hypothesisId: "B",
-      location: "crm/email.ts:sendCrmEmail:beforeSend",
-      message: "calling sendSmartlanceEmail",
-      data: {
-        inputSendingProfileId: input.sendingProfileId ?? null,
-        emailRecordId: emailRecord.id,
-      },
-    });
-  }
-  // #endregion
   const result = await sendSmartlanceEmail({
     category: "CRM_MANUAL",
     sendingProfileId: input.sendingProfileId,
